@@ -4,7 +4,7 @@
  * Faz, sem ninguém mexer:
  *   1. atualizarEstoque()   todo dia às 06h  · lê as PACs (Itajaí e Londrina) e publica colunas/mural/estoque.json
  *   2. publicarMural()      a cada 10 min    · lê as respostas do formulário e publica colunas/mural/mural.json
- *   3. enviarEmailDiario()  todo dia às 07h30 · e-mail com notícias + resumo de faturamento e estoque, do seu e-mail da empresa
+ *   3. enviarEmailDiario()  todo dia às 07h30 · newsletter Radar Domus (de radar@domuscommerce.com) para a aba Assinantes
  *   4. publicarMetas()      ao editar a aba Metas · publica colunas/meta/metas.json (a meta aparece no telão em ~1 min)
  *   Menu "Telão" na planilha de metas: atualizar agora, pedir notícias novas, enviar e-mail, diagnóstico.
  *   Algo falhou? Rode diagnostico() e veja o Registro de execução.
@@ -26,7 +26,10 @@ const CFG = {
     itajai:   { nome: 'Itajaí',   id: '17xjD_hJq1V_vpydBPeY25NQWbL9F9GwlQqM2HhIymPE', aba: 'Gustavo', base: 'SC' },
     londrina: { nome: 'Londrina', id: '1f-JzRrFNtKh_EUzeLcgvszLkibvvYP4KDcupJzL4tnw', aba: 'COMPRAS', base: 'PR' },
   },
-  EMAILS: ['joao.vitor@domuscommerce.com'],  // quem recebe o e-mail das 07h30
+  EMAILS: ['joao.vitor@domuscommerce.com'],  // primeiros assinantes (nível completo); depois a lista fica na aba Assinantes
+  REMETENTE: 'radar@domuscommerce.com',      // instale o script logado nesta conta: o Radar sai dela
+  REMETENTE_NOME: 'Radar Domus',
+  DOMINIO: 'domuscommerce.com',
   APROVACAO_AUTOMATICA: true,                // false = só vai ao telão quem tiver "sim" na coluna Aprovado
   MIDIA_MAX_MB: 25,
   FUSO: 'America/Sao_Paulo',
@@ -62,6 +65,7 @@ function configurarTudo() {
   props.setProperty('FORM_ID', form.getId());
   props.setProperty('RESPOSTAS_ID', ss.getId());
   criarAbaMetas_(ss);
+  abaAssinantes_();
   instalarGatilhos_(ss);
 
   Logger.log('Formulário (para os analistas): ' + form.getPublishedUrl());
@@ -141,6 +145,9 @@ function diagnostico() {
   t('Metas', () => JSON.stringify(lerMetas_()));
   t('Gatilhos automáticos', () => { const g = ScriptApp.getProjectTriggers().map(x => x.getHandlerFunction()); if (!g.length) throw new Error('nenhum: rode configurarTudo'); return g.join(', '); });
   t('GitHub', () => { if (!githubOk_()) throw new Error('falta GITHUB_OWNER no código e/ou GITHUB_TOKEN nas propriedades (o e-mail funciona sem isso)'); const r = gh_('README.md', 'get'); if (r.code !== 200) throw new Error('resposta ' + r.code + ' (token sem acesso ao repositório?)'); return 'acesso ok'; });
+  t('Remetente do Radar', () => { const q = Session.getEffectiveUser().getEmail(); if (q.toLowerCase() !== CFG.REMETENTE) throw new Error(`o script roda como ${q}; para sair de ${CFG.REMETENTE}, instale-o logado nessa conta`); return q; });
+  t('Assinantes', () => { const l = lerAssinantes_(); return `${l.filter(a => a.ativo).length} ativos (${l.filter(a => a.ativo && a.nivel === 'completo').length} completo)`; });
+  t('Página de inscrição (web app)', () => { const u = ScriptApp.getService().getUrl(); if (!u) throw new Error('não implantada: Implantar > Nova implantação > App da Web'); return u; });
   t('Cota de e-mail hoje', () => MailApp.getRemainingDailyQuota() + ' envios restantes');
   const txt = [...ok, ...erro].join('\n');
   Logger.log(txt);
@@ -153,7 +160,12 @@ function montarMenu() {
     .addItem('Atualizar estoque agora', 'atualizarEstoque')
     .addItem('Publicar mural agora', 'publicarMural')
     .addItem('Publicar metas agora', 'publicarMetas')
-    .addItem('Enviar e-mail agora', 'enviarEmailDiario')
+    .addSeparator()
+    .addItem('Radar: enviar teste só para mim', 'enviarTeste')
+    .addItem('Radar: enviar agora para todos', 'enviarEmailDiario')
+    .addItem('Radar: adicionar pessoas', 'adicionarAssinante')
+    .addItem('Radar: remover pessoas', 'removerAssinante')
+    .addItem('Radar: importar toda a organização', 'importarOrganizacao')
     .addSeparator()
     .addItem('Pedir notícias e análises novas', 'pedirAtualizacao')
     .addItem('Atualizar tudo agora (Google) + pedir notícias', 'atualizarTudoAgora')
@@ -349,48 +361,194 @@ function subirMidia_(id, url) {
 
 // ===================================================================== 3. e-mail das 07h30
 
-function enviarEmailDiario() {
+// ===================================================================== 3. newsletter "Radar Domus" (e-mail das 07h30)
+//
+// Remetente: rode este script logado em radar@domuscommerce.com (o e-mail sai da conta que roda o script).
+// Lista: aba "Assinantes" da planilha do telão. Ativo = sim/não. Conteúdo = completo (notícias + faturamento + estoque)
+//        ou noticias (só notícias e mural). Quem entra pela importação da organização começa como "noticias".
+// Cada e-mail traz o link "Gerenciar inscrição" (web app só para contas @domuscommerce.com).
+
+const ASSIN_ = ['E-mail', 'Nome', 'Ativo (sim/não)', 'Conteúdo (completo/noticias)', 'Desde', 'Origem'];
+
+function abaAssinantes_() {
+  const id = PropertiesService.getScriptProperties().getProperty('RESPOSTAS_ID');
+  if (!id) throw new Error('Planilha do telão ainda não criada: rode configurarTudo');
+  const ss = SpreadsheetApp.openById(id);
+  let sh = ss.getSheetByName('Assinantes');
+  if (!sh) {
+    sh = ss.insertSheet('Assinantes', 1);
+    sh.getRange(1, 1, 1, ASSIN_.length).setValues([ASSIN_]).setFontWeight('bold').setBackground('#212121').setFontColor('#ECFC30');
+    sh.setFrozenRows(1); sh.setColumnWidths(1, ASSIN_.length, 200);
+    sh.getRange('C2:C').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['sim', 'não']).build());
+    sh.getRange('D2:D').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['completo', 'noticias']).build());
+    CFG.EMAILS.forEach(e => sh.appendRow([e, '', 'sim', 'completo', hoje_(), 'inicial']));
+  }
+  return sh;
+}
+
+function lerAssinantes_() {
+  const v = abaAssinantes_().getDataRange().getValues().slice(1);
+  const vistos = {};
+  return v.map(r => ({ email: String(r[0]).trim().toLowerCase(), nome: String(r[1]).trim(), ativo: !/^n/i.test(String(r[2]).trim()), nivel: /^c/i.test(String(r[3]).trim()) ? 'completo' : 'noticias' }))
+    .filter(a => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(a.email) && !vistos[a.email] && (vistos[a.email] = true));
+}
+
+/** Inclui ou reativa um e-mail. nivel: 'completo' | 'noticias'. */
+function definirAssinante_(email, ativo, nivel, origem) {
+  email = String(email).trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('E-mail inválido: ' + email);
+  const sh = abaAssinantes_(), v = sh.getDataRange().getValues();
+  const i = v.findIndex((r, k) => k > 0 && String(r[0]).trim().toLowerCase() === email);
+  if (i > 0) { sh.getRange(i + 1, 3).setValue(ativo ? 'sim' : 'não'); if (nivel) sh.getRange(i + 1, 4).setValue(nivel); return 'atualizado'; }
+  if (!ativo) return 'não estava na lista';
+  sh.appendRow([email, '', 'sim', nivel || 'noticias', hoje_(), origem || 'manual']); return 'incluído';
+}
+
+// ---------- menu: adicionar, remover, importar a organização ----------
+function adicionarAssinante() {
+  const ui = SpreadsheetApp.getUi(), r = ui.prompt('Adicionar ao Radar', 'E-mail (para vários, separe por vírgula). Entram com conteúdo "noticias"; troque para "completo" na aba Assinantes.', ui.ButtonSet.OK_CANCEL);
+  if (r.getSelectedButton() !== ui.Button.OK) return;
+  const res = r.getResponseText().split(/[,;\s]+/).filter(Boolean).map(e => `${e}: ${definirAssinante_(e, true, null, 'manual')}`);
+  ui.alert(res.join('\n'));
+}
+function removerAssinante() {
+  const ui = SpreadsheetApp.getUi(), r = ui.prompt('Remover do Radar', 'E-mail (para vários, separe por vírgula). A linha fica com Ativo = não (histórico preservado).', ui.ButtonSet.OK_CANCEL);
+  if (r.getSelectedButton() !== ui.Button.OK) return;
+  ui.alert(r.getResponseText().split(/[,;\s]+/).filter(Boolean).map(e => `${e}: ${definirAssinante_(e, false)}`).join('\n'));
+}
+/** Importa todas as contas do diretório @domuscommerce.com (precisa do serviço avançado People API, já no appsscript.json). */
+function importarOrganizacao() {
+  let token, n = 0, novos = 0;
+  const ja = {}; lerAssinantes_().forEach(a => ja[a.email] = 1);
+  do {
+    const r = People.People.listDirectoryPeople({ readMask: 'emailAddresses,names', sources: ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE'], pageSize: 500, pageToken: token });
+    (r.people || []).forEach(p => {
+      const e = ((p.emailAddresses || [])[0] || {}).value; if (!e) return; n++;
+      const em = e.toLowerCase(); if (ja[em] || !em.endsWith('@' + CFG.DOMINIO)) return;
+      abaAssinantes_().appendRow([em, ((p.names || [])[0] || {}).displayName || '', 'sim', 'noticias', hoje_(), 'organização']); novos++; ja[em] = 1;
+    });
+    token = r.nextPageToken;
+  } while (token);
+  const msg = `${n} contas no diretório · ${novos} incluídas agora (conteúdo "noticias").`;
+  try { SpreadsheetApp.getUi().alert(msg); } catch (e) { Logger.log(msg); }
+}
+
+// ---------- página "Gerenciar inscrição" (web app: Implantar > Nova implantação > App da Web) ----------
+function doGet(e) {
+  const email = (Session.getActiveUser().getEmail() || '').toLowerCase();
+  const acao = (e && e.parameter && e.parameter.acao) || '';
+  let msg = '';
+  if (!email.endsWith('@' + CFG.DOMINIO)) msg = 'Entre com a sua conta @' + CFG.DOMINIO + ' para gerenciar a inscrição.';
+  else if (acao === 'sair') msg = 'Pronto, você saiu do Radar Domus (' + definirAssinante_(email, false) + ').';
+  else if (acao === 'entrar') msg = 'Pronto, você está no Radar Domus (' + definirAssinante_(email, true, null, 'autoinscrição') + ').';
+  const a = email ? lerAssinantes_().find(x => x.email === email) : null;
+  const status = a && a.ativo ? 'inscrito' : 'fora da lista';
+  const url = ScriptApp.getService().getUrl();
+  const html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:40px auto;color:#212121">
+    <div style="background:#212121;color:#ECFC30;padding:16px 20px;border-radius:10px;font-size:20px;font-weight:bold">Radar Domus</div>
+    <p>${msg ? `<b>${msg}</b><br><br>` : ''}Conta: <b>${email || '-'}</b> · situação: <b>${status}</b></p>
+    <p><a href="${url}?acao=entrar" target="_top" style="background:#ECFC30;color:#212121;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:bold">Quero receber</a>
+       &nbsp; <a href="${url}?acao=sair" target="_top" style="background:#eee;color:#212121;padding:10px 16px;border-radius:8px;text-decoration:none">Não quero mais receber</a></p></div>`;
+  return HtmlService.createHtmlOutput(html).setTitle('Radar Domus · inscrição');
+}
+
+// ---------- montagem e envio ----------
+function dadosDoDia_() {
   const meta = lerRepo_('colunas/meta/dados.json');
   const news = lerRepo_('colunas/noticias/dados.json');
+  const mural = lerRepo_('colunas/mural/mural.json');
   let est; try { est = calcularEstoque_(); } catch (e) { est = lerRepo_('colunas/mural/estoque.json'); }
-  const brl = v => v >= 1e6 ? 'R$ ' + (v / 1e6).toFixed(2).replace('.', ',') + ' mi' : 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil';
-  const pc = v => v == null ? '–' : v.toFixed(1).replace('.', ',') + '%';
+  if (meta) { const mt = lerMetas_()[meta.mes]; if (mt) { meta.meta_mes = mt.meta; meta.meta_exemplo = mt.exemplo; } }
+  return { meta, news, mural, est };
+}
+
+const brl_ = v => v >= 1e6 ? 'R$ ' + (v / 1e6).toFixed(2).replace('.', ',') + ' mi' : 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil';
+const pc_ = v => v == null ? '–' : v.toFixed(1).replace('.', ',') + '%';
+const escH_ = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const urlOk_ = u => /^https:\/\/[^\s"<>]+$/.test(String(u || ''));
+
+function montarEmail_(D, nivel, gerenciarUrl) {
+  const { meta, news, mural, est } = D, brl = brl_, pc = pc_;
   const ddmm = s => s.slice(8, 10) + '/' + s.slice(5, 7);
   const th = 'style="text-align:right;padding:4px 10px;border-bottom:1px solid #ddd"', tl = 'style="text-align:left;padding:4px 10px;border-bottom:1px solid #ddd"';
   const tabela = (cab, linhas) => `<table style="border-collapse:collapse;margin-top:8px;font-size:14px"><tr>${cab.map((c, i) => `<th ${i ? th : tl}>${c}</th>`).join('')}</tr>${linhas.map(l => `<tr>${l.map((c, i) => `<td ${i ? th : tl}>${c}</td>`).join('')}</tr>`).join('')}</table>`;
+  const h3 = t => `<h3 style="margin:26px 0 8px;border-left:6px solid #ECFC30;padding-left:10px">${t}</h3>`;
   const L = [];
   L.push(`<div style="font-family:Arial,sans-serif;max-width:680px;color:#212121">`);
-  L.push(`<div style="background:#212121;color:#fff;padding:18px 22px;border-radius:10px 10px 0 0"><b style="color:#ECFC30;font-size:20px">Telão WeAxis</b><br>Resumo de ${Utilities.formatDate(new Date(), CFG.FUSO, 'dd/MM/yyyy')}</div>`);
-  if (meta) {
-    const mt = lerMetas_()[meta.mes]; if (mt) { meta.meta_mes = mt.meta; meta.meta_exemplo = mt.exemplo; }
-    const p = meta.realizado_mes / meta.meta_mes * 100, F = meta.filiais || {};
-    const pj = projecao_(meta.realizado_mes, meta.meta_mes, meta.referencia);
-    L.push(`<h3 style="margin:22px 0 6px">Faturamento · Domus (Itajaí + Londrina)</h3><p style="margin:0">No mês: <b>${brl(meta.realizado_mes)}</b>${meta.margem_pct_mes != null ? ' · margem ' + pc(meta.margem_pct_mes) : ''} · ${pc(p)} da meta de ${brl(meta.meta_mes)}${meta.meta_exemplo ? ' (meta de exemplo)' : ''}<br>Ontem (${ddmm(meta.ontem.data)}): <b>${brl(meta.ontem.receita)}</b> · ${meta.ontem.pedidos.toLocaleString('pt-BR')} pedidos<br>Projeção no ritmo atual (${brl(pj.ritmo)}/dia): <b>${brl(pj.proj)}</b> · ${pc(pj.pct_proj)} da meta${pj.restantes ? `<br>Para bater a meta: <b>${brl(pj.necessario)}/dia</b> nos ${pj.restantes} dias restantes` : ''}</p>`);
-    const ks = Object.keys(F);
-    const cel = v => v && v.receita ? `${brl(v.receita)} <span style="color:#777">· ${pc(v.margem_pct)}</span>` : '–';
-    if (meta.canais_mes) L.push(`<p style="margin:12px 0 0;color:#555">Canais no mês: receita · margem</p>` + tabela(['Canal', ...ks.map(k => F[k].nome), 'Domus'],
-      [...meta.canais_mes.map(c => [c.canal, ...ks.map(k => cel(c[k])), `<b>${cel(c.total)}</b>`]),
-       ['<b>Total</b>', ...ks.map(k => `<b>${cel({ receita: F[k].realizado_mes, margem_pct: F[k].margem_pct_mes })}</b>`), `<b>${cel({ receita: meta.realizado_mes, margem_pct: meta.margem_pct_mes })}</b>`]]));
+  L.push(`<div style="background:#212121;color:#fff;padding:18px 22px;border-radius:10px 10px 0 0"><b style="color:#ECFC30;font-size:22px">Radar Domus</b><br>${Utilities.formatDate(new Date(), CFG.FUSO, "dd/MM/yyyy")} · marketplaces, faturamento e estoque</div>`);
+
+  // 1. matérias do dia, com link
+  if (news && (news.itens || []).length) {
+    L.push(h3('Notícias do dia'));
+    news.itens.forEach(n => {
+      const link = urlOk_(n.url) ? `<a href="${n.url}" style="color:#1a56db">Ler a matéria</a>` : '';
+      L.push(`<p style="margin:0 0 14px"><b>${escH_(n.manchete)}</b><br>${escH_(n.detalhe || '')}<br><span style="color:#777">${escH_(n.fonte)}${n.data_fonte ? ' · ' + escH_(n.data_fonte) : ''}</span>${link ? ' · ' + link : ''}</p>`);
+    });
+    const extras = (news.mais_links || []).filter(x => urlOk_(x.url));
+    if (extras.length) L.push(`<p style="margin:6px 0 0;color:#555"><b>Mais leituras</b></p><ul style="margin:4px 0 0;padding-left:18px">${extras.map(x => `<li><a href="${x.url}" style="color:#1a56db">${escH_(x.titulo)}</a> <span style="color:#777">· ${escH_(x.fonte || '')}</span></li>`).join('')}</ul>`);
   }
-  if (est) {
-    const bl = Object.values(est.filiais).filter(Boolean); if (est.total) bl.push(est.total);
-    L.push(`<h3 style="margin:22px 0 6px">Estoque</h3>`);
-    L.push(tabela(['', ...bl.map(f => f.nome)], [
-      ['Valor a custo', ...bl.map(f => brl(f.valor_custo))],
-      ['Unidades', ...bl.map(f => f.unidades.toLocaleString('pt-BR'))],
-      ['Cobertura', ...bl.map(f => Math.round(f.cobertura_dias) + ' dias')],
-      ['Em excesso', ...bl.map(f => `${brl(f.excesso_valor)} (${pc(f.excesso_valor / f.valor_custo * 100)})`)],
-      ['Parado (sem venda)', ...bl.map(f => `${brl(f.parado_valor)} (${f.parado_skus} SKUs)`)],
-      ['<b style="color:#D93838">Ruptura</b>', ...bl.map(f => `<b style="color:#D93838">${pc(f.pct_ruptura)}</b> (${f.skus_ruptura} SKUs)`)],
-      ['Venda perdida/dia', ...bl.map(f => brl(f.perda_dia_custo))],
-      ['Curvas AA e A sem estoque', ...bl.map(f => `${f.curvas.AA.ruptura + f.curvas.A.ruptura} SKUs (${brl(f.curvas.AA.perda + f.curvas.A.perda)}/dia)`)],
-    ]));
-    Object.values(est.filiais).filter(Boolean).forEach(f => L.push(`<p style="margin:12px 0 0"><b>Maiores perdas · ${f.nome}</b></p><ul style="margin:4px 0 0;padding-left:18px">${f.top_skus.slice(0, 5).map(s => `<li>${s.titulo} · curva ${s.curva} · ${brl(s.perda)}/dia${s.oc ? ' · OC ' + s.oc : ' · sem OC'}</li>`).join('')}</ul>`));
+
+  // 2. mural dos analistas
+  const posts = ((mural && mural.posts) || []).filter(p => !p.exemplo && (!p.ate || p.ate >= hoje_()));
+  if (posts.length) {
+    L.push(h3('Mural do time'));
+    posts.forEach(p => L.push(`<p style="margin:0 0 10px"><b>${escH_(p.titulo)}</b>${p.numero ? ` · <b>${escH_(p.numero)}</b>` : ''}<br>${escH_(p.texto)}<br><span style="color:#777">${escH_(p.autor)}</span></p>`));
   }
-  if (news && news.itens) {
-    L.push(`<h3 style="margin:22px 0 6px">Notícias de marketplaces</h3>`);
-    news.itens.forEach(n => L.push(`<p style="margin:0 0 12px"><b>${n.manchete}</b><br>${n.detalhe || ''}<br><span style="color:#777">${n.fonte}${n.data_fonte ? ' · ' + n.data_fonte : ''}${n.url ? ` · <a href="${n.url}">ler</a>` : ''}</span></p>`));
+
+  if (nivel === 'completo') {
+    // 3. faturamento e margem
+    if (meta) {
+      const p = meta.realizado_mes / meta.meta_mes * 100, F = meta.filiais || {};
+      const pj = projecao_(meta.realizado_mes, meta.meta_mes, meta.referencia);
+      L.push(h3('Faturamento · Domus (Itajaí + Londrina)'));
+      L.push(`<p style="margin:0">No mês: <b>${brl(meta.realizado_mes)}</b>${meta.margem_pct_mes != null ? ' · margem ' + pc(meta.margem_pct_mes) : ''} · ${pc(p)} da meta de ${brl(meta.meta_mes)}${meta.meta_exemplo ? ' (meta de exemplo)' : ''}<br>Ontem (${ddmm(meta.ontem.data)}): <b>${brl(meta.ontem.receita)}</b> · ${meta.ontem.pedidos.toLocaleString('pt-BR')} pedidos<br>Projeção no ritmo atual (${brl(pj.ritmo)}/dia): <b>${brl(pj.proj)}</b> · ${pc(pj.pct_proj)} da meta${pj.restantes ? `<br>Para bater a meta: <b>${brl(pj.necessario)}/dia</b> nos ${pj.restantes} dias restantes` : ''}</p>`);
+      const ks = Object.keys(F);
+      const cel = v => v && v.receita ? `${brl(v.receita)} <span style="color:#777">· ${pc(v.margem_pct)}</span>` : '–';
+      if (meta.canais_mes) L.push(`<p style="margin:12px 0 0;color:#555">Canais no mês: receita · margem</p>` + tabela(['Canal', ...ks.map(k => F[k].nome), 'Domus'],
+        [...meta.canais_mes.map(c => [c.canal, ...ks.map(k => cel(c[k])), `<b>${cel(c.total)}</b>`]),
+         ['<b>Total</b>', ...ks.map(k => `<b>${cel({ receita: F[k].realizado_mes, margem_pct: F[k].margem_pct_mes })}</b>`), `<b>${cel({ receita: meta.realizado_mes, margem_pct: meta.margem_pct_mes })}</b>`]]));
+    }
+    // 4. estoque
+    if (est) {
+      const bl = Object.values(est.filiais).filter(Boolean); if (est.total) bl.push(est.total);
+      L.push(h3('Estoque'));
+      L.push(tabela(['', ...bl.map(f => f.nome)], [
+        ['Valor a custo', ...bl.map(f => brl(f.valor_custo))],
+        ['Unidades', ...bl.map(f => f.unidades.toLocaleString('pt-BR'))],
+        ['Cobertura', ...bl.map(f => Math.round(f.cobertura_dias) + ' dias')],
+        ['Em excesso', ...bl.map(f => `${brl(f.excesso_valor)} (${pc(f.excesso_valor / f.valor_custo * 100)})`)],
+        ['Parado (sem venda)', ...bl.map(f => `${brl(f.parado_valor)} (${f.parado_skus} SKUs)`)],
+        ['<b style="color:#D93838">Ruptura</b>', ...bl.map(f => `<b style="color:#D93838">${pc(f.pct_ruptura)}</b> (${f.skus_ruptura} SKUs)`)],
+        ['Venda perdida/dia', ...bl.map(f => brl(f.perda_dia_custo))],
+        ['Curvas AA e A sem estoque', ...bl.map(f => `${f.curvas.AA.ruptura + f.curvas.A.ruptura} SKUs (${brl(f.curvas.AA.perda + f.curvas.A.perda)}/dia)`)],
+      ]));
+      Object.values(est.filiais).filter(Boolean).forEach(f => L.push(`<p style="margin:12px 0 0"><b>Maiores perdas · ${f.nome}</b></p><ul style="margin:4px 0 0;padding-left:18px">${f.top_skus.slice(0, 5).map(s => `<li>${escH_(s.titulo)} · curva ${s.curva} · ${brl(s.perda)}/dia${s.oc ? ' · OC ' + s.oc : ' · sem OC'}</li>`).join('')}</ul>`));
+    }
   }
-  L.push(`<p style="color:#888;font-size:12px;margin-top:24px">Gerado automaticamente. Faturamento é D+1 (Preço Certo); estoque vem das PACs. Valores de estoque a custo.</p></div>`);
-  MailApp.sendEmail({ to: CFG.EMAILS.join(','), subject: `Telão · resumo do dia ${Utilities.formatDate(new Date(), CFG.FUSO, 'dd/MM')}`, htmlBody: L.join('\n'), name: 'Telão WeAxis' });
+
+  L.push(`<p style="color:#888;font-size:12px;margin-top:28px;border-top:1px solid #eee;padding-top:10px">Radar Domus · enviado por ${CFG.REMETENTE}. ${nivel === 'completo' ? 'Contém dados internos de faturamento e estoque: não encaminhe para fora da Domus. ' : ''}Faturamento é D+1 (Preço Certo); estoque vem das PACs, a custo.${gerenciarUrl ? `<br><a href="${gerenciarUrl}" style="color:#888">Gerenciar inscrição ou parar de receber</a>` : ''}</p></div>`);
+  return L.join('\n');
+}
+
+/** Envia o Radar para cada assinante ativo (um e-mail por pessoa, com o conteúdo do nível dela). */
+function enviarEmailDiario() {
+  const D = dadosDoDia_();
+  if (!D.news && !D.meta && !D.est) throw new Error('Sem dados para enviar (GitHub e PACs indisponíveis).');
+  const quem = Session.getEffectiveUser().getEmail();
+  if (quem.toLowerCase() !== CFG.REMETENTE) Logger.log(`Aviso: o script roda como ${quem}; o Radar sai desse endereço. Para sair de ${CFG.REMETENTE}, instale o script logado nessa conta.`);
+  let gerenciar = ''; try { gerenciar = ScriptApp.getService().getUrl() || ''; } catch (e) { }
+  const html = { completo: montarEmail_(D, 'completo', gerenciar), noticias: montarEmail_(D, 'noticias', gerenciar) };
+  const assunto = `Radar Domus · ${Utilities.formatDate(new Date(), CFG.FUSO, 'dd/MM')}` + (D.news && D.news.itens && D.news.itens[0] ? ` · ${D.news.itens[0].manchete}` : '');
+  const lista = lerAssinantes_().filter(a => a.ativo);
+  if (lista.length > MailApp.getRemainingDailyQuota()) throw new Error(`Lista (${lista.length}) maior que a cota de e-mail de hoje (${MailApp.getRemainingDailyQuota()}).`);
+  let ok = 0; const falhas = [];
+  lista.forEach(a => { try { MailApp.sendEmail({ to: a.email, subject: assunto, htmlBody: html[a.nivel], name: CFG.REMETENTE_NOME, replyTo: CFG.REMETENTE }); ok++; } catch (e) { falhas.push(`${a.email}: ${e.message}`); } });
+  Logger.log(`Radar enviado para ${ok} de ${lista.length}.` + (falhas.length ? ' Falhas: ' + falhas.join(' | ') : ''));
+}
+
+/** Envia só para quem está rodando o script (para conferir antes de soltar para todos). */
+function enviarTeste() {
+  const D = dadosDoDia_(), eu = Session.getEffectiveUser().getEmail();
+  MailApp.sendEmail({ to: eu, subject: '[teste] Radar Domus', htmlBody: montarEmail_(D, 'completo', '') + '<hr>' + montarEmail_(D, 'noticias', ''), name: CFG.REMETENTE_NOME });
+  try { SpreadsheetApp.getActive().toast('Teste enviado para ' + eu + ' (versão completa e versão só notícias).', 'Radar', 8); } catch (e) { Logger.log('Teste enviado para ' + eu); }
 }

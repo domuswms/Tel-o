@@ -87,6 +87,16 @@ Com a conta da empresa que **tem acesso às duas PACs** (SC e PR):
 6. Envie o link do formulário aos analistas. Para moderar antes de ir ao ar, mude `APROVACAO_AUTOMATICA` para `false` e escreva `sim` na coluna **Aprovado** da planilha.
 7. Teste: rode **atualizarRuptura**, **publicarMural** e **enviarEmailDiario** uma vez cada.
 
+### 4.0 Newsletter Radar Domus (radar@domuscommerce.com)
+1. Instale o Apps Script **logado em radar@domuscommerce.com** (o e-mail sai da conta que roda o script). Compartilhe as duas PACs com essa conta (leitura basta).
+2. No editor: engrenagem → marque **Mostrar o arquivo appsscript.json** → cole `automacao/apps-script/appsscript.json` (liga a People API e define a página de inscrição só para o domínio).
+3. **Implantar → Nova implantação → App da Web** (Executar como: eu · Quem pode acessar: qualquer pessoa em domuscommerce.com). Esse link vai no rodapé de todo e-mail como "Gerenciar inscrição".
+4. Lista de envio = aba **Assinantes** da planilha do telão. Cada linha: e-mail · Ativo (sim/não) · Conteúdo (`completo` = notícias + faturamento + estoque; `noticias` = notícias + mural).
+   - Menu **Telão → Radar: importar toda a organização** inclui todas as contas @domuscommerce.com como `noticias`.
+   - **Radar: adicionar / remover pessoas**, ou edite a planilha. Remover marca Ativo = não (histórico fica).
+   - Cada pessoa também entra ou sai sozinha pelo link do rodapé (só com a conta dela da Domus).
+5. **Radar: enviar teste só para mim** antes de liberar. Depois o envio é automático às 07h30.
+
 ### 4.1 Se o Apps Script não funcionar
 Rode a função **diagnostico** e abra **Registro de execução**. Cada linha diz OK ou ERRO com o motivo. Os erros mais comuns:
 - **Sem acesso à PAC**: o script roda com a conta da empresa; as PACs precisam estar compartilhadas com ela (hoje podem estar só na conta pessoal).
