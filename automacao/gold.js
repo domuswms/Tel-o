@@ -7,6 +7,8 @@
  *  - dado faltante nunca vira zero (null); afeta só os cálculos que dependem dele e marca "parcial"
  *  - Empresa total = recálculo sobre as linhas somadas, nunca média das filiais
  *  - 6 indicadores: estoque a custo, DIO, CCC, NWC, ruptura ponderada (% e R$/dia), excesso acima do Emax
+ *  - Gold+ (extras): cobertura por faixa, estoque lento, vai romper, OCs acima do Emax, nível de serviço, curvas com estoque/DIO,
+ *    concentração e a lista completa dos AA/A sem estoque
  *  - listas (não são indicadores): top ruptura (AA/A primeiro), estoque congelado (sem giro),
  *    campeões (maior giro a custo) e azarões (burst: ritmo dos últimos 15 dias × ritmo dos 45 anteriores)
  */
@@ -101,8 +103,48 @@ function goldCalc_(todas, meta) {
     .sort((a, b) => (b.fator ?? 99) * Math.sqrt(b.ritmo15 * b.x.c) - (a.fator ?? 99) * Math.sqrt(a.ritmo15 * a.x.c)).slice(0, 5)
     .map(z => Object.assign(item(z.x), { d15: z.x.d15, ritmo15: z.ritmo15, ritmo_ant: z.ant45, fator: z.fator, cobertura: z.x.q > 0 ? z.x.q / z.ritmo15 : 0 }));
 
+  // ---------- Gold+ · indicadores extras de estoque (não substituem os 6 indicadores) ----------
+  const soma = (arr, f) => arr.reduce((t, x) => t + f(x), 0);
+  const cob = x => x.m > 0 && x.q > 0 ? x.q / x.m : null;
+  const ativos = L.filter(temC);
+  // estoque por faixa de cobertura (dias de venda que o estoque aguenta), a custo
+  const cobertura_faixas = [['até 15 d', 0, 15], ['15 a 30 d', 15, 30], ['30 a 60 d', 30, 60], ['60 a 90 d', 60, 90], ['90 a 180 d', 90, 180], ['mais de 180 d', 180, Infinity]]
+    .map(([faixa, a, b]) => { const s = ativos.filter(x => cob(x) !== null && cob(x) >= a && cob(x) < b); return { faixa, valor: soma(s, x => x.q * x.c), skus: s.length }; });
+  cobertura_faixas.push({ faixa: 'sem venda', valor: semGiro, skus: cong.length });
+  // estoque lento: vende, mas a cobertura passa de 120 dias
+  const lentoArr = ativos.filter(x => cob(x) !== null && cob(x) > 120);
+  const lentos = lentoArr.slice().sort((a, b) => b.q * b.c - a.q * a.c).slice(0, 5).map(x => Object.assign(item(x), { valor: x.q * x.c, cobertura: cob(x) }));
+  // vai romper: tem estoque, vende, cobertura menor que o lead time (7 dias se não houver LT) e nenhuma OC em trânsito
+  const romperArr = ativos.filter(x => x.q > 0 && x.m > 0 && !(x.oc > 0) && x.q / x.m < (x.lt > 0 ? x.lt : 7));
+  const vai_romper = romperArr.slice().sort((a, b) => ordemCurva(a.curva) - ordemCurva(b.curva) || b.m * b.c - a.m * a.c).slice(0, 8)
+    .map(x => Object.assign(item(x), { giro: x.m * x.c, cobertura: cob(x) }));
+  // OCs: valor em trânsito e a parte que já vai passar do Emax quando chegar
+  const ocExc = ativos.filter(x => x.oc > 0 && x.emax !== null && x.q !== null && Math.max(x.q, 0) + x.oc > x.emax);
+  // nível de serviço: dos SKUs que vendem, quantos têm estoque
+  const vendem = ativos.filter(x => x.m > 0);
+  // por curva: estoque, congelado e DIO
+  Object.values(curvas).forEach(c => { c.estoque = 0; c.congelado = 0; });
+  ativos.forEach(x => { const c = curvas[x.curva]; if (!c || !(x.q > 0)) return; c.estoque += x.q * x.c; if (x.m === 0) c.congelado += x.q * x.c; });
+  Object.values(curvas).forEach(c => { c.dio = c.giro > 0 ? c.estoque / c.giro : null; });
+  // concentração: quanto do estoque está nos 20% de SKUs de maior valor
+  const valores = ativos.filter(x => x.q > 0).map(x => x.q * x.c).sort((a, b) => b - a);
+  const top20 = soma(valores.slice(0, Math.max(1, Math.ceil(valores.length * .2))), v => v);
+  // lista completa (até 40) dos mais vendidos sem estoque: curvas AA e A, com nome
+  const ruptura_aa_a = rup.filter(x => x.curva === 'AA' || x.curva === 'A')
+    .sort((a, b) => ordemCurva(a.curva) - ordemCurva(b.curva) || (a.curva === 'AA' ? 0 : 1) - (b.curva === 'AA' ? 0 : 1) || b.m * b.c - a.m * a.c).slice(0, 40)
+    .map(x => Object.assign(item(x), { perdido: x.m * x.c }));
+  const extras = {
+    pct_congelado: E > 0 ? semGiro / E * 100 : null, pct_excesso: E > 0 ? exc / E * 100 : null,
+    cobertura_faixas, lento_valor: soma(lentoArr, x => x.q * x.c), lento_skus: lentoArr.length, lentos,
+    vai_romper, vai_romper_skus: romperArr.length, vai_romper_giro: soma(romperArr, x => x.m * x.c),
+    oc_valor: soma(ativos, x => (x.oc || 0) * x.c), oc_acima_emax: soma(ocExc, x => Math.min(x.oc, Math.max(x.q, 0) + x.oc - x.emax) * x.c), oc_acima_emax_skus: ocExc.length,
+    nivel_servico: vendem.length ? vendem.filter(x => x.q > 0).length / vendem.length * 100 : null,
+    concentracao_top20: valores.length ? top20 / soma(valores, v => v) * 100 : null,
+    ruptura_aa_a, skus_ruptura_aa_a: rup.filter(x => x.curva === 'AA' || x.curva === 'A').length,
+  };
+
   const porForn = (arr, f) => { const o = {}; arr.forEach(x => o[x.forn] = (o[x.forn] || 0) + f(x)); return Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([nome, v]) => ({ nome, valor: v })); };
-  return Object.assign({}, meta, {
+  return Object.assign({}, meta, extras, {
     skus: L.length, skus_pi: pi.length, estoque_pi: pi.reduce((s, x) => s + (temC(x) ? qp(x) * x.c : 0), 0),
     estoque: E, unidades: Math.round(unid), giro_disp: Gd, mvd_perdida: Gp, ruptura_pct: Gpot > 0 ? Gp / Gpot * 100 : null,
     dio, dpo, dso, ccc, nwc, excesso: exc, sem_giro: semGiro,

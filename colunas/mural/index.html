@@ -38,6 +38,7 @@
   .qbar { position:absolute; left:60px; right:60px; top:404px; height:16px; border-radius:8px; overflow:hidden; display:flex; background:#2E2E2E; }
   .qbar > div { width:0; transition:width 1.3s cubic-bezier(.2,.9,.25,1) .5s; }
   .on .qbar > div { width:var(--w); }
+  .lst { margin-top:12px; } .li { font-size:44px; font-weight:500; line-height:1.22; white-space:nowrap; }
   .media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .media-cap { position:absolute; left:0; right:0; bottom:0; padding:22px 60px 30px; background:linear-gradient(transparent, rgba(20,20,20,.92) 40%); }
   #prog { position:absolute; left:0; bottom:0; height:8px; width:0; }
@@ -59,6 +60,7 @@ function fit() { const s = Math.min(innerWidth / 853, innerHeight / 512); $('#st
 addEventListener('resize', fit); fit();
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmtBRL = v => v >= 1e6 ? 'R$ ' + (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' mi' : v >= 1e3 ? 'R$ ' + (v / 1e3).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' mil' : 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+const nSku = n => `${(n || 0).toLocaleString('pt-BR')} ${n === 1 ? 'SKU' : 'SKUs'}`;
 const pct = v => v.toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%';
 function conta(s, p) { const m = s.match(/\d+(?:[.,]\d+)?/); if (!m || s.includes('/')) return s; const raw = m[0], dec = raw.includes(',') ? raw.split(',')[1].length : 0; const v = parseFloat(raw.replace(/\./g, '').replace(',', '.')); if (v < 10 && !dec) return s; const c = v * p; const t = dec ? c.toFixed(dec).replace('.', ',') : String(Math.round(c)); return s.slice(0, m.index) + t + s.slice(m.index + raw.length); }
 const M = document.createElement('span'); M.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;font-family:Archivo'; document.body.appendChild(M);
@@ -127,6 +129,22 @@ function cardsEstoque() {
     const nA = aa.ruptura + a1.ruptura, pA = aa.perda + a1.perda;
     if (nA) cards.push({ tipo: 'alerta', selo: f.nome, cor_selo: cor, meta: 'Curvas AA e A', titulo: 'Mais vendidos sem estoque', numero: nA + ' SKUs', cor_num: '#F25C5C',
       texto: `${fmtBRL(pA)}/dia` + (f.top_fornecedores?.[0] ? ` · maior: ${f.top_fornecedores[0].nome}` : ''), foot: `${f.sem_oc} SKUs em ruptura sem OC` });
+    // lista com nome dos AA/A sem estoque: só por filial, 4 por card, até 3 cards
+    const L = k !== 'total' ? (f.ruptura_aa_a || []) : [];
+    for (let i = 0; i < Math.min(L.length, 12); i += 4) cards.push({ tipo: 'estoque', lista: L.slice(i, i + 4), selo: f.nome, cor_selo: cor, meta: `Sem estoque · AA e A${L.length > 4 ? ` · ${i / 4 + 1}/${Math.ceil(Math.min(L.length, 12) / 4)}` : ''}`,
+      titulo: i ? 'Mais itens sem estoque' : `${f.skus_ruptura_aa_a ?? L.length} mais vendidos zerados` });
+    // Gold+: estoque congelado, lento, excesso, vai romper e OCs acima do Emax
+    if (f.sem_giro > 0) cards.push({ tipo: 'aviso', selo: f.nome, cor_selo: cor, meta: 'Estoque congelado', titulo: 'Parado, sem nenhuma venda', numero: fmtBRL(f.sem_giro), cor_num: Q.excesso,
+      texto: nSku(f.skus_congelados) + (f.pct_congelado != null ? ` · ${pct(f.pct_congelado)} do estoque` : ''), foot: f.congelados?.[0] ? `Maior: ${f.congelados[0].titulo}` : '' });
+    if (f.lento_valor > 0) cards.push({ tipo: 'aviso', selo: f.nome, cor_selo: cor, meta: 'Estoque lento', titulo: 'Mais de 120 dias de cobertura', numero: fmtBRL(f.lento_valor), cor_num: Q.excesso,
+      texto: `${nSku(f.lento_skus)} vendendo devagar`, foot: f.lentos?.[0] ? `Maior: ${f.lentos[0].titulo}` : '' });
+    if (f.excesso > 0) cards.push({ tipo: 'aviso', selo: f.nome, cor_selo: cor, meta: 'Excesso', titulo: 'Acima do estoque máximo', numero: fmtBRL(f.excesso), cor_num: Q.excesso,
+      texto: (f.pct_excesso != null ? `${pct(f.pct_excesso)} do estoque` : 'a custo') + (f.forn_excesso?.[0] ? ` · ${f.forn_excesso[0].nome}` : ''),
+      foot: f.oc_acima_emax > 0 ? `${fmtBRL(f.oc_acima_emax)} em OCs passam do Emax` : '' });
+    if (f.vai_romper_skus > 0) cards.push({ tipo: 'alerta', selo: f.nome, cor_selo: cor, meta: 'Vai romper', titulo: 'Acaba antes da reposição', numero: nSku(f.vai_romper_skus), cor_num: '#F25C5C',
+      texto: `${fmtBRL(f.vai_romper_giro)}/dia em risco, sem OC`, foot: f.vai_romper?.[0] ? `Primeiro: ${f.vai_romper[0].titulo}` : '' });
+    if (f.nivel_servico != null) cards.push({ tipo: 'estoque', selo: f.nome, cor_selo: cor, meta: 'Nível de serviço', titulo: 'Itens que vendem e têm estoque', numero: pct(f.nivel_servico), cor_num: cor,
+      texto: `Ruptura de ${pct(f.pct_ruptura ?? 0)} da demanda`, foot: '' });
   }
   return cards;
 }
@@ -163,6 +181,15 @@ async function mostra(c) {
     card.innerHTML = `${video ? `<video class="media" src="${esc(c.midia)}" muted playsinline autoplay></video>` : `<img class="media" src="${esc(c.midia)}" alt="">`}
       <div class="media-cap"><div class="top"><span class="badge" style="background:${T.cor};color:${T.fg}">${esc(c.selo)}</span><span class="meta-l mask d1"><span>${esc(c.meta || '')}</span></span></div>
       <div class="tit" style="font-size:54px;margin-top:12px">${linhas(c.titulo, 54, 600, 1)}</div></div>`;
+  } else if (c.lista) {
+    const maxw = 853 - 120, z = 44;
+    const corte = (t, w) => { t = String(t); if (mw(t, z, 500) <= w) return t; while (t.length > 4 && mw(t + '…', z, 500) > w) t = t.slice(0, -1); return t.trim() + '…'; };
+    const ln = c.lista.map((x, i) => { const st = x.oc > 0 ? '' : ' · sem OC'; const pre = x.curva + '  ';
+      return `<div class="li mask d${Math.min(4, i + 1)}"><span><b style="color:${x.curva === 'AA' ? '#F25C5C' : '#FF9F43'}">${esc(x.curva)}</b> ${esc(corte(x.titulo, maxw - mw(pre, z, 700) - (st ? mw(st, z, 500) : 0)))}<span style="color:#BDBDBD">${st}</span></span></div>`; }).join('');
+    card.innerHTML = `
+      <div class="top"><span class="badge" style="background:${c.cor_selo};color:#212121">${esc(c.selo)}</span><span class="meta-l mask d1"><span>${esc(c.meta || '')}</span></span></div>
+      <div class="tit" style="font-size:50px;margin-top:16px">${linhas(c.titulo, 50, 600, 1)}</div>
+      <div class="lst">${ln}</div>`;
   } else {
     card.innerHTML = `
       <div class="top"><span class="badge" style="background:${c.cor_selo || T.cor};color:${c.cor_selo ? '#212121' : T.fg}">${esc(c.selo)}</span><span class="meta-l mask d1"><span>${esc(c.meta || '')}</span></span></div>
@@ -197,6 +224,7 @@ async function loop() {
   else m.forEach((p, i) => seq.push(r[i % r.length], p));
   if (m.length && r.length && m.length < r.length) seq.push(...r.slice(m.length));
   if (!seq.length) { await sleep(5000); return loop(); }
+  const fix = new URLSearchParams(location.search).get('card'); if (fix !== null && seq[+fix]) seq = [seq[+fix]];   // ?card=N: teste de um card
   for (const c of seq) { try { await mostra(c); } catch (e) { console.error(e); } }
   loop();
 }

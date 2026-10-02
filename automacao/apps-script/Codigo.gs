@@ -42,7 +42,8 @@ const CFG = {
 function configurarTudo() {
   const props = PropertiesService.getScriptProperties();
   if (!props.getProperty('GITHUB_TOKEN')) Logger.log('Aviso: GITHUB_TOKEN ainda não definido. E-mail funciona; o telão só recebe dados depois do token.');
-  if (props.getProperty('FORM_ID')) { instalarGatilhos_(SpreadsheetApp.openById(props.getProperty('RESPOSTAS_ID'))); return Logger.log('Já configurado. Gatilhos reinstalados. Planilha: ' + SpreadsheetApp.openById(props.getProperty('RESPOSTAS_ID')).getUrl()); }
+  if (props.getProperty('FORM_ID')) { try { const shM = SpreadsheetApp.openById(props.getProperty('RESPOSTAS_ID')).getSheetByName('Metas'); if (shM && !/meta\s*2/i.test(shM.getRange(1, 1, 1, 6).getValues()[0].join('|'))) atualizarAbaMetas(); } catch (e) { Logger.log('Aba Metas: ' + e.message); }
+    instalarGatilhos_(SpreadsheetApp.openById(props.getProperty('RESPOSTAS_ID'))); return Logger.log('Já configurado. Gatilhos reinstalados. Planilha: ' + SpreadsheetApp.openById(props.getProperty('RESPOSTAS_ID')).getUrl()); }
 
   const form = FormApp.create('Telão · publicar no mural');
   form.setDescription('O que você enviar aqui aparece na coluna da direita do telão (em até 10 minutos). Seja curto: o telão lê como faixa.');
@@ -88,30 +89,30 @@ function instalarGatilhos_(ss) {
 
 // ===================================================================== metas (aba Metas da planilha do telão)
 
-// Três degraus por mês: Meta (o compromisso), Super meta (o desafio) e Mega meta (o recorde).
-const NIVEIS_ = [['meta', 'Meta'], ['super', 'Super meta'], ['mega', 'Mega meta']];
-const CAB_METAS_ = ['Mês (AAAA-MM)', 'Meta (R$)', 'Super meta (R$)', 'Mega meta (R$)', 'Exemplo? (sim/não)', 'Observação'];
+// Meta escalonada: três degraus por mês, Meta 1 < Meta 2 < Meta 3 (no JSON continuam meta / super / mega, que o telão já lê).
+const NIVEIS_ = [['meta', 'Meta 1'], ['super', 'Meta 2'], ['mega', 'Meta 3']];
+const CAB_METAS_ = ['Mês (AAAA-MM)', 'Meta 1 (R$)', 'Meta 2 (R$)', 'Meta 3 (R$)', 'Exemplo? (sim/não)', 'Observação'];
 
 function criarAbaMetas_(ss, linhas) {
   const sh = ss.getSheetByName('Metas') || ss.insertSheet('Metas', 0);
   sh.clear();
   sh.getRange(1, 1, 1, CAB_METAS_.length).setValues([CAB_METAS_]).setFontWeight('bold').setBackground('#212121').setFontColor('#ECFC30');
-  const L = linhas && linhas.length ? linhas : [['2026-10', 21000000, 23000000, 25000000, 'sim', 'Itajaí + Londrina somadas · super e mega de exemplo']];
+  const L = linhas && linhas.length ? linhas : [['2026-10', 21000000, 23000000, 25000000, 'sim', 'Itajaí + Londrina somadas · Meta 2 e Meta 3 de exemplo']];
   sh.getRange(2, 1, L.length, CAB_METAS_.length).setValues(L);
   sh.getRange('A:A').setNumberFormat('@'); sh.getRange('B:D').setNumberFormat('"R$" #,##0');
   sh.getRange('E2:E').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['sim', 'não']).build());
   sh.setColumnWidths(1, CAB_METAS_.length, 170); sh.setFrozenRows(1);
-  sh.getRange('H1').setValue('Uma linha por mês. Meta < Super meta < Mega meta. Super e Mega são opcionais. O telão atualiza em cerca de 1 minuto.');
+  sh.getRange('H1').setValue('Uma linha por mês, meta da Domus (Itajaí + Londrina). Meta 1 < Meta 2 < Meta 3. O telão e o e-mail atualizam em cerca de 1 minuto.');
 }
 
-/** Converte a aba Metas antiga (uma meta só) para o formato com três níveis, mantendo os valores. */
+/** Converte a aba Metas antiga (uma meta só, ou Meta/Super/Mega) para Meta 1, Meta 2 e Meta 3, mantendo os valores. */
 function atualizarAbaMetas() {
   const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('RESPOSTAS_ID'));
   const atual = lerMetas_();
   const linhas = Object.entries(atual).map(([m, v]) => [m, v.meta, v.super || '', v.mega || '', v.exemplo ? 'sim' : 'não', '']);
   criarAbaMetas_(ss, linhas);
   publicarMetas();
-  try { SpreadsheetApp.getActive().toast('Aba Metas com Meta, Super meta e Mega meta. Preencha os valores.', 'Telão', 8); } catch (e) { }
+  try { SpreadsheetApp.getActive().toast('Aba Metas com Meta 1, Meta 2 e Meta 3. Preencha os valores.', 'Telão', 8); } catch (e) { }
 }
 
 /** Lê a aba Metas: { 'AAAA-MM': { meta, super, mega, exemplo } }. Aceita o formato antigo (só Meta). */
@@ -121,7 +122,7 @@ function lerMetas_() {
   const v = sh.getDataRange().getValues(); if (!v.length) return {};
   const H = v[0].map(h => String(h).toLowerCase());
   const col = (...k) => H.findIndex(h => k.some(x => h.includes(x)));
-  const C = { mes: col('mês', 'mes'), meta: H.findIndex(h => /^meta/.test(h)), super: col('super'), mega: col('mega'), ex: col('exemplo') };
+  const C = { mes: col('mês', 'mes'), meta: H.findIndex(h => /^meta\b/.test(h) && !/meta\s*[23]/.test(h)), super: H.findIndex(h => /meta\s*2|super/.test(h)), mega: H.findIndex(h => /meta\s*3|mega/.test(h)), ex: col('exemplo') };
   const num = x => typeof x === 'number' ? x : parseFloat(String(x).replace(/R\$|\s|\./g, '').replace(',', '.'));
   const out = {};
   v.slice(1).forEach(r => {
@@ -143,7 +144,7 @@ function publicarMetas(e) {
   if (e && e.range && e.range.getSheet().getName() === 'Mensagens') return publicarTelaCheia_();
   if (e && e.range && e.range.getSheet().getName() !== 'Metas') return;
   const m = lerMetas_();
-  const out = Object.assign({ _info: 'Metas de faturamento por mês (R$), da Domus (Itajaí + Londrina): meta, super (Super meta) e mega (Mega meta). Gerado pela aba Metas da planilha do telão. Não editar à mão.' }, m);
+  const out = Object.assign({ _info: 'Metas de faturamento por mês (R$), da Domus (Itajaí + Londrina): meta = Meta 1, super = Meta 2, mega = Meta 3. Gerado pela aba Metas da planilha do telão. Não editar à mão.' }, m);
   Logger.log(publicar_('colunas/meta/metas.json', JSON.stringify(out, null, 1), 'metas: ' + Object.entries(m).map(([k, v]) => `${k} ${v.meta}/${v.super || '-'}/${v.mega || '-'}`).join(', ')));
 }
 
@@ -384,8 +385,48 @@ function goldCalc_(todas, meta) {
     .sort((a, b) => (b.fator ?? 99) * Math.sqrt(b.ritmo15 * b.x.c) - (a.fator ?? 99) * Math.sqrt(a.ritmo15 * a.x.c)).slice(0, 5)
     .map(z => Object.assign(item(z.x), { d15: z.x.d15, ritmo15: z.ritmo15, ritmo_ant: z.ant45, fator: z.fator, cobertura: z.x.q > 0 ? z.x.q / z.ritmo15 : 0 }));
 
+  // ---------- Gold+ · indicadores extras de estoque (não substituem os 6 indicadores) ----------
+  const soma = (arr, f) => arr.reduce((t, x) => t + f(x), 0);
+  const cob = x => x.m > 0 && x.q > 0 ? x.q / x.m : null;
+  const ativos = L.filter(temC);
+  // estoque por faixa de cobertura (dias de venda que o estoque aguenta), a custo
+  const cobertura_faixas = [['até 15 d', 0, 15], ['15 a 30 d', 15, 30], ['30 a 60 d', 30, 60], ['60 a 90 d', 60, 90], ['90 a 180 d', 90, 180], ['mais de 180 d', 180, Infinity]]
+    .map(([faixa, a, b]) => { const s = ativos.filter(x => cob(x) !== null && cob(x) >= a && cob(x) < b); return { faixa, valor: soma(s, x => x.q * x.c), skus: s.length }; });
+  cobertura_faixas.push({ faixa: 'sem venda', valor: semGiro, skus: cong.length });
+  // estoque lento: vende, mas a cobertura passa de 120 dias
+  const lentoArr = ativos.filter(x => cob(x) !== null && cob(x) > 120);
+  const lentos = lentoArr.slice().sort((a, b) => b.q * b.c - a.q * a.c).slice(0, 5).map(x => Object.assign(item(x), { valor: x.q * x.c, cobertura: cob(x) }));
+  // vai romper: tem estoque, vende, cobertura menor que o lead time (7 dias se não houver LT) e nenhuma OC em trânsito
+  const romperArr = ativos.filter(x => x.q > 0 && x.m > 0 && !(x.oc > 0) && x.q / x.m < (x.lt > 0 ? x.lt : 7));
+  const vai_romper = romperArr.slice().sort((a, b) => ordemCurva(a.curva) - ordemCurva(b.curva) || b.m * b.c - a.m * a.c).slice(0, 8)
+    .map(x => Object.assign(item(x), { giro: x.m * x.c, cobertura: cob(x) }));
+  // OCs: valor em trânsito e a parte que já vai passar do Emax quando chegar
+  const ocExc = ativos.filter(x => x.oc > 0 && x.emax !== null && x.q !== null && Math.max(x.q, 0) + x.oc > x.emax);
+  // nível de serviço: dos SKUs que vendem, quantos têm estoque
+  const vendem = ativos.filter(x => x.m > 0);
+  // por curva: estoque, congelado e DIO
+  Object.values(curvas).forEach(c => { c.estoque = 0; c.congelado = 0; });
+  ativos.forEach(x => { const c = curvas[x.curva]; if (!c || !(x.q > 0)) return; c.estoque += x.q * x.c; if (x.m === 0) c.congelado += x.q * x.c; });
+  Object.values(curvas).forEach(c => { c.dio = c.giro > 0 ? c.estoque / c.giro : null; });
+  // concentração: quanto do estoque está nos 20% de SKUs de maior valor
+  const valores = ativos.filter(x => x.q > 0).map(x => x.q * x.c).sort((a, b) => b - a);
+  const top20 = soma(valores.slice(0, Math.max(1, Math.ceil(valores.length * .2))), v => v);
+  // lista completa (até 40) dos mais vendidos sem estoque: curvas AA e A, com nome
+  const ruptura_aa_a = rup.filter(x => x.curva === 'AA' || x.curva === 'A')
+    .sort((a, b) => ordemCurva(a.curva) - ordemCurva(b.curva) || (a.curva === 'AA' ? 0 : 1) - (b.curva === 'AA' ? 0 : 1) || b.m * b.c - a.m * a.c).slice(0, 40)
+    .map(x => Object.assign(item(x), { perdido: x.m * x.c }));
+  const extras = {
+    pct_congelado: E > 0 ? semGiro / E * 100 : null, pct_excesso: E > 0 ? exc / E * 100 : null,
+    cobertura_faixas, lento_valor: soma(lentoArr, x => x.q * x.c), lento_skus: lentoArr.length, lentos,
+    vai_romper, vai_romper_skus: romperArr.length, vai_romper_giro: soma(romperArr, x => x.m * x.c),
+    oc_valor: soma(ativos, x => (x.oc || 0) * x.c), oc_acima_emax: soma(ocExc, x => Math.min(x.oc, Math.max(x.q, 0) + x.oc - x.emax) * x.c), oc_acima_emax_skus: ocExc.length,
+    nivel_servico: vendem.length ? vendem.filter(x => x.q > 0).length / vendem.length * 100 : null,
+    concentracao_top20: valores.length ? top20 / soma(valores, v => v) * 100 : null,
+    ruptura_aa_a, skus_ruptura_aa_a: rup.filter(x => x.curva === 'AA' || x.curva === 'A').length,
+  };
+
   const porForn = (arr, f) => { const o = {}; arr.forEach(x => o[x.forn] = (o[x.forn] || 0) + f(x)); return Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([nome, v]) => ({ nome, valor: v })); };
-  return Object.assign({}, meta, {
+  return Object.assign({}, meta, extras, {
     skus: L.length, skus_pi: pi.length, estoque_pi: pi.reduce((s, x) => s + (temC(x) ? qp(x) * x.c : 0), 0),
     estoque: E, unidades: Math.round(unid), giro_disp: Gd, mvd_perdida: Gp, ruptura_pct: Gpot > 0 ? Gp / Gpot * 100 : null,
     dio, dpo, dso, ccc, nwc, excesso: exc, sem_giro: semGiro,
@@ -426,7 +467,7 @@ function calcularEstoque_() {
 /** Nomes curtos e campos que a coluna 3 e o e-mail já usam. */
 function arrumar_(e) {
   const curtoItem = x => Object.assign(x, { forn: fornCurto_(x.forn) });
-  ['top_ruptura', 'congelados', 'campeoes', 'azaroes'].forEach(k => e[k].forEach(curtoItem));
+  ['top_ruptura', 'congelados', 'campeoes', 'azaroes', 'lentos', 'vai_romper', 'ruptura_aa_a'].forEach(k => (e[k] || []).forEach(curtoItem));
   e.top_fornecedores = e.forn_ruptura.map(x => ({ nome: fornCurto_(x.nome), perda: x.valor }));
   e.forn_excesso = e.forn_excesso.map(x => ({ nome: fornCurto_(x.nome), valor: x.valor }));
   e.top_skus = e.top_ruptura.map(x => ({ sku: x.sku, filial: x.filial, titulo: x.titulo.slice(0, 48), curva: x.curva, perda: Math.round(x.perdido), oc: x.oc }));
@@ -453,6 +494,12 @@ function insights_(est, meta) {
   // ponto de melhoria
   const L = F.londrina; if (L && L.estoque > 0 && L.sem_giro / L.estoque > .2) add('melhoria', 'Estoque parado em Londrina', curto_(L.sem_giro), `${Math.round(L.sem_giro / L.estoque * 100)}% do estoque sem venda`, L.congelados[0] ? `Maior item: ${L.congelados[0].titulo.slice(0, 40)}` : '');
   if (T) add('melhoria', 'Excesso acima do estoque máximo', curto_(T.excesso), 'a custo, acima do Emax', T.forn_excesso[0] ? `Maior concentração: ${T.forn_excesso[0].nome}` : '');
+  // Gold+: congelado, lento, vai romper, OC acima do Emax
+  Object.values(F).filter(Boolean).forEach(f => {
+    if (f.vai_romper_skus > 0) add('alerta', `${f.vai_romper_skus} SKUs de ${f.nome} vão romper sem OC`, curto_(f.vai_romper_giro) + '/dia', 'de venda em risco', f.vai_romper[0] ? `Primeiro da fila: ${f.vai_romper[0].titulo.slice(0, 36)}` : '');
+    if (f.oc_acima_emax > 0) add('melhoria', `OCs que passam do estoque máximo em ${f.nome}`, curto_(f.oc_acima_emax), 'vão chegar acima do Emax', `${f.oc_acima_emax_skus} SKUs com OC além do necessário`);
+    if (f.lento_valor > 0 && f.estoque > 0) add('melhoria', `Estoque lento em ${f.nome}`, curto_(f.lento_valor), 'com mais de 120 dias de cobertura', `${Math.round(f.lento_valor / f.estoque * 100)}% do estoque da filial`);
+  });
   // alerta
   const aaL = pctCurva(L, 'AA'); if (aaL !== null && aaL >= 20) add('alerta', 'Curva AA de Londrina sem estoque', d1_(aaL) + '%', 'da demanda AA em ruptura', L.top_ruptura[0] ? `${L.top_ruptura[0].titulo.slice(0, 36)} · ${L.top_ruptura[0].oc > 0 ? 'OC ' + L.top_ruptura[0].oc + ' un' : 'sem OC'}` : '');
   if (T && T.top_fornecedores[0]) add('alerta', `Ruptura concentrada em ${T.top_fornecedores[0].nome}`, curto_(T.top_fornecedores[0].perda) + '/dia', 'de MVD perdida a custo', T.top_ruptura[0] ? `Item mais afetado: ${T.top_ruptura[0].titulo.slice(0, 36)}` : '');
@@ -672,7 +719,7 @@ function dadosDoDia_() {
   return { meta, news, mural, est };
 }
 
-const brl_ = v => v >= 1e6 ? 'R$ ' + (v / 1e6).toFixed(2).replace('.', ',') + ' mi' : 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil';
+const brl_ = v => !v ? 'R$ 0' : Math.abs(v) >= 1e6 ? 'R$ ' + (v / 1e6).toFixed(2).replace('.', ',') + ' mi' : 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil';
 const pc_ = v => v == null ? '–' : v.toFixed(1).replace('.', ',') + '%';
 const escH_ = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const urlOk_ = u => /^https:\/\/[^\s"<>]+$/.test(String(u || ''));
@@ -722,12 +769,12 @@ function montarEmail_(D, nivel, gerenciarUrl, temLogo) {
   // ---------- resumo em 3 números (só nível completo) ----------
   if (nivel === 'completo' && meta) {
     const pj = projecao_(meta.realizado_mes, meta.meta_mes, meta.referencia);
-    const nv = meta.niveis && meta.niveis.length ? meta.niveis : [{ nome: 'Meta', valor: meta.meta_mes }];
+    const nv = meta.niveis && meta.niveis.length ? meta.niveis : [{ nome: 'Meta 1', valor: meta.meta_mes }];
     const alc = nv.filter(n => pj.proj >= n.valor).pop();
     const rup = est && (est.total || Object.values(est.filiais).find(Boolean));
     R.push(`<tr><td style="padding:24px 26px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      ${kpi('Faturamento no mês', brl(meta.realizado_mes), `${pc(meta.realizado_mes / meta.meta_mes * 100)} da Meta · margem ${pc(meta.margem_pct_mes)}`)}
-      ${kpi('Projeção do mês', brl(pj.proj), alc ? `fecha na ${alc.nome}` : 'abaixo da Meta', alc ? C.lime : '#F25C5C')}
+      ${kpi('Faturamento no mês', brl(meta.realizado_mes), `${pc(meta.realizado_mes / meta.meta_mes * 100)} da Meta 1 · margem ${pc(meta.margem_pct_mes)}`)}
+      ${kpi('Projeção do mês', brl(pj.proj), alc ? `fecha na ${alc.nome}` : 'abaixo da Meta 1', alc ? C.lime : '#F25C5C')}
       ${rup ? kpi('Ruptura · Domus', pc(rup.pct_ruptura), `${brl(rup.perda_dia_custo)}/dia de venda perdida`, '#F25C5C') : '<td></td>'}
     </tr></table></td></tr>`);
   }
@@ -759,7 +806,8 @@ function montarEmail_(D, nivel, gerenciarUrl, temLogo) {
   }
 
   // ---------- mural ----------
-  const posts = ((mural && mural.posts) || []).filter(p => !p.exemplo && (!p.ate || p.ate >= hoje_()));
+  const vazio = s => !String(s == null ? '' : s).trim() || /^(undefined|null)$/i.test(String(s).trim());
+  const posts = ((mural && mural.posts) || []).filter(p => !p.exemplo && (!p.ate || p.ate >= hoje_()) && !(vazio(p.titulo) && vazio(p.texto)));
   if (posts.length) {
     R.push(secao('Mural do time', 'Metas, ações e avisos publicados pelos analistas'));
     posts.forEach(p => R.push(`<tr><td style="padding:6px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.g1};border-radius:10px"><tr><td style="padding:12px 16px;font:400 14px/1.45 ${FONTE_};color:${C.txt}">
@@ -771,7 +819,7 @@ function montarEmail_(D, nivel, gerenciarUrl, temLogo) {
     if (meta) {
       const F = meta.filiais || {}, ks = Object.keys(F);
       const pj = projecao_(meta.realizado_mes, meta.meta_mes, meta.referencia);
-      const nv = meta.niveis && meta.niveis.length ? meta.niveis : [{ nome: 'Meta', valor: meta.meta_mes }];
+      const nv = meta.niveis && meta.niveis.length ? meta.niveis : [{ nome: 'Meta 1', valor: meta.meta_mes }];
       R.push(secao('Faturamento · Domus', `D+1 · até ${ddmm(meta.referencia)} · ontem ${brl(meta.ontem.receita)} em ${meta.ontem.pedidos.toLocaleString('pt-BR')} pedidos${meta.meta_exemplo ? ' · metas de exemplo' : ''}`));
       R.push(`<tr><td style="padding:0 32px">${tabela(['Degrau', 'Valor', 'Feito', 'Projeção', 'Precisa/dia'], nv.map(n => [`<b>${n.nome}</b>`, brl(n.valor), pc(meta.realizado_mes / n.valor * 100), pc(pj.proj / n.valor * 100), pj.restantes ? brl(Math.max(0, n.valor - meta.realizado_mes) / pj.restantes) : '–']))}
         <div style="font:400 12px/1.4 ${FONTE_};color:${C.sub};padding-top:6px">Ritmo atual: ${brl(pj.ritmo)}/dia · projeção linear até o fim do mês.</div></td></tr>`);
@@ -801,6 +849,32 @@ function montarEmail_(D, nivel, gerenciarUrl, temLogo) {
       R.push(lista('Campeões de venda (giro a custo)', T.campeoes, x => `${d1_(x.mvd)} un/dia · ${brl(x.giro)}/dia · ${x.estoque > 0 ? Math.round(x.cobertura) + ' dias de cobertura' : '<b style="color:' + C.red + '">em ruptura</b>'}`));
       R.push(lista('Azarões (disparou nos últimos 15 dias)', T.azaroes, x => `${x.fator ? '×' + d1_(x.fator) : 'novo'} · ${Math.round(x.d15)} un em 15 dias · ${x.estoque > 0 ? Math.round(x.cobertura) + ' dias de cobertura' : '<b style="color:' + C.red + '">em ruptura</b>'}`));
       R.push(lista('Estoque congelado (maior valor sem venda)', T.congelados, x => `${brl(x.valor)} · ${Math.round(x.estoque)} un`));
+
+      // ---------- Gold+: congelado, lento, excesso, OCs e cobertura ----------
+      const tem = f => f.pct_congelado !== undefined;
+      if (bl.every(tem)) {
+        R.push(secao('Saúde do estoque', 'Para onde está indo o dinheiro parado · valores a custo'));
+        R.push(`<tr><td style="padding:0 32px">${tabela(['Indicador', ...bl.map(f => f.nome + (f.parcial ? ' *' : ''))], [
+          ['Congelado (sem venda)', ...bl.map(f => sub(`<b>${brl(f.sem_giro)}</b>`, pc(f.pct_congelado)))],
+          ['Lento (cobertura &gt; 120 d)', ...bl.map(f => sub(brl(f.lento_valor), f.lento_skus + ' SKUs'))],
+          ['Excesso acima do Emax', ...bl.map(f => sub(brl(f.excesso), pc(f.pct_excesso)))],
+          ['OC em trânsito', ...bl.map(f => brl(f.oc_valor))],
+          ['OC que passa do Emax', ...bl.map(f => sub(`<span style="color:${f.oc_acima_emax > 0 ? C.red : C.txt}">${brl(f.oc_acima_emax)}</span>`, f.oc_acima_emax_skus + ' SKUs'))],
+          ['Vai romper (sem OC)', ...bl.map(f => sub(`<b style="color:${f.vai_romper_skus ? C.red : C.txt}">${f.vai_romper_skus} SKUs</b>`, curto_(f.vai_romper_giro) + '/dia'))],
+          ['Nível de serviço', ...bl.map(f => pc(f.nivel_servico))],
+          ['Estoque nos 20% maiores SKUs', ...bl.map(f => pc(f.concentracao_top20))],
+        ])}<div style="font:400 12px/1.4 ${FONTE_};color:${C.sub};padding-top:6px">Vai romper = cobertura menor que o lead time e nenhuma OC. Nível de serviço = SKUs que vendem e têm estoque.</div></td></tr>`);
+        const fx = (T.cobertura_faixas || []);
+        if (fx.length) R.push(`<tr><td style="padding:14px 32px 0"><div style="font:600 13px/1.4 ${FONTE_};color:${C.sub};padding-bottom:6px">Cobertura do estoque · ${escH_(T.nome)} (dias de venda que o estoque aguenta)</div>${tabela(['Faixa', 'Valor', 'SKUs', '% do estoque'], fx.map(x => [x.faixa, brl(x.valor), x.skus.toLocaleString('pt-BR'), pc(T.estoque > 0 ? x.valor / T.estoque * 100 : null)]))}</td></tr>`);
+        R.push(lista('Estoque lento (maior valor com mais de 120 dias de cobertura)', T.lentos, x => `${brl(x.valor)} · ${Math.round(x.cobertura)} dias`));
+        R.push(lista('Vai romper antes de chegar (sem OC)', T.vai_romper, x => `${d1_(x.cobertura)} dias de estoque · LT ${x.lt ? Math.round(x.lt) + ' d' : '–'}`));
+      }
+
+      // ---------- sem estoque · curvas AA e A, por filial, com nome ----------
+      Object.values(est.filiais).filter(f => f && f.ruptura_aa_a && f.ruptura_aa_a.length).forEach(f => {
+        R.push(secao(`Sem estoque · curvas AA e A · ${escH_(f.nome)}`, `${f.skus_ruptura_aa_a} SKUs${f.skus_ruptura_aa_a > Math.min(25, f.ruptura_aa_a.length) ? ` (mostrando os ${Math.min(25, f.ruptura_aa_a.length)} de maior venda perdida)` : ''}${f.parcial ? ' · base parcial' : ''}`));
+        R.push(`<tr><td style="padding:0 32px">${tabela(['Produto', 'Curva', 'SKU', 'Perda/dia', 'OC'], f.ruptura_aa_a.slice(0, 25).map(x => [escH_(x.titulo.slice(0, 46)), `<b>${x.curva}</b>`, escH_(x.sku), brl(x.perdido), x.oc > 0 ? Math.round(x.oc) + ' un' : `<b style="color:${C.red}">sem OC</b>`]))}</td></tr>`);
+      });
     }
   }
 

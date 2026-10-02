@@ -1,16 +1,11 @@
 # Rotina diária do telão (tarefa agendada do Claude)
 
-Roda todo dia às 06h15 (horário de Brasília), sem intervenção. Atualiza a coluna 1 (meta), a coluna 2 (notícias) e a **Análise do dia** (gráficos em tela cheia). O Cloudflare Pages publica sozinho em ~1 minuto. A coluna 3 (estoque e mural), a Análise Gold e o e-mail das 07h30 são do Apps Script.
+Roda todo dia às 06h15 (horário de Brasília), sem intervenção. Atualiza a coluna 1 (meta), a coluna 2 (notícias) e a **Análise do dia** (gráficos em tela cheia) com git push direto no `domuswms/Tel-o`. O Cloudflare Pages publica sozinho em ~1 minuto. A coluna 3 (estoque e mural), a Análise Gold, as metas e o e-mail das 07h30 são do Apps Script (`Codigo.gs`), que grava os próprios arquivos no mesmo repositório.
 
-## Como os dados chegam ao GitHub (sem git push)
+## Requisitos
 
-A sessão do Claude na nuvem não consegue dar `git push` no `domuswms/Tel-o` (o proxy só libera repositórios vinculados à sessão). Por isso a rotina entrega por um **Receptor**: um Apps Script pequeno e separado (`automacao/apps-script/receptor/`) que recebe os JSON por HTTPS, confere um segredo e grava no GitHub com o token que já fica guardado no Google. O mesmo Receptor devolve os scripts e dados de entrada (`acao: "ler"`), então a rotina funciona com o repositório **privado**.
-
-Requisitos (uma vez):
-
-1. **Admin da organização no Claude**: Configurações de administrador → Capacidades → acesso à rede: liberar `script.google.com` e `script.googleusercontent.com`.
-2. **Receptor**: novo projeto em script.google.com ("Telão · Receptor"), colar `Receptor.gs` e `appsscript.json` (mostrar manifesto em Configurações do projeto). Propriedade `GITHUB_TOKEN` (mesmo tipo de token do Codigo.gs). Rodar `gerarSegredo` e `testarReceptor`. Implantar → App da Web, executar como **Eu**, acesso **Qualquer pessoa**. Copiar a URL `/exec`.
-3. **Ambiente da tarefa no Claude**: variáveis `TELAO_RECEPTOR_URL` (a URL /exec) e `TELAO_SEGREDO` (o valor do registro do `gerarSegredo`). Nunca no prompt nem no código.
+- Conector Preço Certo habilitado na conta que roda a tarefa.
+- Escrita da tarefa no `domuswms/Tel-o`: Claude GitHub App instalado na organização com acesso ao Tel-o e o repositório vinculado à tarefa. O commit sai com o autor da sessão (o prompt não troca o autor).
 
 ## Prompt da tarefa (copiado na tarefa agendada)
 
@@ -18,16 +13,9 @@ Requisitos (uma vez):
 Você mantém o telão WeAxis. Responda e escreva em português do Brasil. Trabalhe sem pedir confirmação.
 
 1. PREPARAR
-   Se TELAO_RECEPTOR_URL e TELAO_SEGREDO existem no ambiente, baixe os arquivos pelo Receptor:
-   crie /tmp/baixar.py com as linhas abaixo (tire os 5 espaços da margem esquerda) e rode: mkdir -p telao && cd telao && python3 /tmp/baixar.py
-     import json,os,urllib.request
-     u,s=os.environ['TELAO_RECEPTOR_URL'],os.environ['TELAO_SEGREDO']
-     q=urllib.request.Request(u,data=json.dumps({'segredo':s,'acao':'ler'}).encode(),headers={'Content-Type':'application/json'})
-     r=json.load(urllib.request.urlopen(q,timeout=90)); assert r.get('ok'),r
-     for p,t in r['arquivos'].items():
-         os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w',encoding='utf-8').write(t)
-     print(len(r['arquivos']),'arquivos')
-   Se não existem (ou o Receptor falhar), use: git clone https://x-access-token:$GH_TOKEN@github.com/domuswms/Tel-o.git telao && cd telao
+   git clone https://github.com/domuswms/Tel-o.git telao && cd telao
+   (se o clone pedir credencial e existir $GH_TOKEN no ambiente, use https://x-access-token:$GH_TOKEN@github.com/domuswms/Tel-o.git)
+   Não altere git config user.name nem user.email: o commit sai com o autor da sessão.
    Trabalhe sempre dentro de telao/.
 
 2. COLUNA 1 · FATURAMENTO (Preço Certo, dado D+1)
@@ -63,12 +51,16 @@ Você mantém o telão WeAxis. Responda e escreva em português do Brasil. Traba
    - Faturamento e margem: colunas/meta/dados.json (gerado no passo 2) e, se precisar, mais chamadas ao Preço Certo:
      sales_summary por month (últimos 6 meses), por day, por channel, por filial; products_summary para produtos que puxaram ou derrubaram o mês.
    - Análise Gold da PAC (gerada pelo Apps Script às 06h): colunas/telacheia/dados.json (escopos itajai, londrina, domus com
-     ruptura_pct, mvd_perdida, dio, dpo, dso, ccc, nwc, estoque, excesso, sem_giro, curvas, top_ruptura, congelados, campeoes, azaroes)
+     ruptura_pct, mvd_perdida, dio, dpo, dso, ccc, nwc, estoque, excesso, sem_giro, curvas (com estoque, congelado e dio por curva),
+     top_ruptura, congelados, campeoes, azaroes e o Gold+: pct_congelado, pct_excesso, cobertura_faixas, lento_valor, lentos,
+     vai_romper, vai_romper_skus, vai_romper_giro, oc_valor, oc_acima_emax, nivel_servico, concentracao_top20, ruptura_aa_a)
      e colunas/mural/estoque.json. Se a data da PAC for mais velha que 3 dias, diga isso no subtitulo.
-   Temas que devem aparecer ao longo da semana:
-   - Faturamento: ritmo × meta/super/mega, mês a mês, dia a dia, canal, filial, margem por canal.
+   Pelo menos metade das cenas do dia é de estoque (ruptura, congelado, lento, excesso, cobertura, caixa). Temas da semana:
+   - Faturamento: ritmo × Meta 1, Meta 2 e Meta 3 (em metas.json: meta, super, mega), mês a mês, dia a dia, canal, filial, margem por canal.
    - Ruptura: % da demanda perdida por filial e curva, R$/dia perdido, quem mais pesa (AA/A primeiro), rupturas sem OC.
-   - Congelamento: estoque sem giro e excesso acima do Emax, em R$, por filial; maiores itens parados.
+   - Congelamento: estoque sem giro, lento (cobertura > 120 d) e excesso acima do Emax, em R$ e % do estoque, por filial; maiores itens parados;
+     cobertura_faixas em colunas; OCs que vão chegar acima do Emax.
+   - Reposição: vai_romper (acaba antes do lead time e sem OC), nível de serviço por filial, AA/A sem estoque (ruptura_aa_a).
    - Fluxo de caixa: CCC = DIO + DSO − DPO em cascata, NWC (capital empatado), comparação entre filiais.
    Regras de leitura (Análise Gold): dado faltante não é zero; Domus é recálculo das linhas somadas, nunca média; PI verticalizado fica fora.
    Londrina usa base parcial (só Verticalizados): avise no subtitulo quando a cena mostrar Londrina.
@@ -88,23 +80,21 @@ Você mantém o telão WeAxis. Responda e escreva em português do Brasil. Traba
    Rode: python3 automacao/validar_analise.py colunas/telacheia/analise.json e corrija e repita até "ok".
    Se faltar dado para um tema, escolha outro. Se nada der certo, mantenha o arquivo anterior.
 
-5. ENTREGAR
+5. ENTREGAR (git push direto)
    - Rode python3 automacao/tem_pedido.py --feito
-   - Com o Receptor: python3 automacao/entregar.py colunas/meta/dados.json colunas/noticias/dados.json colunas/telacheia/analise.json automacao/ultima_execucao.json
-   - Sem o Receptor (ou se ele falhar com erro de rede): git add, commit ("rotina: meta <ontem> + notícias + análise <hoje>") e git push.
-   - Se nenhum dos dois funcionar, diga exatamente o erro no resumo.
+   - git add colunas/meta/dados.json colunas/meta/metas.json colunas/noticias/dados.json colunas/telacheia/analise.json automacao/ultima_execucao.json
+   - Se houver mudança: git commit -m "rotina: meta <ontem> + notícias + análise <hoje>" e git push origin main.
+   - Se o push for recusado porque o remoto andou (o Apps Script grava estoque e mural no mesmo repositório): git pull --rebase origin main e git push de novo.
+   - Se o push falhar por permissão, não tente outros caminhos: diga o erro exato no resumo.
 
 6. Termine com um resumo de 4 linhas: faturamento do mês e % da meta (total, Itajaí, Londrina); quantas notícias; quais cenas de análise você escolheu e por quê (uma linha); e qualquer falha.
+
 ```
 
 ## Atualização forçada (pedido manual)
 
 Qualquer pessoa da planilha "Telão WeAxis · metas e mural" usa o menu **Telão → Pedir notícias e análises novas**. Isso grava `automacao/pedido.json` no repositório.
 
-Uma segunda tarefa agendada (de hora em hora, 08h às 19h) faz o passo 1, roda `python3 automacao/tem_pedido.py` e, se houver pedido, executa os passos 2 a 6.
+Uma segunda tarefa agendada (de hora em hora, 08h às 19h) clona o repositório, roda `python3 automacao/tem_pedido.py` e, se houver pedido, executa os passos 2 a 6.
 
 Também dá para forçar direto pelo app do Claude: **Tarefas agendadas → Rotina do telão → Executar agora**.
-
-## Alternativa sem admin: rodar no seu computador
-
-Se a liberação de rede não sair, a tarefa pode rodar no seu computador (app do Claude aberto, pasta do repositório conectada). Aí o push sai pelo git da sua máquina, com a sua credencial do GitHub. Peça "mude a rotina do telão para rodar no meu computador".

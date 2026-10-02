@@ -114,9 +114,9 @@ function projecao() {
 function diasNoMes(mes) { const [y, m] = mes.split('-').map(Number); return new Date(y, m, 0).getDate(); }
 
 // ---------- cabeçalho com escopo: deixa claro se o número é da empresa toda ou de uma filial ----------
-// três degraus da meta: Meta (compromisso), Super meta (desafio), Mega meta (recorde)
-const NIVEIS = [['meta', 'Meta', '#ECFC30'], ['super', 'Super meta', '#7FD6FF'], ['mega', 'Mega meta', '#FF9F43']];
-const niveis = () => (D.niveis && D.niveis.length) ? D.niveis : [{ k: 'meta', nome: 'Meta', cor: '#ECFC30', valor: D.meta_mes }];
+// meta escalonada: Meta 1, Meta 2 e Meta 3 (no JSON: meta, super, mega)
+const NIVEIS = [['meta', 'Meta 1', '#ECFC30'], ['super', 'Meta 2', '#7FD6FF'], ['mega', 'Meta 3', '#FF9F43']];
+const niveis = () => (D.niveis && D.niveis.length) ? D.niveis : [{ k: 'meta', nome: 'Meta 1', cor: '#ECFC30', valor: D.meta_mes }];
 const COR_CANAL = { 'Shopee': '#EE4D2D', 'Mercado Livre': '#FFE600', 'Amazon': '#FF9900', 'Magalu': '#0086FF', 'TikTok Shop': '#FE2C55', 'Outros': '#BDBDBD' };
 const CANAIS = ['Shopee', 'Mercado Livre', 'Amazon', 'Magalu', 'TikTok Shop'];   // sempre os cinco, mesmo zerados
 function chip(esc) {
@@ -136,7 +136,7 @@ function slideMes() {
     <div class="top">${LOGO}<span>${D.meta_exemplo ? '<b class="ex">meta exemplo</b>' : ''}${chip('empresa')}</span></div>
     <div class="lbl mask"><span>Realizado no mês${D.margem_pct_mes != null ? ` · margem ${mg(D.margem_pct_mes)}` : ''}</span></div>
     <div class="big mask"><span class="num">R$ 0</span></div>
-    <div class="sub mask"><span>${pct(p)} da Meta de ${fmtBRL(meta)}</span></div>
+    <div class="sub mask"><span>${pct(p)} da Meta 1 de ${fmtBRL(meta)}</span></div>
     <svg class="chart" viewBox="0 0 733 110" preserveAspectRatio="none"></svg>`;
   // gráfico: acumulado real (lima) e ritmo necessário (tracejado) até a meta
   const svg = el.querySelector('svg.chart');
@@ -171,7 +171,7 @@ function slideProjecao() {
     ${head('Projeção do mês', 'empresa')}
     <div class="lbl mask"><span>Fechamento no ritmo atual</span></div>
     <div class="big mask"><span class="num">R$ 0</span></div>
-    <div class="sub mask" style="color:${alc ? alc.cor : '#F25C5C'}"><span>${alc ? `Bate a ${alc.nome} · ${pct(P.proj / alc.valor * 100)}` : `${pct(P.pct)} da Meta`}</span></div>
+    <div class="sub mask" style="color:${alc ? alc.cor : '#F25C5C'}"><span>${alc ? `Bate a ${alc.nome} · ${pct(P.proj / alc.valor * 100)}` : `${pct(P.pct)} da Meta 1`}</span></div>
     <div class="sub grey mask" style="margin-top:12px"><span>Ritmo atual: ${fmtC(P.ritmo)}/dia</span></div>
     <div class="sub grey mask" style="margin-top:4px"><span>${P.rest && prox ? `${prox.nome} pede ${fmtC(Math.max(0, prox.valor - D.realizado_mes) / P.rest)}/dia` : (P.rest ? 'Acima da Mega meta' : 'Mês fechado')}</span></div>`;
   el._play = async () => countUp(el.querySelector('.num'), P.proj);

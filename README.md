@@ -39,7 +39,7 @@ Todo slide traz no canto superior direito o **escopo** do número: **Domus** (It
 - Qualidade: saudável, em excesso (acima do Emax da PAC) e parado (com estoque e sem venda), em barra.
 - Ruptura: % dos SKUs com venda sem estoque, venda perdida por dia a custo, curvas AA e A sem estoque e SKUs em ruptura sem OC.
 
-Metas do mês (da Domus toda) em três degraus: **Meta** (compromisso), **Super meta** (desafio) e **Mega meta** (recorde). Edite na aba **Metas** da planilha do telão; ela gera `colunas/meta/metas.json`. Planilha criada antes desta versão: menu **Telão → Metas: passar para Meta / Super / Mega**. Edite ali (pelo próprio GitHub) e tire `"exemplo": true` quando for a meta oficial.
+Metas do mês (da Domus toda) em três degraus: **Meta 1**, **Meta 2** e **Meta 3** (meta escalonada). Edite na aba **Metas** da planilha do telão; ela gera `colunas/meta/metas.json`. Planilha criada antes desta versão: menu **Telão → Metas: passar para Meta / Super / Mega**. Edite ali (pelo próprio GitHub) e tire `"exemplo": true` quando for a meta oficial.
 
 E-mail das 07h30 (notícias + faturamento por canal × filial + estoque por filial) sai do Apps Script, pela conta Google da empresa de quem instalou o script.
 
@@ -143,6 +143,3 @@ Animação por tipo (todas saem das elipses do símbolo): **Meta batida** disco 
 
 Medida ideal de vídeo para a coluna: **852 × 512 px** (ou 1704 × 1024).
 
-## Entrega sem git push (Receptor)
-
-A rotina do Claude na nuvem não consegue dar push no repositório. Ela entrega pelo **Receptor** (`automacao/apps-script/receptor/`), um Apps Script separado que confere um segredo e grava no GitHub. Passo a passo em `automacao/rotina-diaria.md`, seção "Como os dados chegam ao GitHub".
