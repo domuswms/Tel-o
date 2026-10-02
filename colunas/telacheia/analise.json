@@ -1,0 +1,188 @@
+{
+ "_info": "Análise do dia (tela cheia): gráficos escolhidos pela rotina do Claude a partir do Preço Certo e da Análise Gold da PAC. Formato validado por automacao/validar_analise.py.",
+ "data": "2026-10-02",
+ "atualizado_em": "2026-10-02T19:30:00-03:00",
+ "cenas": [
+  {
+   "tipo": "colunas",
+   "titulo": "Faturamento por mês",
+   "subtitulo": "outubro projetado pelo ritmo",
+   "escopo": "Domus",
+   "tom": "bem",
+   "numero": "R$ 24,2 mi",
+   "insight": "Com 1 dia de dados, outubro passa a meta de R$ 22 mi.",
+   "formato": "brl",
+   "referencia": {
+    "valor": 22000000,
+    "rotulo": "Meta"
+   },
+   "itens": [
+    {
+     "rotulo": "Ago",
+     "valor": 21760616
+    },
+    {
+     "rotulo": "Set",
+     "valor": 20047236
+    },
+    {
+     "rotulo": "Out (proj.)",
+     "valor": 24170000,
+     "destaque": true,
+     "cor": "lima"
+    }
+   ]
+  },
+  {
+   "tipo": "barras",
+   "titulo": "Margem por canal em setembro",
+   "subtitulo": "margem · à direita, fatia da receita",
+   "escopo": "Domus",
+   "tom": "neutro",
+   "numero": "27,9%",
+   "insight": "TikTok Shop tem a maior margem, mas faz só 3% da receita.",
+   "formato": "pct",
+   "itens": [
+    {
+     "rotulo": "TikTok Shop",
+     "valor": 27.9,
+     "cor": "lima",
+     "extra": "3,0% da receita"
+    },
+    {
+     "rotulo": "Amazon",
+     "valor": 17.7,
+     "cor": "cinza",
+     "extra": "0,6%"
+    },
+    {
+     "rotulo": "Magalu",
+     "valor": 13.7,
+     "cor": "cinza",
+     "extra": "0,2%"
+    },
+    {
+     "rotulo": "Shopee",
+     "valor": 13.5,
+     "cor": "cinza",
+     "extra": "55,2%"
+    },
+    {
+     "rotulo": "Mercado Livre",
+     "valor": 11.7,
+     "cor": "coral",
+     "extra": "40,7%"
+    }
+   ]
+  },
+  {
+   "tipo": "comparacao",
+   "titulo": "Itajaí e Londrina na Análise Gold",
+   "subtitulo": "PAC 02/10 · lima = melhor",
+   "escopo": "Filiais",
+   "tom": "alerta",
+   "numero": "42%",
+   "insight": "Londrina tem a pior ruptura e o estoque mais parado.",
+   "grupos": [
+    "Itajaí",
+    "Londrina"
+   ],
+   "metricas": [
+    {
+     "rotulo": "Ruptura da demanda",
+     "valores": [
+      11.0,
+      42.0
+     ],
+     "formato": "pct",
+     "melhor": "menor"
+    },
+    {
+     "rotulo": "DIO",
+     "valores": [
+      25.5,
+      101.2
+     ],
+     "formato": "dias",
+     "melhor": "menor"
+    },
+    {
+     "rotulo": "CCC",
+     "valores": [
+      -7.4,
+      65.1
+     ],
+     "formato": "dias",
+     "melhor": "menor"
+    },
+    {
+     "rotulo": "Congelado",
+     "valores": [
+      317936,
+      1670368
+     ],
+     "formato": "brl",
+     "melhor": "menor"
+    }
+   ]
+  },
+  {
+   "tipo": "cascata",
+   "titulo": "Ciclo de caixa · Londrina",
+   "subtitulo": "estoque + receber − pagar",
+   "escopo": "Londrina",
+   "tom": "alerta",
+   "numero": "65,1 dias",
+   "insight": "Paga o fornecedor 65 dias antes de receber: R$ 1,6 mi empatado.",
+   "formato": "num",
+   "total_rotulo": "CCC (dias)",
+   "itens": [
+    {
+     "rotulo": "DIO",
+     "valor": 101.2,
+     "cor": "cinza"
+    },
+    {
+     "rotulo": "DSO",
+     "valor": 11,
+     "cor": "cinza"
+    },
+    {
+     "rotulo": "DPO",
+     "valor": -47,
+     "cor": "lima"
+    }
+   ],
+   "total": 65.1
+  },
+  {
+   "tipo": "cascata",
+   "titulo": "Ciclo de caixa · Itajaí",
+   "subtitulo": "estoque + receber − pagar",
+   "escopo": "Itajaí",
+   "tom": "bem",
+   "numero": "-7,4 dias",
+   "insight": "Recebe antes de pagar: o fornecedor financia R$ 2,9 mi.",
+   "formato": "num",
+   "total_rotulo": "CCC (dias)",
+   "itens": [
+    {
+     "rotulo": "DIO",
+     "valor": 25.5,
+     "cor": "cinza"
+    },
+    {
+     "rotulo": "DSO",
+     "valor": 11,
+     "cor": "cinza"
+    },
+    {
+     "rotulo": "DPO",
+     "valor": -44,
+     "cor": "lima"
+    }
+   ],
+   "total": -7.4
+  }
+ ]
+}

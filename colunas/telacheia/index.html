@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telão · Tela cheia</title>
+<!--
+  Tela cheia autônoma (2560 × 512): cenas da Análise Gold da PAC e mensagens. Só lê ./dados.json.
+  Dentro do telão, o index.html da raiz chama um bloco por vez (postMessage {acao:'tocar'}) e a página responde {acao:'fim'}.
+  Aberta sozinha, roda todos os blocos em loop. ?cena=N fixa uma cena; ?demo=1 usa dados_demo.json.
+-->
+<style>
+@font-face { font-family:'Archivo'; src:url(archivo.woff2) format('woff2-variations'), url(archivo.woff2) format('woff2'); font-weight:100 900; font-stretch:62% 125%; font-display:block; }
+:root { --ink:#212121; --lime:#ECFC30; --white:#FFFFFF; --g3:#BDBDBD; --g2:#DCDCDC; --bad:#FF6B4A; --line:#3A3A3A; --cyan:#7FD6FF; }
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { background:#000; overflow:hidden; width:100%; height:100%; }
+body { font-family:'Archivo','Helvetica Neue',Arial,sans-serif; color:var(--white); font-weight:500; }
+#stage { position:absolute; left:0; top:0; width:2560px; height:512px; background:var(--ink); overflow:hidden; transform-origin:0 0; }
+.num { font-variant-numeric:tabular-nums; }
+#esq { position:absolute; left:150px; top:60px; width:500px; height:392px; }
+#logo { position:absolute; left:0; top:0; height:50px; width:auto; color:#fff; }
+#tit { position:absolute; left:0; top:100px; font-size:92px; font-weight:600; letter-spacing:-.03em; line-height:1; white-space:nowrap; font-stretch:85%; }
+#nota { position:absolute; left:0; top:222px; max-height:170px; overflow:hidden; width:500px; font-size:44px; line-height:1.12; color:var(--g3); font-stretch:78%; }
+#rod { position:absolute; left:0; bottom:0; display:flex; gap:18px; align-items:center; font-size:44px; color:var(--g3); font-stretch:78%; white-space:nowrap; }
+.chip { display:inline-block; font-size:44px; line-height:1; font-weight:600; padding:6px 16px 8px; border-radius:40px; font-stretch:85%; white-space:nowrap; }
+.chip.parc { border:3px solid var(--bad); color:var(--bad); padding:3px 14px 5px; }
+.chip.lima { background:var(--lime); color:var(--ink); }
+.chip.coral { background:var(--bad); color:var(--ink); }
+.chip.cinza { border:3px solid var(--g3); color:var(--white); padding:3px 14px 5px; }
+#regua { position:absolute; left:700px; top:60px; width:4px; height:392px; background:var(--line); }
+#din { position:absolute; left:704px; top:0; width:1856px; height:512px; overflow:hidden; }
+#fundo { position:absolute; inset:0; width:1856px; height:512px; }
+#cena { position:absolute; left:60px; top:60px; width:1646px; height:392px; }
+#varre { position:absolute; left:0; top:0; width:2560px; height:512px; pointer-events:none; }
+#barra { position:absolute; left:0; bottom:0; height:6px; width:0; background:var(--lime); }
+.c { position:absolute; inset:0; }
+.cab { display:flex; align-items:center; gap:24px; height:56px; white-space:nowrap; }
+.cab .t { font-size:56px; font-weight:600; letter-spacing:-.01em; }
+.cab .n { font-size:44px; color:var(--g3); font-stretch:78%; overflow:hidden; text-overflow:ellipsis; }
+.bom { color:var(--lime); } .ruim { color:var(--bad); }
+/* indicadores */
+.k4 { position:absolute; top:112px; left:0; right:0; bottom:0; display:grid; grid-template-columns:1fr 1.3fr .85fr 1fr; }
+.k { padding:0 0 0 40px; border-left:3px solid var(--line); min-width:0; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; }
+.k:first-child { padding-left:0; border-left:0; }
+.k .l { font-size:44px; color:var(--g2); font-stretch:78%; white-space:nowrap; }
+.k .v { font-size:100px; font-weight:600; line-height:1; letter-spacing:-.03em; font-stretch:78%; white-space:nowrap; }
+.k .v small { font-size:48px; margin-left:8px; letter-spacing:0; }
+.k .a { font-size:44px; color:var(--g3); font-stretch:75%; white-space:nowrap; }
+.k .a b { color:var(--white); font-weight:600; }
+/* listas de 5 */
+.tb { position:absolute; top:76px; left:0; right:0; bottom:0; display:grid; grid-template-rows:repeat(5, 1fr); }
+.r { display:grid; grid-template-columns:50px 1fr 104px 230px 280px 240px; align-items:center; column-gap:22px; border-top:2px solid var(--line); font-size:44px; white-space:nowrap; }
+.r .p { color:var(--lime); font-weight:600; font-size:48px; }
+.r .ti { display:flex; min-width:0; font-stretch:78%; color:var(--white); }
+.r .ti .b { overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.r .ti .f { flex:none; color:var(--g3); }
+.r .cv { justify-self:start; font-size:40px; padding:3px 0 5px; width:96px; text-align:center; }
+.r .c1 { text-align:right; color:var(--g2); font-stretch:80%; }
+.r .c2 { text-align:right; font-weight:600; font-stretch:80%; }
+.r .c3 { text-align:right; font-stretch:80%; }
+.vazio { position:absolute; top:150px; font-size:56px; color:var(--g3); }
+/* mensagem em tela cheia */
+#msg { position:absolute; inset:0; display:none; background:var(--ink); }
+#msg.on { display:block; }
+#msg svg.sg { position:absolute; inset:0; width:2560px; height:512px; }
+#msg .tag { position:absolute; left:150px; top:66px; }
+#msg .mt { position:absolute; left:150px; top:150px; width:1500px; font-size:104px; font-weight:600; line-height:1.02; letter-spacing:-.03em; font-stretch:85%; }
+#msg .ma { position:absolute; left:150px; bottom:62px; width:1500px; font-size:48px; color:var(--g3); font-stretch:80%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#msg .mn { position:absolute; right:150px; top:110px; width:700px; text-align:right; }
+#msg .mn .v { font-size:190px; font-weight:700; line-height:1; letter-spacing:-.03em; font-stretch:75%; white-space:nowrap; }
+#msg .mn .l { font-size:48px; color:var(--g2); font-stretch:80%; margin-top:10px; }
+#msg #logo2 { position:absolute; right:150px; bottom:62px; height:48px; width:auto; color:#fff; }
+/* gráficos da análise do dia */
+#graf { position:absolute; left:0; top:92px; width:1646px; height:300px; overflow:visible; }
+#graf text { font-family:'Archivo',sans-serif; }
+.big2 { font-size:120px !important; font-stretch:75% !important; }
+.rv { clip-path:inset(0 100% 0 0); animation:rv .8s cubic-bezier(.16,1,.3,1) forwards; }
+@keyframes rv { to { clip-path:inset(0 0 0 0); } }
+.up { opacity:0; transform:translateY(24px); animation:up .7s cubic-bezier(.16,1,.3,1) forwards; }
+@keyframes up { to { opacity:1; transform:none; } }
+@keyframes traco { to { stroke-dashoffset:0; } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="esq">
+    <svg id="logo" viewBox="0 0 669.56 186.67" xmlns="http://www.w3.org/2000/svg" aria-label="weaxis"><path fill="currentColor" d="M220.4 37.46L239.45 37.46L253.12 125.04L267.61 37.46L288.61 37.46L303.27 125.04L316.78 37.46L335.82 37.46L316.13 143.27L292.68 143.27L278.03 53.9L262.73 143.27L240.26 143.27L220.4 37.46ZM340.32 105.67L340.32 75.06C340.32 49.5 351.72 35.83 375.32 35.83C397.95 35.83 409.51 48.85 409.51 74.9L409.51 94.6L359.86 94.6L359.86 108.92C359.86 123.25 365.06 128.95 375.48 128.95C384.6 128.95 389 124.39 389.32 112.67L389.48 108.51L409.18 108.51L409.18 109.41C408.53 132.37 397.79 144.9 375.32 144.9C351.72 144.9 340.32 131.23 340.32 105.67ZM359.86 80.6L389.97 80.6L389.97 69.85C389.48 56.34 384.27 51.78 375.32 51.78C365.06 51.78 359.86 57.48 359.86 71.97L359.86 80.6ZM467.18 143.27L467.18 128.46C462.13 140.02 452.53 144.9 441.3 144.9C426.81 144.9 416.88 136.6 416.88 118.2C416.88 99.97 429.57 90.85 440.81 85.64L448.13 82.39C457.58 77.83 466.69 73.6 466.69 64.48L466.69 63.01C466.69 56.67 463.44 51.78 453.67 51.78C443.58 51.78 438.37 56.83 438.37 66.76L438.45 72.47L419.24 72.47L419.16 69.53C419.16 49.18 429.25 35.83 453.51 35.83C477.76 35.83 485.74 48.2 485.74 67.25L485.74 143.27L467.18 143.27ZM436.25 115.44C436.25 123.58 440.32 127.97 448.3 127.97C459.53 127.97 466.69 118.2 466.69 101.11L466.69 85.32C465.06 90.04 460.02 92.48 453.83 95.9L447.65 99.16C440.64 103.06 436.25 107.78 436.25 115.44ZM490.99 143.27L517.36 88.57L493.1 37.46L513.94 37.46L529.41 72.29L544.87 37.46L564.57 37.46L540.15 88.57L566.53 143.27L545.69 143.27L528.11 104.85L510.69 143.27L490.99 143.27ZM572.22 37.46L591.26 37.46L591.26 143.27L572.22 143.27L572.22 37.46ZM650.68 86.46C664.03 93.46 669.56 100.95 669.56 114.62C669.56 130.9 661.58 144.9 635.86 144.9C612.74 144.9 601.19 134.16 601.19 113.48L601.19 108.4L620.72 108.4L620.72 113.16C620.72 124.39 625.28 128.95 636.02 128.95C646.44 128.95 650.02 124.55 650.02 115.76C650.02 108.6 647.58 105.02 637.65 99.16L621.53 90.36C609.49 84.67 602.49 77.18 602.49 63.67C602.49 49.18 610.79 35.83 635.37 35.83C658.65 35.83 668.75 47.22 668.75 65.94L668.63 72.52L649.1 72.52L649.21 66.11C649.21 55.53 644.49 51.78 635.21 51.78C626.91 51.78 622.02 55.36 622.02 62.85C622.02 68.88 624.79 72.13 632.12 76.04L650.68 86.46ZM581.49 1.95C588.5 1.95 594.18 7.12 594.18 13.49C594.18 19.86 588.5 25.03 581.49 25.03C574.48 25.03 568.8 19.86 568.8 13.49C568.8 7.12 574.48 1.95 581.49 1.95ZM118.47 87.27C135.63 117.2 126.85 154.5 98.87 170.58C70.89 186.67 34.3 175.45 17.15 145.52C0 115.6 8.77 78.3 36.75 62.21C64.73 46.13 101.32 57.35 118.47 87.27ZM189.75 82.13C194.81 116.44 186.85 146.03 171.97 148.23C157.09 150.43 140.93 124.41 135.87 90.1C130.81 55.79 138.77 26.2 153.65 24C168.52 21.8 184.69 47.82 189.75 82.13ZM81.12 38.63C47.42 47.68 18.38 48.59 16.26 40.67C14.14 32.75 39.75 19.01 73.45 9.96C107.15 0.92 136.19 0 138.31 7.92C140.42 15.84 114.82 29.59 81.12 38.63Z"/></svg>
+    <div id="tit"></div>
+    <div id="nota"></div>
+    <div id="rod"></div>
+  </div>
+  <div id="regua"></div>
+  <div id="din">
+    <svg id="fundo" viewBox="0 0 1856 512"></svg>
+    <div id="cena"></div>
+    <div id="barra"></div>
+  </div>
+  <div id="msg"><svg class="sg" viewBox="0 0 2560 512"></svg><div class="tag"></div><div class="mt"></div><div class="mn"><div class="v"></div><div class="l"></div></div><div class="ma"></div><svg id="logo2" viewBox="0 0 669.56 186.67" xmlns="http://www.w3.org/2000/svg" aria-label="weaxis"><path fill="currentColor" d="M220.4 37.46L239.45 37.46L253.12 125.04L267.61 37.46L288.61 37.46L303.27 125.04L316.78 37.46L335.82 37.46L316.13 143.27L292.68 143.27L278.03 53.9L262.73 143.27L240.26 143.27L220.4 37.46ZM340.32 105.67L340.32 75.06C340.32 49.5 351.72 35.83 375.32 35.83C397.95 35.83 409.51 48.85 409.51 74.9L409.51 94.6L359.86 94.6L359.86 108.92C359.86 123.25 365.06 128.95 375.48 128.95C384.6 128.95 389 124.39 389.32 112.67L389.48 108.51L409.18 108.51L409.18 109.41C408.53 132.37 397.79 144.9 375.32 144.9C351.72 144.9 340.32 131.23 340.32 105.67ZM359.86 80.6L389.97 80.6L389.97 69.85C389.48 56.34 384.27 51.78 375.32 51.78C365.06 51.78 359.86 57.48 359.86 71.97L359.86 80.6ZM467.18 143.27L467.18 128.46C462.13 140.02 452.53 144.9 441.3 144.9C426.81 144.9 416.88 136.6 416.88 118.2C416.88 99.97 429.57 90.85 440.81 85.64L448.13 82.39C457.58 77.83 466.69 73.6 466.69 64.48L466.69 63.01C466.69 56.67 463.44 51.78 453.67 51.78C443.58 51.78 438.37 56.83 438.37 66.76L438.45 72.47L419.24 72.47L419.16 69.53C419.16 49.18 429.25 35.83 453.51 35.83C477.76 35.83 485.74 48.2 485.74 67.25L485.74 143.27L467.18 143.27ZM436.25 115.44C436.25 123.58 440.32 127.97 448.3 127.97C459.53 127.97 466.69 118.2 466.69 101.11L466.69 85.32C465.06 90.04 460.02 92.48 453.83 95.9L447.65 99.16C440.64 103.06 436.25 107.78 436.25 115.44ZM490.99 143.27L517.36 88.57L493.1 37.46L513.94 37.46L529.41 72.29L544.87 37.46L564.57 37.46L540.15 88.57L566.53 143.27L545.69 143.27L528.11 104.85L510.69 143.27L490.99 143.27ZM572.22 37.46L591.26 37.46L591.26 143.27L572.22 143.27L572.22 37.46ZM650.68 86.46C664.03 93.46 669.56 100.95 669.56 114.62C669.56 130.9 661.58 144.9 635.86 144.9C612.74 144.9 601.19 134.16 601.19 113.48L601.19 108.4L620.72 108.4L620.72 113.16C620.72 124.39 625.28 128.95 636.02 128.95C646.44 128.95 650.02 124.55 650.02 115.76C650.02 108.6 647.58 105.02 637.65 99.16L621.53 90.36C609.49 84.67 602.49 77.18 602.49 63.67C602.49 49.18 610.79 35.83 635.37 35.83C658.65 35.83 668.75 47.22 668.75 65.94L668.63 72.52L649.1 72.52L649.21 66.11C649.21 55.53 644.49 51.78 635.21 51.78C626.91 51.78 622.02 55.36 622.02 62.85C622.02 68.88 624.79 72.13 632.12 76.04L650.68 86.46ZM581.49 1.95C588.5 1.95 594.18 7.12 594.18 13.49C594.18 19.86 588.5 25.03 581.49 25.03C574.48 25.03 568.8 19.86 568.8 13.49C568.8 7.12 574.48 1.95 581.49 1.95ZM118.47 87.27C135.63 117.2 126.85 154.5 98.87 170.58C70.89 186.67 34.3 175.45 17.15 145.52C0 115.6 8.77 78.3 36.75 62.21C64.73 46.13 101.32 57.35 118.47 87.27ZM189.75 82.13C194.81 116.44 186.85 146.03 171.97 148.23C157.09 150.43 140.93 124.41 135.87 90.1C130.81 55.79 138.77 26.2 153.65 24C168.52 21.8 184.69 47.82 189.75 82.13ZM81.12 38.63C47.42 47.68 18.38 48.59 16.26 40.67C14.14 32.75 39.75 19.01 73.45 9.96C107.15 0.92 136.19 0 138.31 7.92C140.42 15.84 114.82 29.59 81.12 38.63Z"/></svg></div>
+  <svg id="varre" viewBox="0 0 2560 512"></svg>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const Q = new URLSearchParams(location.search);
+const TEMPO = 12;                       // segundos por cena
+const sozinha = window.top === window;  // aberta direto (fora do telão)
+let dados = { escopos: [], mensagens: [] }, analise = null;
+
+function escala() { const s = Math.min(innerWidth / 2560, innerHeight / 512); $('#stage').style.transform = `scale(${s})`; }
+addEventListener('resize', escala);
+
+// ---------- formatos (guia: ≥ 1 mi "R$ 12,5 mi"; ≥ 10 mil "R$ 67 mil"; abaixo "R$ 7.235"; dias e % com 1 casa) ----------
+const brl = v => { if (v === null || v === undefined) return '–'; const a = Math.abs(v), sg = v < 0 ? '-' : '';
+  return a >= 1e6 ? `${sg}R$ ${(a / 1e6).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} mi` : a >= 1e4 ? `${sg}R$ ${Math.round(a / 1e3)} mil` : `${sg}R$ ${Math.round(a).toLocaleString('pt-BR')}`; };
+const d1 = v => v === null || v === undefined ? '–' : v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const un = v => v >= 100 ? Math.round(v).toLocaleString('pt-BR') : d1(v);
+const sigla = f => f === 'Itajaí' ? 'ITJ' : f === 'Londrina' ? 'LDN' : '';
+// título sem a variação no fim (" - 220V", " - Branco / Branco") e a variação curta à parte
+function nome(t) { const m = String(t).match(/^(.*?)\s+-\s+([^-]{1,18})$/); return m ? [m[1], m[2].length <= 6 ? m[2] : ''] : [String(t), '']; }
+
+// ---------- fundo vivo: as três elipses do símbolo girando devagar ----------
+const SIMB = [{ cx: -24, cy: -56, rx: 15, ry: 63, rot: 75 }, { cx: -33, cy: 36, rx: 58, ry: 62, rot: 151 }, { cx: 62, cy: 6, rx: 27, ry: 63, rot: 172 }];
+function fundo() {
+  const g = document.createElementNS(NS, 'g');
+  g.innerHTML = SIMB.map(e => `<ellipse cx="${e.cx}" cy="${e.cy}" rx="${e.rx}" ry="${e.ry}" transform="rotate(${e.rot} ${e.cx} ${e.cy})" fill="none" stroke="#2E2E2E" stroke-width="1.2"/>`).join('');
+  $('#fundo').appendChild(g);
+  const t0 = performance.now();
+  (function loop(t) { const a = (t - t0) / 1000; g.setAttribute('transform', `translate(1750 250) rotate(${a * 2.4}) scale(${4.6 + .12 * Math.sin(a * .35)})`); requestAnimationFrame(loop); })(t0);
+}
+// passagem: a elipse vertical lima varre a tela inteira e troca a cena no meio
+function varrer(meio, cor = '#ECFC30') {
+  return new Promise(res => {
+    const sv = $('#varre'); sv.innerHTML = `<ellipse cx="0" cy="256" rx="620" ry="1300" fill="${cor}"/>`;
+    const el = sv.firstChild, d = 1000, t0 = performance.now(); let trocou = false;
+    const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    (function passo(t) { const p = Math.max(0, Math.min((t - t0) / d, 1)), x = -800 + ease(p) * (2560 + 1600);
+      el.setAttribute('transform', `translate(${x} 0) rotate(14 0 256)`);
+      if (!trocou && p > .5) { trocou = true; meio(); }
+      if (p < 1) requestAnimationFrame(passo); else { sv.innerHTML = ''; res(); } })(t0);
+  });
+}
+
+// ---------- cenas ----------
+function esquerda(e) {
+  $('#tit').classList.remove('big2'); $('#tit').textContent = e.nome === 'Domus' ? 'Domus' : e.nome;
+  $('#nota').textContent = e.nota || '';
+  $('#rod').innerHTML = (e.parcial ? '<span class="chip parc">base parcial</span>' : '') + `<span>PAC ${esc(dados.corte || '')}</span>`;
+}
+function ind(e) {
+  const tC = e.ccc !== null && e.ccc < 0 ? 'bom' : 'ruim', tN = e.nwc < 0 ? 'bom' : 'ruim', tR = (e.ruptura_pct || 0) >= 10 ? 'ruim' : 'bom';
+  return `<div class="c">
+    <div class="cab rv"><span class="t">Indicadores da PAC</span>${dados.demo ? '<span class="chip cinza">exemplo</span>' : ''}<span class="chip lima">${e.skus.toLocaleString('pt-BR')} SKUs</span><span class="n">análise Gold, valores a custo</span></div>
+    <div class="k4">
+      <div class="k up" style="animation-delay:.15s"><div class="l">Estoque a custo</div><div class="v num">${brl(e.estoque)}</div><div class="a">DIO <b>${d1(e.dio)}</b> dias</div></div>
+      <div class="k up" style="animation-delay:.3s"><div class="l">MVD perdido na ruptura</div><div class="v num ruim">${brl(e.mvd_perdida)}<small>/dia</small></div><div class="a"><b class="${tR}">${d1(e.ruptura_pct)}%</b> da demanda a custo</div></div>
+      <div class="k up" style="animation-delay:.45s"><div class="l">CCC${e.prazo_parcial ? ' · parcial' : ''}</div><div class="v num ${tC}">${d1(e.ccc)}<small>dias</small></div><div class="a">DPO <b>${Math.round(e.dpo)}</b> · DSO <b>${Math.round(e.dso)}</b></div></div>
+      <div class="k up" style="animation-delay:.6s"><div class="l">NWC${e.nwc_parcial ? ' · parcial' : ''}</div><div class="v num ${tN}">${brl(e.nwc)}</div><div class="a">${e.nwc < 0 ? 'fornecedor financia' : 'capital empatado'}</div></div>
+    </div></div>`;
+}
+// tabela de 5 itens com 3 colunas numéricas
+function lista(titulo, nota, itens, multi, cols) {
+  if (dados.demo) nota = '<span class="chip cinza" style="margin-right:16px">exemplo</span>' + nota;
+  if (!itens || !itens.length) return `<div class="c"><div class="cab rv"><span class="t">${titulo}</span></div><div class="vazio">Nada para mostrar nesta leitura.</div></div>`;
+  const linhas = itens.slice(0, 5).map((x, i) => { const [n, v] = nome(x.titulo);
+    return `<div class="r up" style="animation-delay:${.15 + i * .12}s">
+      <div class="p num">${i + 1}</div>
+      <div class="ti">${multi ? `<span class="f">${sigla(x.filial)}&nbsp;·&nbsp;</span>` : ''}<span class="b">${esc(n)}</span>${v ? `<span class="f" style="margin-left:12px">${esc(v)}</span>` : ''}</div>
+      <div class="chip ${x.curva === 'AA' || x.curva === 'A' ? 'lima' : 'cinza'} cv">${esc(x.curva)}</div>
+      ${cols.map((f, k) => `<div class="c${k + 1} num">${f(x)}</div>`).join('')}
+    </div>`; }).join('');
+  return `<div class="c"><div class="cab rv"><span class="t">${titulo}</span><span class="n">${nota}</span></div><div class="tb">${linhas}</div></div>`;
+}
+const CENAS = {
+  ind: e => ind(e),
+  rup: e => lista('Top 5 em ruptura', `curva AA e A primeiro · ${e.skus_ruptura} SKUs sem estoque, ${e.rupturas_com_oc} com OC`, e.top_ruptura, e.nome === 'Domus', [
+    x => `${d1(x.mvd)} un/dia`, x => `<span class="ruim">${brl(x.perdido)}/dia</span>`, x => x.oc > 0 ? `<span class="bom">OC ${Math.round(x.oc)} un</span>` : '<span class="ruim">sem OC</span>']),
+  cong: e => lista('Estoque congelado', `${brl(e.sem_giro)} sem venda em 60 dias · ${e.skus_congelados} SKUs · excesso total ${brl(e.excesso)}`, e.congelados, e.nome === 'Domus', [
+    x => `${un(x.estoque)} un`, x => `<span class="ruim">${brl(x.valor)}</span>`, x => `<span style="color:var(--g3)">${esc((x.forn || '').slice(0, 12))}</span>`]),
+  camp: e => lista('Campeões de venda', 'maior giro a custo · cobertura no ritmo atual', e.campeoes, e.nome === 'Domus', [
+    x => `${d1(x.mvd)} un/dia`, x => `${brl(x.giro)}/dia`, x => x.estoque > 0 ? `<span class="${x.lt && x.cobertura < x.lt ? 'ruim' : 'bom'}">${Math.round(x.cobertura)} dias</span>` : '<span class="ruim">em ruptura</span>']),
+  azar: e => lista('Azarões', 'disparou nos últimos 15 dias × 45 dias anteriores', e.azaroes, e.nome === 'Domus', [
+    x => `<span class="bom">${x.fator ? '×' + d1(x.fator) : 'novo'}</span>`, x => `${Math.round(x.d15)} un em 15 d`, x => x.estoque > 0 ? `<span class="${x.lt && x.cobertura < x.lt ? 'ruim' : 'bom'}">${Math.round(x.cobertura)} dias</span>` : '<span class="ruim">em ruptura</span>']),
+};
+
+// ---------- análise do dia: gráficos escolhidos pela rotina (analise.json) ----------
+const COR = { lima: '#ECFC30', ciano: '#7FD6FF', coral: '#FF6B4A', laranja: '#FF9F43', lilas: '#C9A7FF', cinza: '#8A8A8A', branco: '#FFFFFF' };
+const cor = c => COR[c] || (/^#[0-9a-f]{6}$/i.test(c || '') ? c : COR.lima);
+function fmt(v, f) {
+  if (v === null || v === undefined || isNaN(v)) return '–';
+  if (f === 'brl') return brl(v);
+  if (f === 'pct') return d1(v) + '%';
+  if (f === 'dias') return d1(v) + ' dias';
+  if (f === 'un') return Math.round(v).toLocaleString('pt-BR') + ' un';
+  return Math.abs(v) >= 100 ? Math.round(v).toLocaleString('pt-BR') : d1(v);
+}
+const T = (x, y, txt, o = {}) => `<text x="${x}" y="${y}" font-size="${o.s || 44}" font-weight="${o.w || 500}" fill="${o.c || '#DCDCDC'}" text-anchor="${o.a || 'start'}" style="font-stretch:${o.st || '80%'}">${esc(txt)}</text>`;
+const anima = (k) => `style="animation:up .7s cubic-bezier(.16,1,.3,1) ${(.15 + k * .08).toFixed(2)}s both"`;
+const G = {
+  barras(g) {   // horizontal: ranking, até 6 itens
+    const it = (g.itens || []).slice(0, 6), n = it.length, h = 300 / n, max = Math.max(...it.map(x => Math.abs(x.valor))) || 1;
+    const x0 = 380, x1 = 1646 - (it.some(x => x.extra) ? 560 : 240);
+    return it.map((x, k) => { const y = k * h, w = Math.max(6, (x1 - x0) * Math.abs(x.valor) / max), bh = Math.min(30, h * .42);
+      return `<g ${anima(k)}>${T(0, y + h / 2 + 15, x.rotulo, { c: '#FFFFFF', w: 600 })}
+        <rect x="${x0}" y="${y + h / 2 - bh / 2}" width="${w}" height="${bh}" rx="4" fill="${cor(x.cor)}"/>
+        ${T(x0 + w + 18, y + h / 2 + 15, fmt(x.valor, g.formato), { c: '#FFFFFF', w: 600 })}
+        ${x.extra ? T(1646, y + h / 2 + 15, x.extra, { a: 'end', c: x.extra_cor ? cor(x.extra_cor) : '#BDBDBD' }) : ''}</g>`; }).join('');
+  },
+  colunas(g) {  // vertical: até 14 colunas (meses, dias, canais)
+    const it = (g.itens || []).slice(0, 14), n = it.length, gap = 16, w = (1646 - gap * (n - 1)) / n, max = Math.max(...it.map(x => x.valor)) || 1, base = 236;
+    const ref = g.referencia && g.referencia.valor ? base - 200 * g.referencia.valor / max : null;
+    return it.map((x, k) => { const hh = Math.max(4, 200 * x.valor / max), xx = k * (w + gap);
+      return `<g ${anima(k)}><rect x="${xx}" y="${base - hh}" width="${w}" height="${hh}" rx="4" fill="${cor(x.cor || (x.destaque ? 'lima' : 'cinza'))}"/>
+        ${x.destaque || k === n - 1 ? T(xx + w / 2, base - hh - 14, fmt(x.valor, g.formato), { a: 'middle', c: '#FFFFFF', w: 600, s: 40 }) : ''}
+        ${T(xx + w / 2, 290, x.rotulo, { a: 'middle', s: 40, c: '#BDBDBD' })}</g>`; }).join('')
+      + (ref !== null ? `<line x1="0" x2="1646" y1="${ref}" y2="${ref}" stroke="#ECFC30" stroke-width="3" stroke-dasharray="14 12" opacity=".8"/>${T(0, ref - 12, (g.referencia.rotulo || '') + ' ' + fmt(g.referencia.valor, g.formato), { s: 40, c: '#ECFC30' })}` : '');
+  },
+  linha(g) {    // série no tempo: até 3 séries, rótulo direto no fim de cada linha
+    const ss = (g.series || []).slice(0, 3), n = Math.max(...ss.map(x => x.valores.length)), all = ss.flatMap(x => x.valores).filter(v => v !== null);
+    const lo = Math.min(0, ...all), hi = Math.max(...all, g.referencia ? g.referencia.valor : -Infinity) || 1, W = 1646 - 330, top = 20, bot = 240;
+    const X = i => i / Math.max(1, n - 1) * W, Y = v => bot - (v - lo) / (hi - lo) * (bot - top);
+    const xs = g.eixo_x || []; const marcas = [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i);
+    let out = marcas.map(i => xs[i] ? T(X(i), 290, xs[i], { a: i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle', s: 40, c: '#8A8A8A' }) : '').join('');
+    out += `<line x1="0" x2="${W}" y1="${bot}" y2="${bot}" stroke="#3A3A3A" stroke-width="2"/>`;
+    if (g.referencia) out += `<line x1="0" x2="${W}" y1="${Y(g.referencia.valor)}" y2="${Y(g.referencia.valor)}" stroke="#BDBDBD" stroke-width="3" stroke-dasharray="14 12"/>${T(W + 16, Y(g.referencia.valor) + 14, (g.referencia.rotulo || '') + ' ' + fmt(g.referencia.valor, g.formato), { s: 40, c: '#BDBDBD' })}`;
+    ss.forEach((sr, k) => { const pts = sr.valores.map((v, i) => v === null ? null : [X(i), Y(v)]).filter(Boolean); if (!pts.length) return;
+      const d = 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L'), c = cor(sr.cor || ['lima', 'ciano', 'laranja'][k]);
+      if (k === 0) out += `<path d="${d} L${pts[pts.length - 1][0]} ${bot} L${pts[0][0]} ${bot} Z" fill="${c}" opacity=".10"/>`;
+      const L = pts.reduce((a, p, i) => i ? a + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0, 0) + 10;
+      out += `<path d="${d}" fill="none" stroke="${c}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" style="stroke-dasharray:${L};stroke-dashoffset:${L};animation:traco 1.6s cubic-bezier(.16,1,.3,1) ${.2 + k * .2}s forwards"/>`;
+      const p = pts[pts.length - 1], ult = sr.valores.filter(v => v !== null).pop();
+      out += `<circle cx="${p[0]}" cy="${p[1]}" r="9" fill="${c}" stroke="#212121" stroke-width="3"/>${T(W + 16, p[1] + 14 + (k ? 0 : -0), `${sr.nome ? sr.nome + ' ' : ''}${fmt(ult, g.formato)}`, { s: 40, c: '#FFFFFF', w: 600 })}`; });
+    return out;
+  },
+  cascata(g) {  // ponte: DIO + DSO − DPO = CCC (ou qualquer soma)
+    const it = (g.itens || []).slice(0, 6); let acc = 0; const pos = it.map(x => { const a = acc; acc += x.valor; return [a, acc]; });
+    const tot = typeof g.total === 'number' ? g.total : acc, vals = pos.flat().concat([0, tot]), lo = Math.min(...vals), hi = Math.max(...vals), n = it.length + 1, gap = 40, w = (1646 - gap * (n - 1)) / n;
+    const Y = v => 230 - (v - lo) / ((hi - lo) || 1) * 200;
+    let out = `<line x1="0" x2="1646" y1="${Y(0)}" y2="${Y(0)}" stroke="#3A3A3A" stroke-width="2"/>`;
+    it.forEach((x, k) => { const [a, b] = pos[k], xx = k * (w + gap), y = Math.min(Y(a), Y(b)), hh = Math.max(4, Math.abs(Y(a) - Y(b)));
+      out += `<g ${anima(k)}><rect x="${xx}" y="${y}" width="${w}" height="${hh}" rx="4" fill="${cor(x.cor || (x.valor < 0 ? 'lima' : 'cinza'))}"/>
+        ${T(xx + w / 2, y - 14, (x.valor > 0 ? '+' : '') + fmt(x.valor, g.formato), { a: 'middle', s: 40, c: '#FFFFFF', w: 600 })}${T(xx + w / 2, 290, x.rotulo, { a: 'middle', s: 40, c: '#BDBDBD' })}</g>`;
+      if (k < it.length - 1 || true) out += `<line x1="${xx + w}" x2="${xx + w + gap}" y1="${Y(b)}" y2="${Y(b)}" stroke="#8A8A8A" stroke-width="2" stroke-dasharray="6 6"/>`; });
+    const xx = it.length * (w + gap), y = Math.min(Y(0), Y(tot)), hh = Math.max(4, Math.abs(Y(0) - Y(tot))), ct = cor(g.cor_total || (tot < 0 ? 'lima' : 'coral'));
+    out += `<g ${anima(it.length)}><rect x="${xx}" y="${y}" width="${w}" height="${hh}" rx="4" fill="${ct}"/>${T(xx + w / 2, y - 14, fmt(tot, g.formato), { a: 'middle', s: 44, c: ct, w: 700 })}${T(xx + w / 2, 290, g.total_rotulo || 'Total', { a: 'middle', s: 40, c: '#FFFFFF', w: 600 })}</g>`;
+    return out;
+  },
+  comparacao(g) { // filiais lado a lado em até 4 métricas; verde-lima = melhor, coral = pior
+    const gr = (g.grupos || []).slice(0, 3), ms = (g.metricas || []).slice(0, 4), cw = 1646 / ms.length;
+    return ms.map((m, k) => { const vs = m.valores.slice(0, gr.length), max = Math.max(...vs.map(Math.abs)) || 1;
+      const melhor = m.melhor === 'menor' ? Math.min(...vs) : m.melhor === 'maior' ? Math.max(...vs) : null;
+      return `<g transform="translate(${k * cw} 0)"><g ${anima(k)}>${T(0, 36, m.rotulo, { c: '#FFFFFF', w: 600 })}` + vs.map((v, j) => { const y = 70 + j * 105, w = Math.max(6, (cw - 60) * .62 * Math.abs(v) / max);
+        const c = melhor === null ? cor(['lima', 'ciano', 'laranja'][j]) : (v === melhor ? COR.lima : COR.coral);
+        return `${T(0, y + 34, gr[j], { s: 40, c: '#BDBDBD' })}<rect x="0" y="${y + 46}" width="${w}" height="24" rx="4" fill="${c}"/>${T(w + 14, y + 68, fmt(v, m.formato), { s: 40, c: '#FFFFFF', w: 600 })}`; }).join('') + `</g></g>`; }).join('');
+  },
+};
+function grafico(g) {
+  const tom = { bem: ['Vamos bem', 'lima'], melhoria: ['Ponto de melhoria', 'cinza'], alerta: ['Alerta', 'coral'], neutro: ['Análise do dia', 'cinza'] }[g.tom] || ['Análise do dia', 'cinza'];
+  $('#tit').innerHTML = `<span class="${g.tom === 'alerta' ? 'ruim' : g.tom === 'bem' ? 'bom' : ''}">${esc(g.numero || '')}</span>`; $('#tit').classList.toggle('big2', true);
+  $('#nota').textContent = g.insight || '';
+  $('#rod').innerHTML = '';
+  const desenho = (G[g.tipo] || (() => ''))(g);
+  return `<div class="c"><div class="cab rv"><span class="chip ${tom[1]}">${tom[0]}</span><span class="t">${esc(g.titulo)}</span><span class="n">${esc(g.escopo || '')}${g.subtitulo ? ' · ' + esc(g.subtitulo) : ''}</span></div>
+    <svg id="graf" viewBox="0 0 1646 300">${desenho}</svg></div>`;
+}
+
+// mensagem em tela cheia: supergráfico das elipses + título grande + número
+const TIPO = { bem: ['Vamos bem', 'lima', '#ECFC30'], melhoria: ['Ponto de melhoria', 'cinza', '#BDBDBD'], alerta: ['Alerta', 'coral', '#FF6B4A'], marca: ['WeAxis', 'lima', '#ECFC30'] };
+function mostrarMsg(m) {
+  const [rot, chip, cor] = TIPO[m.tipo] || TIPO.marca, el = $('#msg');
+  el.querySelector('.tag').innerHTML = `<span class="chip ${chip} up">${rot}</span>`;
+  el.querySelector('.mt').innerHTML = `<span class="rv" style="display:inline-block">${esc(m.titulo)}</span>`;
+  el.querySelector('.mn .v').innerHTML = m.numero ? `<span class="up num" style="display:inline-block;color:${cor}">${esc(m.numero)}</span>` : '';
+  el.querySelector('.mn .l').innerHTML = m.legenda ? `<span class="up" style="display:inline-block;animation-delay:.2s">${esc(m.legenda)}</span>` : '';
+  el.querySelector('.ma').innerHTML = m.apoio ? `<span class="up" style="display:inline-block;animation-delay:.35s">${esc(m.apoio)}</span>` : '';
+  // supergráfico: as elipses do símbolo ampliadas e cortadas pela borda, na cor do tipo
+  const sv = el.querySelector('svg.sg'); const big = m.numero ? 0.10 : 0.18;
+  sv.innerHTML = `<g transform="translate(${m.numero ? 2300 : 2150} 256)">${SIMB.map((e, i) => `<ellipse cx="${e.cx * 3.3}" cy="${e.cy * 3.3}" rx="${e.rx * 3.3}" ry="${e.ry * 3.3}" transform="rotate(${e.rot} ${e.cx * 3.3} ${e.cy * 3.3})" fill="${cor}" fill-opacity="${big}"><animateTransform attributeName="transform" additive="sum" type="rotate" from="${e.rot} ${e.cx * 3.3} ${e.cy * 3.3}" to="${e.rot + (i % 2 ? -8 : 8)} ${e.cx * 3.3} ${e.cy * 3.3}" dur="12s" fill="freeze"/></ellipse>`).join('')}</g>`;
+  el.classList.add('on');
+}
+
+// ---------- sequência: blocos de cenas ----------
+function blocos() {
+  const B = [], es = dados.escopos || [], ms = (dados.mensagens || []).slice();
+  const msgBloco = () => { const b = ms.splice(0, 2).map(m => ({ msg: m })); if (b.length) B.push(b); };
+  const gs = ((analise && analise.cenas) || []).slice(0, 8);
+  const grafBloco = () => { const b = gs.splice(0, 2).map(g => ({ g })); if (b.length) B.push(b); };
+  grafBloco();
+  es.forEach((e, i) => {
+    B.push([{ e, t: 'ind' }, { e, t: 'rup' }]);
+    msgBloco(); grafBloco();
+    const extra = ['cong', 'camp', 'azar'].filter(t => ({ cong: e.congelados, camp: e.campeoes, azar: e.azaroes }[t] || []).length).map(t => ({ e, t }));
+    if (extra.length) B.push(extra);
+    msgBloco();
+  });
+  while (ms.length || gs.length) { msgBloco(); grafBloco(); }
+  return B;
+}
+let nb = -1;
+async function cena(c) {
+  await varrer(() => {
+    if (c.msg) { mostrarMsg(c.msg); }
+    else if (c.g) { $('#msg').classList.remove('on'); $('#cena').innerHTML = grafico(c.g); }
+    else { $('#msg').classList.remove('on'); esquerda(c.e); $('#cena').innerHTML = CENAS[c.t](c.e); }
+  }, c.msg ? (TIPO[c.msg.tipo] || TIPO.marca)[2] : '#ECFC30');
+  const b = $('#barra'); b.style.transition = 'none'; b.style.width = '0';
+  requestAnimationFrame(() => requestAnimationFrame(() => { b.style.transition = `width ${TEMPO}s linear`; b.style.width = '100%'; }));
+  await new Promise(r => setTimeout(r, TEMPO * 1000));
+}
+async function tocarBloco() {
+  await ler();
+  const B = blocos(); if (!B.length) return;
+  nb = (nb + 1) % B.length;
+  for (const c of B[nb]) await cena(c);
+}
+async function ler() {
+  try { const r = await fetch((Q.get('demo') ? 'dados_demo.json' : 'dados.json') + '?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) dados = await r.json(); } catch (e) { }
+  try { const r = await fetch('analise.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) analise = await r.json(); } catch (e) { }
+}
+
+(async function () {
+  escala(); fundo(); await ler();
+  if (Q.get('cena') !== null) { const todas = blocos().flat(); const c = todas[+Q.get('cena') % todas.length];
+    if (c.msg) mostrarMsg(c.msg); else if (c.g) $('#cena').innerHTML = grafico(c.g); else { esquerda(c.e); $('#cena').innerHTML = CENAS[c.t](c.e); } return; }
+  if (sozinha) { for (;;) await tocarBloco(); }
+  // dentro do telão: espera o pedido da página principal, toca um bloco e avisa que terminou
+  addEventListener('message', async ev => {
+    if (!ev.data || ev.data.acao !== 'tocar') return;
+    try { await tocarBloco(); } catch (e) { console.error(e); }
+    parent.postMessage({ acao: 'fim', origem: 'telacheia' }, '*');
+  });
+  parent.postMessage({ acao: 'pronta', origem: 'telacheia' }, '*');
+})();
+</script>
+</body>
+</html>

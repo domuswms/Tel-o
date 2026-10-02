@@ -56,6 +56,12 @@
   .fil-p { font-size:44px; font-weight:600; margin-top:0; white-space:nowrap; }
   .split { display:flex; height:16px; border-radius:8px; overflow:hidden; margin-top:18px; background:#2E2E2E; }
   .split > div { width:0; transition:width 1.4s cubic-bezier(.2,.9,.25,1); }
+  .dg { margin-top:16px; }
+  .dg-l { display:flex; align-items:baseline; gap:18px; font-size:46px; font-weight:600; white-space:nowrap; }
+  .dg-n { width:270px; } .dg-v { font-variation-settings:'wdth' 80; flex:1; } .dg-p { font-variation-settings:'wdth' 80; color:var(--g3); }
+  .dg-t { position:relative; height:20px; margin-top:8px; background:#2E2E2E; border-radius:10px; overflow:hidden; }
+  .dg-f, .dg-proj { position:absolute; left:0; top:0; height:100%; width:0; border-radius:10px; transition:width 1.4s cubic-bezier(.2,.9,.25,1); }
+  .dg-proj { border:3px dashed; box-sizing:border-box; } .on .dg-f, .on .dg-proj { width:var(--w); }
   #wipe { position:absolute; inset:0; pointer-events:none; }
   #prog { position:absolute; left:0; bottom:0; height:8px; background:var(--lime); width:0; }
   .stale { position:absolute; right:60px; bottom:20px; font-size:28px; color:#ff8a80; display:none; }
@@ -94,7 +100,7 @@ let D = null;
 async function load() {
   try { const r = await fetch('dados.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) D = await r.json(); } catch (e) { }
   // a meta vem de metas.json (aba Metas da planilha): muda no telão sem esperar a rotina do dia seguinte
-  try { const r = await fetch('metas.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok && D) { const m = (await r.json())[D.mes]; if (m && m.meta) { D.meta_mes = m.meta; D.meta_exemplo = !!m.exemplo; } } } catch (e) { }
+  try { const r = await fetch('metas.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok && D) { const m = (await r.json())[D.mes]; if (m && m.meta) { D.meta_mes = m.meta; D.meta_exemplo = !!m.exemplo; D.niveis = NIVEIS.filter(([k]) => m[k] > 0).map(([k, nome, cor]) => ({ k, nome, cor, valor: m[k] })); } } } catch (e) { }
   return D;
 }
 // projeção linear no ritmo atual e ritmo necessário até o fim do mês
@@ -108,6 +114,9 @@ function projecao() {
 function diasNoMes(mes) { const [y, m] = mes.split('-').map(Number); return new Date(y, m, 0).getDate(); }
 
 // ---------- cabeçalho com escopo: deixa claro se o número é da empresa toda ou de uma filial ----------
+// três degraus da meta: Meta (compromisso), Super meta (desafio), Mega meta (recorde)
+const NIVEIS = [['meta', 'Meta', '#ECFC30'], ['super', 'Super meta', '#7FD6FF'], ['mega', 'Mega meta', '#FF9F43']];
+const niveis = () => (D.niveis && D.niveis.length) ? D.niveis : [{ k: 'meta', nome: 'Meta', cor: '#ECFC30', valor: D.meta_mes }];
 const COR_CANAL = { 'Shopee': '#EE4D2D', 'Mercado Livre': '#FFE600', 'Amazon': '#FF9900', 'Magalu': '#0086FF', 'TikTok Shop': '#FE2C55', 'Outros': '#BDBDBD' };
 const CANAIS = ['Shopee', 'Mercado Livre', 'Amazon', 'Magalu', 'TikTok Shop'];   // sempre os cinco, mesmo zerados
 function chip(esc) {
@@ -127,18 +136,19 @@ function slideMes() {
     <div class="top">${LOGO}<span>${D.meta_exemplo ? '<b class="ex">meta exemplo</b>' : ''}${chip('empresa')}</span></div>
     <div class="lbl mask"><span>Realizado no mês${D.margem_pct_mes != null ? ` · margem ${mg(D.margem_pct_mes)}` : ''}</span></div>
     <div class="big mask"><span class="num">R$ 0</span></div>
-    <div class="sub mask"><span>${pct(p)} da meta de ${fmtBRL(meta)}</span></div>
+    <div class="sub mask"><span>${pct(p)} da Meta de ${fmtBRL(meta)}</span></div>
     <svg class="chart" viewBox="0 0 733 110" preserveAspectRatio="none"></svg>`;
   // gráfico: acumulado real (lima) e ritmo necessário (tracejado) até a meta
   const svg = el.querySelector('svg.chart');
   let acc = 0; const pts = [[0, 0]];
   const dias = [...D.dias].sort((a, b) => a.data.localeCompare(b.data));
   for (const d of dias) { acc += d.receita; pts.push([Number(d.data.slice(8, 10)), acc]); }
-  const X = d => d / n * 733, Y = v => 104 - Math.min(1.05, v / meta) * 100;
+  const topo = Math.max(...niveis().map(x => x.valor));
+  const X = d => d / n * 733, Y = v => 104 - Math.min(1.05, v / topo) * 100;
   const real_d = 'M' + pts.map(([d, v]) => `${X(d).toFixed(1)} ${Y(v).toFixed(1)}`).join(' L');
   const last = pts[pts.length - 1];
   svg.innerHTML = `
-    <line x1="0" y1="${Y(0)}" x2="733" y2="${Y(meta)}" stroke="#7a7a7a" stroke-width="4" stroke-dasharray="18 16"/>
+    ${niveis().map(x => `<line x1="0" y1="${Y(0)}" x2="733" y2="${Y(x.valor)}" stroke="${x.cor}" stroke-opacity=".55" stroke-width="4" stroke-dasharray="18 16"/>`).join('')}
     <path class="rl" d="${real_d}" fill="none" stroke="#ECFC30" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
     <circle class="dot" cx="${X(last[0])}" cy="${Y(last[1])}" r="0" fill="#ECFC30"/>`;
   el._play = async () => {
@@ -154,16 +164,31 @@ function slideMes() {
 }
 
 function slideProjecao() {
-  const P = projecao(), ok = P.pct >= 100;
+  const P = projecao(), nv = niveis();
+  const alc = nv.filter(x => P.proj >= x.valor).pop(), prox = nv.find(x => P.proj < x.valor);
   const el = document.createElement('div'); el.className = 'slide';
   el.innerHTML = `
     ${head('Projeção do mês', 'empresa')}
     <div class="lbl mask"><span>Fechamento no ritmo atual</span></div>
     <div class="big mask"><span class="num">R$ 0</span></div>
-    <div class="sub mask" style="color:${ok ? '#ECFC30' : '#F25C5C'}"><span>${pct(P.pct)} da meta de ${fmtBRL(D.meta_mes)}</span></div>
+    <div class="sub mask" style="color:${alc ? alc.cor : '#F25C5C'}"><span>${alc ? `Bate a ${alc.nome} · ${pct(P.proj / alc.valor * 100)}` : `${pct(P.pct)} da Meta`}</span></div>
     <div class="sub grey mask" style="margin-top:12px"><span>Ritmo atual: ${fmtC(P.ritmo)}/dia</span></div>
-    <div class="sub grey mask" style="margin-top:4px"><span>${P.rest ? `Meta pede ${fmtC(P.necessario)}/dia (${P.rest} dias)` : 'Mês fechado'}</span></div>`;
+    <div class="sub grey mask" style="margin-top:4px"><span>${P.rest && prox ? `${prox.nome} pede ${fmtC(Math.max(0, prox.valor - D.realizado_mes) / P.rest)}/dia` : (P.rest ? 'Acima da Mega meta' : 'Mês fechado')}</span></div>`;
   el._play = async () => countUp(el.querySelector('.num'), P.proj);
+  return el;
+}
+
+// os três degraus: quanto já foi feito de cada um e quanto falta por dia
+function slideDegraus() {
+  const nv = niveis(); if (nv.length < 2) return null;
+  const P = projecao();
+  const el = document.createElement('div'); el.className = 'slide';
+  el.innerHTML = `
+    ${head('Degraus da meta', 'empresa')}
+    ${nv.map(x => { const feito = D.realizado_mes / x.valor * 100, proj = P.proj / x.valor * 100;
+      return `<div class="dg"><div class="dg-l"><span class="dg-n" style="color:${x.cor}">${x.nome}</span><span class="dg-v">${fmtBRL(x.valor)}</span><span class="dg-p">${pct(feito)}</span></div>
+        <div class="dg-t"><div class="dg-proj" style="--w:${Math.min(100, proj).toFixed(1)}%;border-color:${x.cor}"></div><div class="dg-f" style="--w:${Math.min(100, feito).toFixed(1)}%;background:${x.cor}"></div></div></div>`; }).join('')}
+    <div class="sub grey mask" style="margin-top:6px;font-size:44px"><span>Cheio = feito · tracejado = projeção</span></div>`;
   return el;
 }
 
@@ -249,7 +274,7 @@ async function loop() {
   await load();
   if (!D) { await sleep(5000); return loop(); }
   const host = $('#slides');
-  const seq = [slideMes, slideProjecao, slideFiliais, slideOntem,
+  const seq = [slideMes, slideProjecao, slideDegraus, slideFiliais, slideOntem,
     () => slideCanais('empresa'), () => slideCanais('itajai'), () => slideCanais('londrina'),
     ...CANAIS.map(n => () => slideCanal(n))];
   for (const make of seq) {

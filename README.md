@@ -10,6 +10,17 @@ Página do telão de LED (2560 × 512) em três colunas **autônomas**:
 
 Cada coluna é uma página independente com código, fonte e dados próprios. Mudar uma não altera as outras; dá até para abrir uma sozinha (`/colunas/meta/`). O `index.html` da raiz só junta as três, e a ordem fica na lista `COLUNAS`.
 
+## Tela cheia (2560 px, por cima das três colunas)
+A cada **3 minutos** (`TELA_CHEIA.a_cada_min` no `index.html`) a tela cheia cobre o telão por um bloco de cenas e devolve as colunas. Pasta própria: `colunas/telacheia/` (autônoma, lê só `dados.json`, gerado pelo Apps Script).
+- **Indicadores da PAC** (Análise Gold) e **Top 5 em ruptura** (curva AA e A primeiro), para Domus, Itajaí e Londrina.
+- **Estoque congelado**: estoque com MVD 0 (sem venda nas janelas de 15/30/60 dias), maior valor a custo primeiro.
+- **Campeões de venda**: maior giro a custo (MVD × custo), com a cobertura no ritmo atual (coral se for menor que o lead time).
+- **Azarões**: itens fora da curva AA que dispararam: ritmo dos últimos 15 dias ≥ 2,5× o ritmo dos 45 dias anteriores (mínimo 15 unidades em 15 dias). Mostra o fator, o volume e quantos dias o estoque aguenta no ritmo novo.
+- **Mensagens em tela cheia**: insights automáticos (vamos bem, ponto de melhoria, alerta; regras da seção 10 do guia da PAC) e mensagens manuais da aba **Mensagens** da planilha do telão (ativa, tipo, título, número, legenda, apoio, até quando).
+- Teste: `index.html?cheia=1` abre a tela cheia em 4 s; `colunas/telacheia/?demo=1` mostra as cenas com dados de exemplo; `?cena=N` fixa uma cena.
+
+A lógica da análise está em `automacao/gold.js` (a mesma colada no Apps Script) e segue o guia "Lógica completa do relatório da PAC": base sem PI Verticalizado, dado faltante nunca vira zero, Domus = recálculo sobre as linhas somadas, 6 indicadores (estoque a custo, DIO, CCC, NWC, ruptura ponderada pela demanda a custo, excesso acima do Emax).
+
 ## O que o telão mede
 
 Todo slide traz no canto superior direito o **escopo** do número: **Domus** (Itajaí + Londrina somadas), **Itajaí** ou **Londrina**. Cores fixas em todo o telão: Itajaí lima, Londrina azul-claro.
@@ -28,7 +39,7 @@ Todo slide traz no canto superior direito o **escopo** do número: **Domus** (It
 - Qualidade: saudável, em excesso (acima do Emax da PAC) e parado (com estoque e sem venda), em barra.
 - Ruptura: % dos SKUs com venda sem estoque, venda perdida por dia a custo, curvas AA e A sem estoque e SKUs em ruptura sem OC.
 
-A meta do mês é da empresa toda e fica em `colunas/meta/metas.json`. Edite ali (pelo próprio GitHub) e tire `"exemplo": true` quando for a meta oficial.
+Metas do mês (da Domus toda) em três degraus: **Meta** (compromisso), **Super meta** (desafio) e **Mega meta** (recorde). Edite na aba **Metas** da planilha do telão; ela gera `colunas/meta/metas.json`. Planilha criada antes desta versão: menu **Telão → Metas: passar para Meta / Super / Mega**. Edite ali (pelo próprio GitHub) e tire `"exemplo": true` quando for a meta oficial.
 
 E-mail das 07h30 (notícias + faturamento por canal × filial + estoque por filial) sai do Apps Script, pela conta Google da empresa de quem instalou o script.
 
@@ -38,12 +49,12 @@ E-mail das 07h30 (notícias + faturamento por canal × filial + estoque por fili
 
 ### 1. GitHub (organização)
 
-1. Na organização, **New repository** → nome `telao-weaxis` → **Private** → Create.
+1. Na organização, **New repository** → nome `Tel-o` → **Private** → Create.
 2. **Add file → Upload files** → arraste todo o conteúdo desta pasta → Commit.
 3. Crie dois tokens (um para o Apps Script, outro para a rotina do Claude), para poder revogar cada um sozinho:
    *Seu perfil → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token*
    - Resource owner: **a organização**
-   - Repository access: **Only select repositories → telao-weaxis**
+   - Repository access: **Only select repositories → Tel-o**
    - Permissions → Repository → **Contents: Read and write**
    - Expiração: 1 ano (anote a data para renovar)
    - Se a organização exigir aprovação de tokens, um owner aprova em *Org → Settings → Personal access tokens → Pending requests*.
@@ -51,7 +62,7 @@ E-mail das 07h30 (notícias + faturamento por canal × filial + estoque por fili
 ### 2. Cloudflare Pages (hospedagem)
 
 1. [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages → Create → Pages → Connect to Git**.
-2. Autorize o app do Cloudflare na **organização** do GitHub e escolha `telao-weaxis`.
+2. Autorize o app do Cloudflare na **organização** do GitHub e escolha `Tel-o`.
 3. Build settings: Framework preset **None** · Build command **vazio** · Build output directory **`/`** → **Save and Deploy**.
    Fica no ar em `telao-weaxis.pages.dev`. Cada commit publica sozinho em cerca de 1 minuto.
 4. **Domínio próprio**: projeto → **Custom domains → Set up a custom domain** → `telao.domuscommerce.com`.
@@ -131,3 +142,7 @@ Ver `automacao/rotina-diaria.md`. Precisa da variável `GH_TOKEN` (token do pass
 Animação por tipo (todas saem das elipses do símbolo): **Meta batida** disco lima cresce no canto · **Ação tomada** a elipse vertical, "o próximo passo", atravessa a coluna · **Alerta** anel vermelho pulsando · **Comemoração** as três elipses entram girando · **Aviso** só a revelação do texto.
 
 Medida ideal de vídeo para a coluna: **852 × 512 px** (ou 1704 × 1024).
+
+## Entrega sem git push (Receptor)
+
+A rotina do Claude na nuvem não consegue dar push no repositório. Ela entrega pelo **Receptor** (`automacao/apps-script/receptor/`), um Apps Script separado que confere um segredo e grava no GitHub. Passo a passo em `automacao/rotina-diaria.md`, seção "Como os dados chegam ao GitHub".

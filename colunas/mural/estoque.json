@@ -1,1 +1,565 @@
-{"_info":"Estoque por filial e Domus · Análise Gold da PAC (6 indicadores + listas). Gerado pelo Apps Script. Não editar à mão.","atualizado_em":"2026-10-02T19:49:06-03:00","corte":"02/10","sigma":"não identificável nas PACs (não excluído)","filiais":{"itajai":{"nome":"Itajaí","base":"SC","nota":"PAC SC, aba Gustavo, sem PI Verticalizado","parcial":false,"fonte":"PAC SC · aba Gustavo","duplicatas":1,"skus":1742,"skus_pi":375,"estoque_pi":344209.88000000006,"estoque":10823983.34999999,"unidades":67169,"giro_disp":404239.28961111093,"mvd_perdida":40612.00811111112,"ruptura_pct":9.12934464146948,"dio":26.776178437313586,"dpo":43.148490240034626,"dso":11.000000000000016,"ccc":-5.372311802721022,"nwc":-2193095.186722222,"excesso":5577689.8747499995,"sem_giro":562567.2999999999,"prazo_parcial":true,"nwc_parcial":true,"linhas_sem_prazo":16,"giro_sem_prazo":125.02266666666664,"linhas_sem_custo":25,"mvd_ausente":0,"skus_ruptura":203,"rupturas_com_oc":86,"skus_congelados":148,"curvas":{"AA":{"ativos":18,"ruptura":2,"perda":4757.097222222222,"giro":204044.22344444445,"giro_perdido":4757.097222222222},"A":{"ativos":61,"ruptura":9,"perda":12557.999777777779,"giro":104147.52905555555,"giro_perdido":12557.999777777779},"B":{"ativos":212,"ruptura":39,"perda":16980.832666666665,"giro":74015.76244444444,"giro_perdido":16980.832666666665},"C":{"ativos":256,"ruptura":51,"perda":4432.779333333332,"giro":18848.259444444448,"giro_perdido":4432.779333333332},"D":{"ativos":393,"ruptura":102,"perda":1883.2991111111112,"giro":3183.515222222223,"giro_perdido":1883.2991111111112}},"top_ruptura":[{"sku":"MOP-PRO","filial":"Itajaí","titulo":"Mop Giratório Balde Cesto Inox Limpeza Esfregão 360","curva":"AA","forn":"Camesa","mvd":85.6111111111111,"custo":33.05,"estoque":0,"oc":300,"lt":15,"perdido":2829.4472222222216},{"sku":"CLIMATIZADOR-CLIN35PRO-127V","filial":"Itajaí","titulo":"Climatizador 35L 150W Branco / Cinza CLIN35PRO Ventisol - 127V","curva":"A","forn":"Ventisol","mvd":5.361111111111111,"custo":499,"estoque":0,"oc":0,"lt":15,"perdido":2675.1944444444443},{"sku":"AR-SPLIT-12000-FR-WIFI-ELGIN","filial":"Itajaí","titulo":"Ar  Condicionado 12000 BTUs Frio Inverter Wi-Fi Elgin","curva":"A","forn":"Elgin","mvd":1.5333333333333334,"custo":1719,"estoque":-12,"oc":0,"lt":10,"perdido":2635.8},{"sku":"MIXER-TURBO-CHEF-3EM1-220V","filial":"Itajaí","titulo":"Mixer Power Turbo Chef  Processador 3 em 1  200W Elgin - 220V","curva":"AA","forn":"Elgin","mvd":25.13888888888889,"custo":76.68,"estoque":0,"oc":2000,"lt":20,"perdido":1927.65},{"sku":"FERRO-EASY-PASS-127V","filial":"Itajaí","titulo":"Ferro de Passar Easy Pass A Vapor Spray 5 Temperaturas Elgin - 127V","curva":"A","forn":"Elgin","mvd":27.816666666666666,"custo":55.91,"estoque":0,"oc":1000,"lt":20,"perdido":1555.2298333333333}],"congelados":[{"sku":"SECADOR-ELEGANZA-PLUS-GAMA-220V","filial":"Itajaí","titulo":"Secador Eleganza Plus Ceramic Ion Gama Italy - 220V","curva":"D","forn":"Brasitech","mvd":0,"custo":121.57,"estoque":400,"oc":0,"lt":null,"valor":48628,"d60":0},{"sku":"MAQ-PIN-AIR-3,0HP-220V","filial":"Itajaí","titulo":"Máquina de Pintura Airless 3.0 Hp MPA 300 Vonder - 220V","curva":"D","forn":"O.v.d.","mvd":0,"custo":3687.52,"estoque":8,"oc":0,"lt":4,"valor":29500.16,"d60":0},{"sku":"ASP-90L-3600W-APV3690-VONDER","filial":"Itajaí","titulo":"Aspirador de Pó e Líquidos 90 Litros APV 3690 Vonder","curva":"D","forn":"O.v.d.","mvd":0,"custo":1624.45,"estoque":16,"oc":0,"lt":4,"valor":25991.2,"d60":0},{"sku":"SECADOR-BABOSA-CER-GAMA-220V","filial":"Itajaí","titulo":"Secador GA.MA Babosa Ceramic Ion - 2100W  Nac - 220V","curva":"D","forn":"Brasitech","mvd":0,"custo":141.03,"estoque":184,"oc":0,"lt":null,"valor":25949.52,"d60":0},{"sku":"COMP-AR-12CV-23PCM-VONDER","filial":"Itajaí","titulo":"Compressor Ar Direto 1/2CV 2.3PCM 40 PSI Bivolt Vonder","curva":"D","forn":"O.v.d.","mvd":0,"custo":446,"estoque":51,"oc":0,"lt":4,"valor":22746,"d60":0}],"campeoes":[{"sku":"LAV-ALT-PRES-LAV1600-110V","filial":"Itajaí","titulo":"Lavadora De Alta Pressão LAV 1600. 1.600 lbf/pol² Vonder - 110","curva":"AA","forn":"O.v.d.","mvd":161,"custo":269.24,"estoque":1036,"oc":0,"lt":4,"giro":43347.64,"cobertura":6.434782608695652},{"sku":"LAV-ALT-PRES-LAV1600-220V","filial":"Itajaí","titulo":"Lavadora De Alta Pressão LAV 1600. 1.600 lbf/pol² Vonder - 220","curva":"AA","forn":"O.v.d.","mvd":145.0388888888889,"custo":269.24,"estoque":2323,"oc":0,"lt":4,"giro":39050.270444444446,"cobertura":16.01639407055579},{"sku":"LAV-VOND-1300-220","filial":"Itajaí","titulo":"Lavadora De Alta Pressão LAV 1300 1.300lbf Vonder - 220V","curva":"AA","forn":"O.v.d.","mvd":114.32777777777778,"custo":246.55,"estoque":1516,"oc":0,"lt":4,"giro":28187.513611111113,"cobertura":13.260119539336216},{"sku":"LAV-VOND-1300-110","filial":"Itajaí","titulo":"Lavadora De Alta Pressão LAV 1300 1.300lbf Vonder - 110V","curva":"AA","forn":"O.v.d.","mvd":102.52777777777777,"custo":246.55,"estoque":1176,"oc":0,"lt":4,"giro":25278.223611111112,"cobertura":11.470062313736115},{"sku":"LAVADORA-LW1305-127V","filial":"Itajaí","titulo":"Lavadora De Alta Pressão 1200W LW1305 127V/220V Worker - 127V","curva":"AA","forn":"Ferragens Negrao Comercial","mvd":44.02222222222222,"custo":229,"estoque":240,"oc":140,"lt":8,"giro":10081.088888888888,"cobertura":5.451792024230187}],"azaroes":[{"sku":"CLIMAT-CLIN16-VENTISOL-220V","filial":"Itajaí","titulo":"Climatizador CLIN16 16L 130W Ventisol - 220V","curva":"B","forn":"Ventisol","mvd":2.994444444444445,"custo":298.9,"estoque":56,"oc":0,"lt":15,"d15":77,"ritmo15":5.133333333333334,"ritmo_ant":0,"fator":null,"cobertura":10.909090909090908},{"sku":"CLIMAT-CLIN16-VENTISOL-127V","filial":"Itajaí","titulo":"Climatizador CLIN16 16L 130W Ventisol - 127V","curva":"B","forn":"Ventisol","mvd":2.9555555555555557,"custo":298.9,"estoque":31,"oc":0,"lt":15,"d15":76,"ritmo15":5.066666666666666,"ritmo_ant":0,"fator":null,"cobertura":6.11842105263158},{"sku":"COOKTOP-ELET-PCT55VC-PHILCO","filial":"Itajaí","titulo":"Cooktop Elétrico 5 Bocas Volcano Philco","curva":"B","forn":"Britania","mvd":0.5833333333333334,"custo":920,"estoque":24,"oc":0,"lt":20,"d15":15,"ritmo15":1,"ritmo_ant":0,"fator":null,"cobertura":24},{"sku":"FOGAO-ELET-2B-FG02-220V","filial":"Itajaí","titulo":"Fogão Elétrico 2 Boca 5 Temp Double Cook 2000W FG02 Elgin - 220V","curva":"B","forn":"Elgin","mvd":4.705555555555556,"custo":74.38,"estoque":88,"oc":162,"lt":20,"d15":121,"ritmo15":8.066666666666666,"ritmo_ant":0,"fator":null,"cobertura":10.90909090909091},{"sku":"ESCOVA-PER02-BIV-PHILCO","filial":"Itajaí","titulo":"Escova Rotativa 1300W Bivolt 2 em 1 Cerâmica PER02 Philco","curva":"C","forn":"Britania","mvd":1.1277777777777778,"custo":122.5,"estoque":0,"oc":0,"lt":20,"d15":29,"ritmo15":1.9333333333333333,"ritmo_ant":0,"fator":null,"cobertura":0}],"forn_ruptura":[{"nome":"ELGIN DISTRIBUIDORA LTDA","valor":5906.983555555556},{"nome":"ELGIN INDUSTRIAL DA AMAZÔNIA LTDA","valor":5116.715888888889},{"nome":"O.V.D. IMPORTADORA E DISTRIBUIDORA LTDA","valor":4922.921055555556}],"forn_excesso":[{"nome":"O.v.d.","valor":2416620.491044445},{"nome":"Tools World Llc Mundo Das Ferramentas","valor":611121.0089000001},{"nome":"Elgin","valor":526636.7937777777}],"valor_custo":10823983.34999999,"cobertura_dias":26.776178437313586,"parado_valor":562567.2999999999,"parado_skus":148,"excesso_valor":5015122.574749994,"saudavel_valor":5246293.4752499955,"perda_dia_custo":40612.00811111112,"pct_ruptura":9.12934464146948,"skus_ativos":940,"sem_oc":117,"top_fornecedores":[{"nome":"Elgin","perda":5906.983555555556},{"nome":"Elgin","perda":5116.715888888889},{"nome":"O.v.d.","perda":4922.921055555556}],"top_skus":[{"sku":"MOP-PRO","filial":"Itajaí","titulo":"Mop Giratório Balde Cesto Inox Limpeza Esfregão ","curva":"AA","perda":2829,"oc":300},{"sku":"CLIMATIZADOR-CLIN35PRO-127V","filial":"Itajaí","titulo":"Climatizador 35L 150W Branco / Cinza CLIN35PRO V","curva":"A","perda":2675,"oc":0},{"sku":"AR-SPLIT-12000-FR-WIFI-ELGIN","filial":"Itajaí","titulo":"Ar  Condicionado 12000 BTUs Frio Inverter Wi-Fi ","curva":"A","perda":2636,"oc":0},{"sku":"MIXER-TURBO-CHEF-3EM1-220V","filial":"Itajaí","titulo":"Mixer Power Turbo Chef  Processador 3 em 1  200W","curva":"AA","perda":1928,"oc":2000},{"sku":"FERRO-EASY-PASS-127V","filial":"Itajaí","titulo":"Ferro de Passar Easy Pass A Vapor Spray 5 Temper","curva":"A","perda":1555,"oc":1000}]},"londrina":{"nome":"Londrina","base":"PR","nota":"PAC PR, aba COMPRAS com filtro Verticalizados","parcial":true,"fonte":"PAC PR · aba COMPRAS","duplicatas":0,"skus":453,"skus_pi":0,"estoque_pi":0,"estoque":2588705.129999999,"unidades":9338,"giro_disp":34652.325555555515,"mvd_perdida":9817.130055555552,"ruptura_pct":22.076119261290575,"dio":74.70509088487348,"dpo":36.314765755974804,"dso":11.000000000000007,"ccc":49.390325128898695,"nwc":1673550.9670000004,"excesso":2219281.396877779,"sem_giro":1670368.0900000008,"prazo_parcial":true,"nwc_parcial":true,"linhas_sem_prazo":23,"giro_sem_prazo":1929.6517222222226,"linhas_sem_custo":10,"mvd_ausente":0,"skus_ruptura":36,"rupturas_com_oc":6,"skus_congelados":88,"curvas":{"AA":{"ativos":5,"ruptura":2,"perda":4288.436277777777,"giro":15028.486333333332,"giro_perdido":4288.436277777777},"A":{"ativos":11,"ruptura":1,"perda":1479.1850555555554,"giro":10055.936277777779,"giro_perdido":1479.1850555555554},"B":{"ativos":25,"ruptura":7,"perda":3173.5811666666673,"giro":5988.367833333333,"giro_perdido":3173.5811666666673},"C":{"ativos":44,"ruptura":6,"perda":571.074388888889,"giro":2753.7698888888895,"giro_perdido":571.074388888889},"D":{"ativos":76,"ruptura":20,"perda":304.85316666666677,"giro":825.7652222222226,"giro_perdido":304.85316666666677}},"top_ruptura":[{"sku":"PANELEIRO-4PORT-BRA","filial":"Londrina","titulo":"Paneleiro 4 Portas 1 Gaveta MDP Branco Aramóveis","curva":"AA","forn":"Aramoveis","mvd":13.338888888888889,"custo":180.69,"estoque":-5,"oc":200,"lt":4,"perdido":2410.203833333333},{"sku":"ESCRIVANINHA_VITORIA_BRA","filial":"Londrina","titulo":"Escrivaninha Vitória 1 Gaveta 1 Porta Em MDP Demóbile - Branco","curva":"AA","forn":"Demobile -","mvd":13.677777777777777,"custo":137.32,"estoque":-1,"oc":170,"lt":4,"perdido":1878.2324444444444},{"sku":"COMODA-DOCE.SONHO-BRA","filial":"Londrina","titulo":"Cômoda Doce Sonho 4 Gavetas Puxadores de Estrela MDP Qmovi - Branco / Branco","curva":"A","forn":"Qmovi","mvd":8.394444444444444,"custo":176.21,"estoque":-9,"oc":100,"lt":4,"perdido":1479.1850555555554},{"sku":"ESCRIVANINHA_VITORIA_AME","filial":"Londrina","titulo":"Escrivaninha Vitória 1 Gaveta 1 Porta Em MDP Demóbile - Amêndola Touch","curva":"B","forn":"Demobile -","mvd":4.733333333333333,"custo":137.32,"estoque":-17,"oc":100,"lt":4,"perdido":649.9813333333333},{"sku":"PISCINA-INFANTIL-253L","filial":"Londrina","titulo":"Piscina Infantil Inflável De Plástico Pequena 253L Wellmix","curva":"B","forn":"Wellmix Importacao","mvd":20.7,"custo":31.39,"estoque":-12,"oc":0,"lt":8,"perdido":649.773}],"congelados":[{"sku":"COMOD_FLORA_RDZ_AME","filial":"Londrina","titulo":"Cômoda Flora 4 Gavetas 1 Porta Com Rodízios em MDP Demóbile - Amêndola Touch","curva":"D","forn":"Demobile -","mvd":0,"custo":413.54,"estoque":1000,"oc":0,"lt":4,"valor":413540,"d60":0},{"sku":"COMOD_FLORA_RDZ_CIN_OFWH","filial":"Londrina","titulo":"Cômoda Flora 4 Gavetas 1 Porta Com Rodízios em MDP Demóbile - Cinamon / Off White","curva":"D","forn":"Demobile -","mvd":0,"custo":413.54,"estoque":1000,"oc":0,"lt":4,"valor":413540,"d60":0},{"sku":"143.081043.8","filial":"Londrina","titulo":"GUARDA-ROUPA TORONTO 081043 CAR/FENDI ESP","curva":"D","forn":"Moval - Moveis Arapongas","mvd":0,"custo":1049.47,"estoque":200,"oc":0,"lt":4,"valor":209894,"d60":0},{"sku":"GR-AMAZONAS-ESP-CAR/FEN","filial":"Londrina","titulo":"Guarda-Roupa Amazonas 6 Portas 5 Gavetas Com Espelho Moval - Carvalho / Fendi","curva":"D","forn":"Moval - Moveis Arapongas","mvd":0,"custo":1409.8,"estoque":110,"oc":0,"lt":4,"valor":155078,"d60":0},{"sku":"ARMARIO-MULTI-FLORENÇA-BRA","filial":"Londrina","titulo":"Armário Multiuso Florença 2 Portas em Aglomerado Aramóveis - Branco","curva":"D","forn":"Aramoveis","mvd":0,"custo":225.08,"estoque":503,"oc":0,"lt":4,"valor":113215.24,"d60":0}],"campeoes":[{"sku":"COMODA-DOCE.SONHO-SAPAT-BRA","filial":"Londrina","titulo":"Cômoda Doce Sonho 4 Gvt Sapateira Puxadores de Estrela Qmovi - Branco / Branco","curva":"AA","forn":"Qmovi","mvd":32.28333333333333,"custo":224.14,"estoque":4,"oc":160,"lt":4,"giro":7235.986333333332,"cobertura":0.12390294269488901},{"sku":"COLCHAO_BABY_LIGHT_12x70x130","filial":"Londrina","titulo":"Colchão Berço Baby Light D18 Impermeável (12x70x130) Ortobom","curva":"AA","forn":"Fabr.espumas Colchoes N.paranaense","mvd":45.66111111111112,"custo":110,"estoque":335,"oc":2773,"lt":14,"giro":5022.722222222223,"cobertura":7.336658960944153},{"sku":"COLCHAO-SOLT-D23-12X88X188","filial":"Londrina","titulo":"Colchão Light D23 Solteiro Antialérgico (12x88x188) Ortobom","curva":"AA","forn":"Fabr.espumas Colchoes N.paranaense","mvd":13.511111111111111,"custo":205,"estoque":87,"oc":360,"lt":14,"giro":2769.777777777778,"cobertura":6.439144736842105},{"sku":"PANELEIRO-4PORT-BRA","filial":"Londrina","titulo":"Paneleiro 4 Portas 1 Gaveta MDP Branco Aramóveis","curva":"AA","forn":"Aramoveis","mvd":13.338888888888889,"custo":180.69,"estoque":-5,"oc":200,"lt":4,"giro":2410.203833333333,"cobertura":0},{"sku":"COMODA-MESA-GIRAT-GAMER-FRE.OFWH","filial":"Londrina","titulo":"Cômoda 3 Gavetas Com Mesa Giratória Gamer em MDP Qmovi - Freijó / Off White","curva":"A","forn":"Qmovi","mvd":9.85,"custo":234.32,"estoque":4,"oc":40,"lt":4,"giro":2308.0519999999997,"cobertura":0.40609137055837563}],"azaroes":[{"sku":"GR-M4KG-HI","filial":"Londrina","titulo":"Graxeira Manual - Bomba De Graxa - Hidromar Hl-4","curva":"B","forn":"Hydronlubz Ind Com Equip","mvd":4.811111111111111,"custo":94.75,"estoque":66,"oc":0,"lt":14,"d15":109,"ritmo15":7.266666666666667,"ritmo_ant":0.8222222222222222,"fator":8.837837837837839,"cobertura":9.082568807339449},{"sku":"TANQ_DUPLO_124X62_RORATO_PED_ES","filial":"Londrina","titulo":"Tanque Duplo Sintético Nº5 124x62 AJ Rorato - Pedra Escura","curva":"C","forn":"A. J. Rorato","mvd":0.6555555555555556,"custo":229.15,"estoque":1,"oc":0,"lt":10,"d15":15,"ritmo15":1,"ritmo_ant":0.15555555555555556,"fator":6.428571428571429,"cobertura":1},{"sku":"COLCHAO-D28-LIGHT-14x88x188","filial":"Londrina","titulo":"Colchão Light D28 Solteiro Resistente (14x88x188) - Ortobom","curva":"A","forn":"Fabr.espumas Colchoes N.paranaense","mvd":2.6722222222222225,"custo":270,"estoque":321,"oc":40,"lt":14,"d15":50,"ritmo15":3.3333333333333335,"ritmo_ant":1.0888888888888888,"fator":3.0612244897959187,"cobertura":96.3},{"sku":"ESCRIV-NOMAD-ARTELY-OF_WHT","filial":"Londrina","titulo":"Escrivaninha Nomad Artely Mesa em L Giratória - Cinamomo/Off White","curva":"B","forn":"Artely Moveis","mvd":2.361111111111111,"custo":236.36,"estoque":21,"oc":0,"lt":10,"d15":44,"ritmo15":2.933333333333333,"ritmo_ant":1.0888888888888888,"fator":2.693877551020408,"cobertura":7.159090909090909}],"forn_ruptura":[{"nome":"DEMOBILE - INDUSTRIA DE MOVEIS LTDA","valor":2528.2137777777775},{"nome":"ARAMOVEIS INDUSTRIA DE MOVEIS LTDA","valor":2417.617611111111},{"nome":"QMOVI INDUSTRIA MOVELEIRA LTDA","valor":1506.9848333333334}],"forn_excesso":[{"nome":"Demobile -","valor":828525.9299999999},{"nome":"Moval - Moveis Arapongas","valor":608595.7019999998},{"nome":"Fabr.espumas Colchoes N.paranaense","valor":197762.89333333334}],"valor_custo":2588705.129999999,"cobertura_dias":74.70509088487348,"parado_valor":1670368.0900000008,"parado_skus":88,"excesso_valor":548913.3068777777,"saudavel_valor":369423.7331222205,"perda_dia_custo":9817.130055555552,"pct_ruptura":22.076119261290575,"skus_ativos":161,"sem_oc":30,"top_fornecedores":[{"nome":"Demobile -","perda":2528.2137777777775},{"nome":"Aramoveis","perda":2417.617611111111},{"nome":"Qmovi","perda":1506.9848333333334}],"top_skus":[{"sku":"PANELEIRO-4PORT-BRA","filial":"Londrina","titulo":"Paneleiro 4 Portas 1 Gaveta MDP Branco Aramóveis","curva":"AA","perda":2410,"oc":200},{"sku":"ESCRIVANINHA_VITORIA_BRA","filial":"Londrina","titulo":"Escrivaninha Vitória 1 Gaveta 1 Porta Em MDP Dem","curva":"AA","perda":1878,"oc":170},{"sku":"COMODA-DOCE.SONHO-BRA","filial":"Londrina","titulo":"Cômoda Doce Sonho 4 Gavetas Puxadores de Estrela","curva":"A","perda":1479,"oc":100},{"sku":"ESCRIVANINHA_VITORIA_AME","filial":"Londrina","titulo":"Escrivaninha Vitória 1 Gaveta 1 Porta Em MDP Dem","curva":"B","perda":650,"oc":100},{"sku":"PISCINA-INFANTIL-253L","filial":"Londrina","titulo":"Piscina Infantil Inflável De Plástico Pequena 25","curva":"B","perda":650,"oc":0}]}},"total":{"nome":"Domus","base":"Itajaí + Londrina","nota":"Itajaí + Londrina, linhas somadas","parcial":true,"skus":2195,"skus_pi":375,"estoque_pi":344209.88000000006,"estoque":13412688.47999999,"unidades":76507,"giro_disp":438891.6151666662,"mvd_perdida":50429.13816666667,"ruptura_pct":10.30594713654288,"dio":30.560366196348063,"dpo":42.636588162887485,"dso":11.00000000000001,"ccc":-1.0762219665394142,"nwc":-519544.2197222206,"excesso":7796971.271627773,"sem_giro":2232935.39,"prazo_parcial":true,"nwc_parcial":true,"linhas_sem_prazo":39,"giro_sem_prazo":2054.674388888889,"linhas_sem_custo":35,"mvd_ausente":0,"skus_ruptura":239,"rupturas_com_oc":92,"skus_congelados":236,"curvas":{"AA":{"ativos":23,"ruptura":4,"perda":9045.5335,"giro":219072.70977777778,"giro_perdido":9045.5335},"A":{"ativos":72,"ruptura":10,"perda":14037.184833333335,"giro":114203.46533333333,"giro_perdido":14037.184833333335},"B":{"ativos":237,"ruptura":46,"perda":20154.413833333332,"giro":80004.13027777777,"giro_perdido":20154.413833333332},"C":{"ativos":300,"ruptura":57,"perda":5003.85372222222,"giro":21602.029333333336,"giro_perdido":5003.85372222222},"D":{"ativos":469,"ruptura":122,"perda":2188.1522777777773,"giro":4009.2804444444455,"giro_perdido":2188.1522777777773}},"top_ruptura":[{"sku":"MOP-PRO","filial":"Itajaí","titulo":"Mop Giratório Balde Cesto Inox Limpeza Esfregão 360","curva":"AA","forn":"Camesa","mvd":85.6111111111111,"custo":33.05,"estoque":0,"oc":300,"lt":15,"perdido":2829.4472222222216},{"sku":"CLIMATIZADOR-CLIN35PRO-127V","filial":"Itajaí","titulo":"Climatizador 35L 150W Branco / Cinza CLIN35PRO Ventisol - 127V","curva":"A","forn":"Ventisol","mvd":5.361111111111111,"custo":499,"estoque":0,"oc":0,"lt":15,"perdido":2675.1944444444443},{"sku":"AR-SPLIT-12000-FR-WIFI-ELGIN","filial":"Itajaí","titulo":"Ar  Condicionado 12000 BTUs Frio Inverter Wi-Fi Elgin","curva":"A","forn":"Elgin","mvd":1.5333333333333334,"custo":1719,"estoque":-12,"oc":0,"lt":10,"perdido":2635.8},{"sku":"PANELEIRO-4PORT-BRA","filial":"Londrina","titulo":"Paneleiro 4 Portas 1 Gaveta MDP Branco Aramóveis","curva":"AA","forn":"Aramoveis","mvd":13.338888888888889,"custo":180.69,"estoque":-5,"oc":200,"lt":4,"perdido":2410.203833333333},{"sku":"MIXER-TURBO-CHEF-3EM1-220V","filial":"Itajaí","titulo":"Mixer Power Turbo Chef  Processador 3 em 1  200W Elgin - 220V","curva":"AA","forn":"Elgin","mvd":25.13888888888889,"custo":76.68,"estoque":0,"oc":2000,"lt":20,"perdido":1927.65}],"congelados":[{"sku":"COMOD_FLORA_RDZ_AME","filial":"Londrina","titulo":"Cômoda Flora 4 Gavetas 1 Porta Com Rodízios em MDP Demóbile - Amêndola Touch","curva":"D","forn":"Demobile -","mvd":0,"custo":413.54,"estoque":1000,"oc":0,"lt":4,"valor":413540,"d60":0},{"sku":"COMOD_FLORA_RDZ_CIN_OFWH","filial":"Londrina","titulo":"Cômoda Flora 4 Gavetas 1 Porta Com Rodízios em MDP Demóbile - Cinamon / Off White","curva":"D","forn":"Demobile -","mvd":0,"custo":413.54,"estoque":1000,"oc":0,"lt":4,"valor":413540,"d60":0},{"sku":"143.081043.8","filial":"Londrina","titulo":"GUARDA-ROUPA TORONTO 081043 CAR/FENDI ESP","curva":"D","forn":"Moval - Moveis Arapongas","mvd":0,"custo":1049.47,"estoque":200,"oc":0,"lt":4,"valor":209894,"d60":0},{"sku":"GR-AMAZONAS-ESP-CAR/FEN","filial":"Londrina","titulo":"Guarda-Roupa Amazonas 6 Portas 5 Gavetas Com Espelho Moval - Carvalho / Fendi","curva":"D","forn":"Moval - Moveis Arapongas","mvd":0,"custo":1409.8,"estoque":110,"oc":0,"lt":4,"valor":155078,"d60":0},{"sku":"ARMARIO-MULTI-FLORENÇA-BRA","filial":"Londrina","titulo":"Armário Multiuso Florença 2 Portas em Aglomerado Aramóveis - Branco","curva":"D","forn":"Aramoveis","mvd":0,"custo":225.08,"estoque":503,"oc":0,"lt":4,"valor":113215.24,"d60":0}],"campeoes":[{"sku":"LAV-ALT-PRES-LAV1600-110V","filial":"Itajaí","titulo":"Lavadora De Alta Pressão LAV 1600. 1.600 lbf/pol² Vonder - 110","curva":"AA","forn":"O.v.d.","mvd":161,"custo":269.24,"estoque":1036,"oc":0,"lt":4,"giro":43347.64,"cobertura":6.434782608695652},{"sku":"LAV-ALT-PRES-LAV1600-220V","filial":"Itajaí","titulo":"Lavadora De Alta Pressão LAV 1600. 1.600 lbf/pol² Vonder - 220","curva":"AA","forn":"O.v.d.","mvd":145.0388888888889,"custo":269.24,"estoque":2323,"oc":0,"lt":4,"giro":39050.270444444446,"cobertura":16.01639407055579},{"sku":"LAV-VOND-1300-220","filial":"Itajaí","titulo":"Lavadora De Alta Pressão LAV 1300 1.300lbf Vonder - 220V","curva":"AA","forn":"O.v.d.","mvd":114.32777777777778,"custo":246.55,"estoque":1516,"oc":0,"lt":4,"giro":28187.513611111113,"cobertura":13.260119539336216},{"sku":"LAV-VOND-1300-110","filial":"Itajaí","titulo":"Lavadora De Alta Pressão LAV 1300 1.300lbf Vonder - 110V","curva":"AA","forn":"O.v.d.","mvd":102.52777777777777,"custo":246.55,"estoque":1176,"oc":0,"lt":4,"giro":25278.223611111112,"cobertura":11.470062313736115},{"sku":"LAVADORA-LW1305-127V","filial":"Itajaí","titulo":"Lavadora De Alta Pressão 1200W LW1305 127V/220V Worker - 127V","curva":"AA","forn":"Ferragens Negrao Comercial","mvd":44.02222222222222,"custo":229,"estoque":240,"oc":140,"lt":8,"giro":10081.088888888888,"cobertura":5.451792024230187}],"azaroes":[{"sku":"CLIMAT-CLIN16-VENTISOL-220V","filial":"Itajaí","titulo":"Climatizador CLIN16 16L 130W Ventisol - 220V","curva":"B","forn":"Ventisol","mvd":2.994444444444445,"custo":298.9,"estoque":56,"oc":0,"lt":15,"d15":77,"ritmo15":5.133333333333334,"ritmo_ant":0,"fator":null,"cobertura":10.909090909090908},{"sku":"CLIMAT-CLIN16-VENTISOL-127V","filial":"Itajaí","titulo":"Climatizador CLIN16 16L 130W Ventisol - 127V","curva":"B","forn":"Ventisol","mvd":2.9555555555555557,"custo":298.9,"estoque":31,"oc":0,"lt":15,"d15":76,"ritmo15":5.066666666666666,"ritmo_ant":0,"fator":null,"cobertura":6.11842105263158},{"sku":"COOKTOP-ELET-PCT55VC-PHILCO","filial":"Itajaí","titulo":"Cooktop Elétrico 5 Bocas Volcano Philco","curva":"B","forn":"Britania","mvd":0.5833333333333334,"custo":920,"estoque":24,"oc":0,"lt":20,"d15":15,"ritmo15":1,"ritmo_ant":0,"fator":null,"cobertura":24},{"sku":"FOGAO-ELET-2B-FG02-220V","filial":"Itajaí","titulo":"Fogão Elétrico 2 Boca 5 Temp Double Cook 2000W FG02 Elgin - 220V","curva":"B","forn":"Elgin","mvd":4.705555555555556,"custo":74.38,"estoque":88,"oc":162,"lt":20,"d15":121,"ritmo15":8.066666666666666,"ritmo_ant":0,"fator":null,"cobertura":10.90909090909091},{"sku":"ESCOVA-PER02-BIV-PHILCO","filial":"Itajaí","titulo":"Escova Rotativa 1300W Bivolt 2 em 1 Cerâmica PER02 Philco","curva":"C","forn":"Britania","mvd":1.1277777777777778,"custo":122.5,"estoque":0,"oc":0,"lt":20,"d15":29,"ritmo15":1.9333333333333333,"ritmo_ant":0,"fator":null,"cobertura":0}],"forn_ruptura":[{"nome":"ELGIN DISTRIBUIDORA LTDA","valor":5906.983555555556},{"nome":"ELGIN INDUSTRIAL DA AMAZÔNIA LTDA","valor":5116.715888888889},{"nome":"O.V.D. IMPORTADORA E DISTRIBUIDORA LTDA","valor":4922.921055555556}],"forn_excesso":[{"nome":"O.v.d.","valor":2425367.9430444455},{"nome":"Demobile -","valor":828525.9299999999},{"nome":"Tools World Llc Mundo Das Ferramentas","valor":611121.0089000001}],"valor_custo":13412688.47999999,"cobertura_dias":30.560366196348063,"parado_valor":2232935.39,"parado_skus":236,"excesso_valor":5564035.88162777,"saudavel_valor":5615717.208372219,"perda_dia_custo":50429.13816666667,"pct_ruptura":10.30594713654288,"skus_ativos":1101,"sem_oc":147,"top_fornecedores":[{"nome":"Elgin","perda":5906.983555555556},{"nome":"Elgin","perda":5116.715888888889},{"nome":"O.v.d.","perda":4922.921055555556}],"top_skus":[{"sku":"MOP-PRO","filial":"Itajaí","titulo":"Mop Giratório Balde Cesto Inox Limpeza Esfregão ","curva":"AA","perda":2829,"oc":300},{"sku":"CLIMATIZADOR-CLIN35PRO-127V","filial":"Itajaí","titulo":"Climatizador 35L 150W Branco / Cinza CLIN35PRO V","curva":"A","perda":2675,"oc":0},{"sku":"AR-SPLIT-12000-FR-WIFI-ELGIN","filial":"Itajaí","titulo":"Ar  Condicionado 12000 BTUs Frio Inverter Wi-Fi ","curva":"A","perda":2636,"oc":0},{"sku":"PANELEIRO-4PORT-BRA","filial":"Londrina","titulo":"Paneleiro 4 Portas 1 Gaveta MDP Branco Aramóveis","curva":"AA","perda":2410,"oc":200},{"sku":"MIXER-TURBO-CHEF-3EM1-220V","filial":"Itajaí","titulo":"Mixer Power Turbo Chef  Processador 3 em 1  200W","curva":"AA","perda":1928,"oc":2000}]}}
+{
+ "_info": "Estoque por filial e Domus · Análise Gold da PAC. Gerado pelo Apps Script (atualizarEstoque). Esta versão é a prévia de 02/10; a primeira execução recalcula tudo.",
+ "atualizado_em": "2026-10-02T14:00:00-03:00",
+ "corte": "02/10",
+ "filiais": {
+  "itajai": {
+   "nome": "Itajaí",
+   "nota": "PAC SC, aba Gustavo, sem PI Verticalizado",
+   "parcial": false,
+   "skus": 1740,
+   "estoque": 9903417.60999999,
+   "dio": 25.5,
+   "mvd_perdida": 48276.820300000036,
+   "ruptura_pct": 11.041563333357105,
+   "ccc": -7.42415836533111,
+   "dpo": 44.0,
+   "dso": 11.0,
+   "nwc": -2908692.0689999987,
+   "prazo_parcial": true,
+   "nwc_parcial": true,
+   "skus_ruptura": 217,
+   "rupturas_com_oc": 88,
+   "excesso": 5110536,
+   "sem_giro": 317936,
+   "skus_congelados": null,
+   "top_ruptura": [
+    {
+     "sku": "CLIMATIZADOR-CLIN60PRO-220V",
+     "filial": "Itajaí",
+     "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60PRO Ventisol - 220V",
+     "curva": "A",
+     "forn": "VENTISOL INDUSTRIA E COMERCIO S. A.",
+     "mvd": 7.4,
+     "custo": 549.0,
+     "estoque": 0,
+     "oc": 0,
+     "lt": 15.0,
+     "perdido": 4068.09
+    },
+    {
+     "sku": "CLIMATIZADOR-CLIN35PRO-220V",
+     "filial": "Itajaí",
+     "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO Ventisol - 220V",
+     "curva": "A",
+     "forn": "VENTISOL INDUSTRIA E COMERCIO S. A.",
+     "mvd": 7.8,
+     "custo": 499.0,
+     "estoque": 0,
+     "oc": 0,
+     "lt": 15.0,
+     "perdido": 3907.17
+    },
+    {
+     "sku": "CLIMATIZADOR-CLIN60PRO-127V",
+     "filial": "Itajaí",
+     "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60PRO Ventisol - 127V",
+     "curva": "A",
+     "forn": "VENTISOL INDUSTRIA E COMERCIO S. A.",
+     "mvd": 6.3,
+     "custo": 549.0,
+     "estoque": 0,
+     "oc": 0,
+     "lt": 15.0,
+     "perdido": 3486.15
+    },
+    {
+     "sku": "CLIMATIZADOR-CLIN35PRO-127V",
+     "filial": "Itajaí",
+     "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO Ventisol - 127V",
+     "curva": "A",
+     "forn": "VENTISOL INDUSTRIA E COMERCIO S. A.",
+     "mvd": 5.4,
+     "custo": 499.0,
+     "estoque": 0,
+     "oc": 0,
+     "lt": 15.0,
+     "perdido": 2674.64
+    },
+    {
+     "sku": "AR-SPLIT-12000-FR-WIFI-ELGIN",
+     "filial": "Itajaí",
+     "titulo": "Ar Condicionado 12000 BTUs Frio Inverter Wi-Fi Elgin",
+     "curva": "A",
+     "forn": "ELGIN INDUSTRIAL DA AMAZÔNIA LTDA",
+     "mvd": 1.5,
+     "custo": 1719.0,
+     "estoque": 0,
+     "oc": 0,
+     "lt": 10.0,
+     "perdido": 2630.07
+    }
+   ],
+   "congelados": [],
+   "campeoes": [],
+   "azaroes": [],
+   "base": "SC",
+   "valor_custo": 9903417.60999999,
+   "cobertura_dias": 25.5,
+   "parado_valor": 317936,
+   "parado_skus": 270,
+   "excesso_valor": 4792600,
+   "saudavel_valor": 4792881.60999999,
+   "perda_dia_custo": 48276.820300000036,
+   "pct_ruptura": 11.041563333357105,
+   "sem_oc": 129,
+   "skus_ativos": 1178,
+   "unidades": 64844,
+   "curvas": {
+    "AA": {
+     "ativos": 15,
+     "ruptura": 0,
+     "perda": 0
+    },
+    "A": {
+     "ativos": 54,
+     "ruptura": 11,
+     "perda": 24158.05
+    },
+    "B": {
+     "ativos": 165,
+     "ruptura": 35,
+     "perda": 15937.77
+    },
+    "C": {
+     "ativos": 263,
+     "ruptura": 49,
+     "perda": 6233.44
+    },
+    "D": {
+     "ativos": 681,
+     "ruptura": 198,
+     "perda": 4469.37
+    }
+   },
+   "top_fornecedores": [
+    {
+     "nome": "Ventisol",
+     "perda": 17306.81
+    },
+    {
+     "nome": "O.V.D.",
+     "perda": 7205.19
+    },
+    {
+     "nome": "Elgin",
+     "perda": 5121.65
+    }
+   ],
+   "top_skus": [
+    {
+     "sku": "CLIMATIZADOR-CLIN60PRO-220V",
+     "filial": "Itajaí",
+     "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60P",
+     "curva": "A",
+     "perda": 4068,
+     "oc": 0
+    },
+    {
+     "sku": "CLIMATIZADOR-CLIN35PRO-220V",
+     "filial": "Itajaí",
+     "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO V",
+     "curva": "A",
+     "perda": 3907,
+     "oc": 0
+    },
+    {
+     "sku": "CLIMATIZADOR-CLIN60PRO-127V",
+     "filial": "Itajaí",
+     "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60P",
+     "curva": "A",
+     "perda": 3486,
+     "oc": 0
+    },
+    {
+     "sku": "CLIMATIZADOR-CLIN35PRO-127V",
+     "filial": "Itajaí",
+     "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO V",
+     "curva": "A",
+     "perda": 2675,
+     "oc": 0
+    },
+    {
+     "sku": "AR-SPLIT-12000-FR-WIFI-ELGIN",
+     "filial": "Itajaí",
+     "titulo": "Ar Condicionado 12000 BTUs Frio Inverter Wi-Fi E",
+     "curva": "A",
+     "perda": 2630,
+     "oc": 0
+    }
+   ]
+  },
+  "londrina": {
+   "nome": "Londrina",
+   "nota": "PAC PR, aba COMPRAS com filtro Verticalizados",
+   "parcial": true,
+   "skus": 453,
+   "estoque": 2592510.329999999,
+   "dio": 101.2,
+   "mvd_perdida": 18563.754899999996,
+   "ruptura_pct": 42.01431806843424,
+   "ccc": 65.0600681490738,
+   "dpo": 47.0,
+   "dso": 11.0,
+   "nwc": 1648429.928200001,
+   "prazo_parcial": true,
+   "nwc_parcial": true,
+   "skus_ruptura": 38,
+   "rupturas_com_oc": 8,
+   "excesso": 2223523,
+   "sem_giro": 1670368,
+   "skus_congelados": null,
+   "top_ruptura": [
+    {
+     "sku": "COMODA-DOCE.SONHO-SAPAT-BRA",
+     "filial": "Londrina",
+     "titulo": "Cômoda Doce Sonho 4 Gvt Sapateira Puxadores de Estrela Qmovi - Branco / Branco",
+     "curva": "AA",
+     "forn": "QMOVI INDUSTRIA MOVELEIRA LTDA",
+     "mvd": 32.3,
+     "custo": 224.14,
+     "estoque": 0,
+     "oc": 160.0,
+     "lt": 4.0,
+     "perdido": 7235.24
+    },
+    {
+     "sku": "PANELEIRO-4PORT-BRA",
+     "filial": "Londrina",
+     "titulo": "Paneleiro 4 Portas 1 Gaveta MDP Branco Aramóveis",
+     "curva": "AA",
+     "forn": "ARAMOVEIS INDUSTRIA DE MOVEIS LTDA",
+     "mvd": 13.3,
+     "custo": 180.69,
+     "estoque": 0,
+     "oc": 200.0,
+     "lt": 4.0,
+     "perdido": 2410.4
+    },
+    {
+     "sku": "ESCRIVANINHA_VITORIA_BRA",
+     "filial": "Londrina",
+     "titulo": "Escrivaninha Vitória 1 Gaveta 1 Porta Em MDP Demóbile - Branco",
+     "curva": "AA",
+     "forn": "DEMOBILE - INDUSTRIA DE MOVEIS LTDA",
+     "mvd": 13.4,
+     "custo": 137.32,
+     "estoque": 0,
+     "oc": 170.0,
+     "lt": 4.0,
+     "perdido": 1845.58
+    },
+    {
+     "sku": "COMODA-MESA-GIRAT-GAMER-BRA",
+     "filial": "Londrina",
+     "titulo": "Cômoda 3 Gavetas Com Mesa Giratória Gamer em MDP Qmovi - Branco / Branco",
+     "curva": "A",
+     "forn": "QMOVI INDUSTRIA MOVELEIRA LTDA",
+     "mvd": 6.6,
+     "custo": 234.32,
+     "estoque": 0,
+     "oc": 70.0,
+     "lt": 4.0,
+     "perdido": 1551.2
+    },
+    {
+     "sku": "COMODA-DOCE.SONHO-BRA",
+     "filial": "Londrina",
+     "titulo": "Cômoda Doce Sonho 4 Gavetas Puxadores de Estrela MDP Qmovi - Branco / Branco",
+     "curva": "A",
+     "forn": "QMOVI INDUSTRIA MOVELEIRA LTDA",
+     "mvd": 8.4,
+     "custo": 176.21,
+     "estoque": 0,
+     "oc": 100.0,
+     "lt": 4.0,
+     "perdido": 1478.4
+    }
+   ],
+   "congelados": [],
+   "campeoes": [],
+   "azaroes": [],
+   "base": "PR",
+   "valor_custo": 2592510.329999999,
+   "cobertura_dias": 101.2,
+   "parado_valor": 1670368,
+   "parado_skus": 96,
+   "excesso_valor": 553155,
+   "saudavel_valor": 368987.32999999914,
+   "perda_dia_custo": 18563.754899999996,
+   "pct_ruptura": 42.01431806843424,
+   "sem_oc": 30,
+   "skus_ativos": 163,
+   "unidades": 9713,
+   "curvas": {
+    "AA": {
+     "ativos": 5,
+     "ruptura": 3,
+     "perda": 11491.22
+    },
+    "A": {
+     "ativos": 11,
+     "ruptura": 2,
+     "perda": 3029.6
+    },
+    "B": {
+     "ativos": 25,
+     "ruptura": 7,
+     "perda": 3147.82
+    },
+    "C": {
+     "ativos": 43,
+     "ruptura": 6,
+     "perda": 572.37
+    },
+    "D": {
+     "ativos": 79,
+     "ruptura": 21,
+     "perda": 317.24
+    }
+   },
+   "top_fornecedores": [
+    {
+     "nome": "Qmovi",
+     "perda": 10292.69
+    },
+    {
+     "nome": "Demobile",
+     "perda": 2469.01
+    },
+    {
+     "nome": "Aramóveis",
+     "perda": 2418.03
+    }
+   ],
+   "top_skus": [
+    {
+     "sku": "COMODA-DOCE.SONHO-SAPAT-BRA",
+     "filial": "Londrina",
+     "titulo": "Cômoda Doce Sonho 4 Gvt Sapateira Puxadores de E",
+     "curva": "AA",
+     "perda": 7235,
+     "oc": 160.0
+    },
+    {
+     "sku": "PANELEIRO-4PORT-BRA",
+     "filial": "Londrina",
+     "titulo": "Paneleiro 4 Portas 1 Gaveta MDP Branco Aramóveis",
+     "curva": "AA",
+     "perda": 2410,
+     "oc": 200.0
+    },
+    {
+     "sku": "ESCRIVANINHA_VITORIA_BRA",
+     "filial": "Londrina",
+     "titulo": "Escrivaninha Vitória 1 Gaveta 1 Porta Em MDP Dem",
+     "curva": "AA",
+     "perda": 1846,
+     "oc": 170.0
+    },
+    {
+     "sku": "COMODA-MESA-GIRAT-GAMER-BRA",
+     "filial": "Londrina",
+     "titulo": "Cômoda 3 Gavetas Com Mesa Giratória Gamer em MDP",
+     "curva": "A",
+     "perda": 1551,
+     "oc": 70.0
+    },
+    {
+     "sku": "COMODA-DOCE.SONHO-BRA",
+     "filial": "Londrina",
+     "titulo": "Cômoda Doce Sonho 4 Gavetas Puxadores de Estrela",
+     "curva": "A",
+     "perda": 1478,
+     "oc": 100.0
+    }
+   ]
+  }
+ },
+ "total": {
+  "nome": "Domus",
+  "nota": "Itajaí + Londrina, linhas somadas",
+  "parcial": true,
+  "skus": 2193,
+  "estoque": 12495927.939999988,
+  "dio": 30.1,
+  "mvd_perdida": 66840.57520000005,
+  "ruptura_pct": 13.884263121335843,
+  "ccc": -2.9306164484832706,
+  "dpo": 44.0,
+  "dso": 11.0,
+  "nwc": -1260262.1407999988,
+  "prazo_parcial": true,
+  "nwc_parcial": true,
+  "skus_ruptura": 255,
+  "rupturas_com_oc": 96,
+  "excesso": 7334059,
+  "sem_giro": 1988304,
+  "skus_congelados": null,
+  "top_ruptura": [
+   {
+    "sku": "COMODA-DOCE.SONHO-SAPAT-BRA",
+    "filial": "Londrina",
+    "titulo": "Cômoda Doce Sonho 4 Gvt Sapateira Puxadores de Estrela Qmovi - Branco / Branco",
+    "curva": "AA",
+    "forn": "QMOVI INDUSTRIA MOVELEIRA LTDA",
+    "mvd": 32.3,
+    "custo": 224.14,
+    "estoque": 0,
+    "oc": 160.0,
+    "lt": 4.0,
+    "perdido": 7235.24
+   },
+   {
+    "sku": "CLIMATIZADOR-CLIN60PRO-220V",
+    "filial": "Itajaí",
+    "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60PRO Ventisol - 220V",
+    "curva": "A",
+    "forn": "VENTISOL INDUSTRIA E COMERCIO S. A.",
+    "mvd": 7.4,
+    "custo": 549.0,
+    "estoque": 0,
+    "oc": 0,
+    "lt": 15.0,
+    "perdido": 4068.09
+   },
+   {
+    "sku": "CLIMATIZADOR-CLIN35PRO-220V",
+    "filial": "Itajaí",
+    "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO Ventisol - 220V",
+    "curva": "A",
+    "forn": "VENTISOL INDUSTRIA E COMERCIO S. A.",
+    "mvd": 7.8,
+    "custo": 499.0,
+    "estoque": 0,
+    "oc": 0,
+    "lt": 15.0,
+    "perdido": 3907.17
+   },
+   {
+    "sku": "CLIMATIZADOR-CLIN60PRO-127V",
+    "filial": "Itajaí",
+    "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60PRO Ventisol - 127V",
+    "curva": "A",
+    "forn": "VENTISOL INDUSTRIA E COMERCIO S. A.",
+    "mvd": 6.3,
+    "custo": 549.0,
+    "estoque": 0,
+    "oc": 0,
+    "lt": 15.0,
+    "perdido": 3486.15
+   },
+   {
+    "sku": "CLIMATIZADOR-CLIN35PRO-127V",
+    "filial": "Itajaí",
+    "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO Ventisol - 127V",
+    "curva": "A",
+    "forn": "VENTISOL INDUSTRIA E COMERCIO S. A.",
+    "mvd": 5.4,
+    "custo": 499.0,
+    "estoque": 0,
+    "oc": 0,
+    "lt": 15.0,
+    "perdido": 2674.64
+   }
+  ],
+  "congelados": [],
+  "campeoes": [],
+  "azaroes": [],
+  "base": "Itajaí + Londrina",
+  "valor_custo": 12495927.939999988,
+  "cobertura_dias": 30.1,
+  "parado_valor": 1988304,
+  "parado_skus": 366,
+  "excesso_valor": 5345755,
+  "saudavel_valor": 5161868.939999988,
+  "perda_dia_custo": 66840.57520000005,
+  "pct_ruptura": 13.884263121335843,
+  "sem_oc": 159,
+  "skus_ativos": 1341,
+  "unidades": 74557,
+  "curvas": {
+   "AA": {
+    "ativos": 20,
+    "ruptura": 3,
+    "perda": 11491.22
+   },
+   "A": {
+    "ativos": 65,
+    "ruptura": 13,
+    "perda": 27187.65
+   },
+   "B": {
+    "ativos": 190,
+    "ruptura": 42,
+    "perda": 19085.59
+   },
+   "C": {
+    "ativos": 306,
+    "ruptura": 55,
+    "perda": 6805.81
+   },
+   "D": {
+    "ativos": 760,
+    "ruptura": 219,
+    "perda": 4786.61
+   }
+  },
+  "top_fornecedores": [
+   {
+    "nome": "Ventisol",
+    "perda": 17306.81
+   },
+   {
+    "nome": "Qmovi",
+    "perda": 10292.69
+   },
+   {
+    "nome": "O.V.D.",
+    "perda": 7205.19
+   }
+  ],
+  "top_skus": [
+   {
+    "sku": "COMODA-DOCE.SONHO-SAPAT-BRA",
+    "filial": "Londrina",
+    "titulo": "Cômoda Doce Sonho 4 Gvt Sapateira Puxadores de E",
+    "curva": "AA",
+    "perda": 7235,
+    "oc": 160.0
+   },
+   {
+    "sku": "CLIMATIZADOR-CLIN60PRO-220V",
+    "filial": "Itajaí",
+    "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60P",
+    "curva": "A",
+    "perda": 4068,
+    "oc": 0
+   },
+   {
+    "sku": "CLIMATIZADOR-CLIN35PRO-220V",
+    "filial": "Itajaí",
+    "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO V",
+    "curva": "A",
+    "perda": 3907,
+    "oc": 0
+   },
+   {
+    "sku": "CLIMATIZADOR-CLIN60PRO-127V",
+    "filial": "Itajaí",
+    "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60P",
+    "curva": "A",
+    "perda": 3486,
+    "oc": 0
+   },
+   {
+    "sku": "CLIMATIZADOR-CLIN35PRO-127V",
+    "filial": "Itajaí",
+    "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO V",
+    "curva": "A",
+    "perda": 2675,
+    "oc": 0
+   }
+  ]
+ }
+}

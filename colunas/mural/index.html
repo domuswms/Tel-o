@@ -118,10 +118,10 @@ function cardsEstoque() {
     const q = [['saudavel', f.saudavel_valor], ['excesso', f.excesso_valor], ['parado', f.parado_valor]].map(([n, x]) => ({ n, w: x / v * 100, cor: Q[n] }));
     cards.push({ tipo: 'estoque', selo: f.nome, cor_selo: cor, meta: k === 'total' ? f.base : 'Estoque a custo', titulo: k === 'total' ? 'Estoque total a custo' : `Estoque ${f.nome}`,
       numero: fmtBRL(f.valor_custo), cor_num: cor,
-      texto: `${f.unidades.toLocaleString('pt-BR')} unidades · ${Math.round(f.cobertura_dias)} dias de cobertura`,
+      texto: `DIO ${String(Math.round(f.cobertura_dias * 10) / 10).replace('.', ',')} dias · ${(f.skus || 0).toLocaleString('pt-BR')} SKUs`,
       barra: q, foot: `${Math.round(q[1].w)}% em excesso · ${Math.round(q[2].w)}% parado` });
-    cards.push({ tipo: 'alerta', selo: f.nome, cor_selo: cor, meta: 'Ruptura', titulo: 'SKUs com venda sem estoque', numero: pct(f.pct_ruptura), cor_num: '#F25C5C',
-      texto: `${fmtBRL(f.perda_dia_custo)} por dia de venda perdida`, foot: `A custo · ${f.skus_ruptura} de ${f.skus_ativos.toLocaleString('pt-BR')} SKUs` });
+    cards.push({ tipo: 'alerta', selo: f.nome, cor_selo: cor, meta: 'Ruptura', titulo: 'Ruptura da demanda', numero: pct(f.pct_ruptura), cor_num: '#F25C5C',
+      texto: `${fmtBRL(f.perda_dia_custo)}/dia de MVD perdida`, foot: `${f.skus_ruptura} SKUs sem estoque · ${f.rupturas_com_oc ?? (f.skus_ruptura - f.sem_oc)} com OC` });
     // curvas AA e A juntas: os itens que mais vendem
     const aa = f.curvas?.AA || { ruptura: 0, perda: 0 }, a1 = f.curvas?.A || { ruptura: 0, perda: 0 };
     const nA = aa.ruptura + a1.ruptura, pA = aa.perda + a1.perda;

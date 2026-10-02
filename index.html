@@ -15,6 +15,8 @@
   #telao { position:absolute; left:0; top:0; width:2560px; height:512px; transform-origin:0 0; display:flex; background:#212121; }
   iframe { border:0; height:512px; display:block; background:#212121; }
   .div { width:3px; height:512px; background:#3A3A3A; flex:none; }
+  #cheia { position:absolute; left:0; top:0; width:2560px; height:512px; border:0; opacity:0; pointer-events:none; transition:opacity .35s; background:#212121; }
+  #cheia.on { opacity:1; }
 </style>
 </head>
 <body>
@@ -25,15 +27,28 @@ const COLUNAS = [
   { src: 'colunas/noticias/', largura: 851 },
   { src: 'colunas/mural/',    largura: 851 },
 ];   // 852 + 851 + 851 + 2 divisórias de 3 px = 2560
+// tela cheia (2560 px, cobre as três colunas): entra de tempos em tempos com cenas da PAC e mensagens
+const TELA_CHEIA = { src: 'colunas/telacheia/', a_cada_min: 3, limite_s: 120 };
 const t = document.getElementById('telao');
 COLUNAS.forEach((c, i) => {
   if (i) { const d = document.createElement('div'); d.className = 'div'; t.appendChild(d); }
   const f = document.createElement('iframe'); f.src = c.src; f.style.width = c.largura + 'px'; f.title = c.src; t.appendChild(f);
 });
+const cheia = document.createElement('iframe'); cheia.id = 'cheia'; cheia.src = TELA_CHEIA.src; cheia.title = 'tela cheia'; t.appendChild(cheia);
+let tocando = false, trava = null;
+function encerrar() { tocando = false; clearTimeout(trava); cheia.classList.remove('on'); }
+function tocarTelaCheia() {
+  if (tocando) return; tocando = true; cheia.classList.add('on');
+  cheia.contentWindow.postMessage({ acao: 'tocar' }, '*');
+  trava = setTimeout(encerrar, TELA_CHEIA.limite_s * 1000);   // se a tela cheia travar, as colunas voltam sozinhas
+}
+addEventListener('message', ev => { if (ev.source === cheia.contentWindow && ev.data && ev.data.acao === 'fim') encerrar(); });
+setInterval(tocarTelaCheia, TELA_CHEIA.a_cada_min * 60000);
+if (new URLSearchParams(location.search).get('cheia')) setTimeout(tocarTelaCheia, 4000);   // ?cheia=1 para testar
 function fit() { const s = Math.min(innerWidth / 2560, innerHeight / 512); t.style.transform = `scale(${s})`; }
 addEventListener('resize', fit); fit();
 // se uma coluna travar, só ela é recarregada (as outras seguem rodando)
-setInterval(() => document.querySelectorAll('iframe').forEach(f => { try { if (!f.contentDocument || !f.contentDocument.body.childElementCount) f.src = f.src; } catch (e) {} }), 5 * 60000);
+setInterval(() => document.querySelectorAll('iframe:not(#cheia)').forEach(f => { try { if (!f.contentDocument || !f.contentDocument.body.childElementCount) f.src = f.src; } catch (e) {} }), 5 * 60000);
 </script>
 </body>
 </html>

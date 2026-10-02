@@ -22,7 +22,7 @@
    "rupturas_com_oc": 96,
    "excesso": 7334059,
    "sem_giro": 1988304,
-   "skus_congelados": null,
+   "skus_congelados": 366,
    "top_ruptura": [
     {
      "sku": "COMODA-DOCE.SONHO-SAPAT-BRA",
@@ -90,9 +90,132 @@
      "perdido": 2674.64
     }
    ],
-   "congelados": [],
-   "campeoes": [],
-   "azaroes": []
+   "congelados": [
+    {
+     "filial": "Londrina",
+     "titulo": "Cômoda Flora 4 Gavetas 1 Porta com Rodízios - Branco",
+     "curva": "D",
+     "estoque": 1450,
+     "valor": 413540,
+     "forn": "Exemplo"
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Cômoda Flora 4 Gavetas 1 Porta com Rodízios - Rosa",
+     "curva": "D",
+     "estoque": 1450,
+     "valor": 413540,
+     "forn": "Exemplo"
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Guarda-Roupa Toronto 081043 Carvalho/Fendi",
+     "curva": "D",
+     "estoque": 310,
+     "valor": 209894,
+     "forn": "Exemplo"
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Guarda-Roupa Amazonas 6 Portas 5 Gavetas",
+     "curva": "D",
+     "estoque": 260,
+     "valor": 155078,
+     "forn": "Exemplo"
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Armário Multiuso Florença 2 Portas",
+     "curva": "D",
+     "estoque": 480,
+     "valor": 113215,
+     "forn": "Exemplo"
+    }
+   ],
+   "campeoes": [
+    {
+     "filial": "Itajaí",
+     "titulo": "Lavadora de Alta Pressão LAV 1600 Vonder - 110V",
+     "curva": "AA",
+     "mvd": 158.3,
+     "giro": 42626,
+     "estoque": 286,
+     "cobertura": 1.8,
+     "lt": 4
+    },
+    {
+     "filial": "Itajaí",
+     "titulo": "Lavadora de Alta Pressão LAV 1600 Vonder - 220V",
+     "curva": "AA",
+     "mvd": 142.4,
+     "giro": 38348,
+     "estoque": 1566,
+     "cobertura": 11,
+     "lt": 4
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Cômoda Doce Sonho 4 Gvt Sapateira Qmovi - Branco / Branco",
+     "curva": "AA",
+     "mvd": 32.3,
+     "giro": 7235,
+     "estoque": 0,
+     "cobertura": 0,
+     "lt": 4
+    },
+    {
+     "filial": "Itajaí",
+     "titulo": "Climatizador 35L 150W CLIN35PRO Ventisol - 220V",
+     "curva": "A",
+     "mvd": 7.8,
+     "giro": 3907,
+     "estoque": 0,
+     "cobertura": 0,
+     "lt": 15
+    },
+    {
+     "filial": "Itajaí",
+     "titulo": "Ferro de Passar Easy Pass a Vapor - 127V",
+     "curva": "A",
+     "mvd": 27.7,
+     "giro": 1546,
+     "estoque": 0,
+     "cobertura": 0,
+     "lt": 10
+    }
+   ],
+   "azaroes": [
+    {
+     "filial": "Itajaí",
+     "titulo": "Produto exemplo A (azarão)",
+     "curva": "C",
+     "fator": 4.2,
+     "d15": 63,
+     "estoque": 40,
+     "cobertura": 9.5,
+     "lt": 15
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Produto exemplo B (azarão)",
+     "curva": "B",
+     "fator": 3.1,
+     "d15": 38,
+     "estoque": 120,
+     "cobertura": 47,
+     "lt": 4
+    },
+    {
+     "filial": "Itajaí",
+     "titulo": "Produto exemplo C (azarão)",
+     "curva": "D",
+     "fator": null,
+     "d15": 22,
+     "estoque": 0,
+     "cobertura": 0,
+     "lt": 10
+    }
+   ]
   },
   {
    "nome": "Itajaí",
@@ -113,7 +236,7 @@
    "rupturas_com_oc": 88,
    "excesso": 5110536,
    "sem_giro": 317936,
-   "skus_congelados": null,
+   "skus_congelados": 270,
    "top_ruptura": [
     {
      "sku": "CLIMATIZADOR-CLIN60PRO-220V",
@@ -182,8 +305,70 @@
     }
    ],
    "congelados": [],
-   "campeoes": [],
-   "azaroes": []
+   "campeoes": [
+    {
+     "filial": "Itajaí",
+     "titulo": "Lavadora de Alta Pressão LAV 1600 Vonder - 110V",
+     "curva": "AA",
+     "mvd": 158.3,
+     "giro": 42626,
+     "estoque": 286,
+     "cobertura": 1.8,
+     "lt": 4
+    },
+    {
+     "filial": "Itajaí",
+     "titulo": "Lavadora de Alta Pressão LAV 1600 Vonder - 220V",
+     "curva": "AA",
+     "mvd": 142.4,
+     "giro": 38348,
+     "estoque": 1566,
+     "cobertura": 11,
+     "lt": 4
+    },
+    {
+     "filial": "Itajaí",
+     "titulo": "Climatizador 35L 150W CLIN35PRO Ventisol - 220V",
+     "curva": "A",
+     "mvd": 7.8,
+     "giro": 3907,
+     "estoque": 0,
+     "cobertura": 0,
+     "lt": 15
+    },
+    {
+     "filial": "Itajaí",
+     "titulo": "Ferro de Passar Easy Pass a Vapor - 127V",
+     "curva": "A",
+     "mvd": 27.7,
+     "giro": 1546,
+     "estoque": 0,
+     "cobertura": 0,
+     "lt": 10
+    }
+   ],
+   "azaroes": [
+    {
+     "filial": "Itajaí",
+     "titulo": "Produto exemplo A (azarão)",
+     "curva": "C",
+     "fator": 4.2,
+     "d15": 63,
+     "estoque": 40,
+     "cobertura": 9.5,
+     "lt": 15
+    },
+    {
+     "filial": "Itajaí",
+     "titulo": "Produto exemplo C (azarão)",
+     "curva": "D",
+     "fator": null,
+     "d15": 22,
+     "estoque": 0,
+     "cobertura": 0,
+     "lt": 10
+    }
+   ]
   },
   {
    "nome": "Londrina",
@@ -204,7 +389,7 @@
    "rupturas_com_oc": 8,
    "excesso": 2223523,
    "sem_giro": 1670368,
-   "skus_congelados": null,
+   "skus_congelados": 96,
    "top_ruptura": [
     {
      "sku": "COMODA-DOCE.SONHO-SAPAT-BRA",
@@ -272,9 +457,72 @@
      "perdido": 1478.4
     }
    ],
-   "congelados": [],
-   "campeoes": [],
-   "azaroes": []
+   "congelados": [
+    {
+     "filial": "Londrina",
+     "titulo": "Cômoda Flora 4 Gavetas 1 Porta com Rodízios - Branco",
+     "curva": "D",
+     "estoque": 1450,
+     "valor": 413540,
+     "forn": "Exemplo"
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Cômoda Flora 4 Gavetas 1 Porta com Rodízios - Rosa",
+     "curva": "D",
+     "estoque": 1450,
+     "valor": 413540,
+     "forn": "Exemplo"
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Guarda-Roupa Toronto 081043 Carvalho/Fendi",
+     "curva": "D",
+     "estoque": 310,
+     "valor": 209894,
+     "forn": "Exemplo"
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Guarda-Roupa Amazonas 6 Portas 5 Gavetas",
+     "curva": "D",
+     "estoque": 260,
+     "valor": 155078,
+     "forn": "Exemplo"
+    },
+    {
+     "filial": "Londrina",
+     "titulo": "Armário Multiuso Florença 2 Portas",
+     "curva": "D",
+     "estoque": 480,
+     "valor": 113215,
+     "forn": "Exemplo"
+    }
+   ],
+   "campeoes": [
+    {
+     "filial": "Londrina",
+     "titulo": "Cômoda Doce Sonho 4 Gvt Sapateira Qmovi - Branco / Branco",
+     "curva": "AA",
+     "mvd": 32.3,
+     "giro": 7235,
+     "estoque": 0,
+     "cobertura": 0,
+     "lt": 4
+    }
+   ],
+   "azaroes": [
+    {
+     "filial": "Londrina",
+     "titulo": "Produto exemplo B (azarão)",
+     "curva": "B",
+     "fator": 3.1,
+     "d15": 38,
+     "estoque": 120,
+     "cobertura": 47,
+     "lt": 4
+    }
+   ]
   }
  ],
  "mensagens": [
@@ -326,5 +574,6 @@
    "apoio": "Revisar compras onde já há excesso",
    "origem": "automático"
   }
- ]
+ ],
+ "demo": true
 }
