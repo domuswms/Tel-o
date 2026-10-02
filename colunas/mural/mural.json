@@ -1,0 +1,42 @@
+{
+ "_info": "Coluna 3 · Publicações dos analistas. Gerado pelo Apps Script a partir do formulário. Não editar à mão.",
+ "atualizado_em": "2026-10-02T09:10:00-03:00",
+ "posts": [
+  {
+   "id": "exemplo-1",
+   "tipo": "acao",
+   "autor": "Gustavo",
+   "titulo": "Reposição de climatizadores",
+   "texto": "OC da Ventisol emitida para os 4 CLIN em ruptura",
+   "numero": "",
+   "legenda": "",
+   "midia": "",
+   "ate": "2026-10-03",
+   "exemplo": true
+  },
+  {
+   "id": "exemplo-2",
+   "tipo": "meta",
+   "autor": "Maria Clara",
+   "titulo": "Shopee bateu a meta do dia",
+   "texto": "R$ 474 mil em 01/10, 61% do faturamento",
+   "numero": "R$ 474 mil",
+   "legenda": "Shopee · 01/10",
+   "midia": "",
+   "ate": "2026-10-03",
+   "exemplo": true
+  },
+  {
+   "id": "exemplo-3",
+   "tipo": "comemoracao",
+   "autor": "Everton",
+   "titulo": "Bem-vindo ao eixo, Lucas",
+   "texto": "Novo analista de Mercado Livre a partir de hoje",
+   "numero": "",
+   "legenda": "",
+   "midia": "",
+   "ate": "2026-10-03",
+   "exemplo": true
+  }
+ ]
+}

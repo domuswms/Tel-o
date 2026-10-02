@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telão WeAxis</title>
+<!--
+  Telão 2560 x 512 em três colunas autônomas. Cada coluna é uma página própria em /colunas/<nome>/
+  com seu próprio código e seus próprios dados: editar uma não altera as outras.
+  Para trocar a ordem ou tirar uma coluna, mude só a lista COLUNAS abaixo.
+-->
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; background:#141414; overflow:hidden; cursor:none; }
+  #telao { position:absolute; left:0; top:0; width:2560px; height:512px; transform-origin:0 0; display:flex; background:#212121; }
+  iframe { border:0; height:512px; display:block; background:#212121; }
+  .div { width:3px; height:512px; background:#3A3A3A; flex:none; }
+</style>
+</head>
+<body>
+<div id="telao"></div>
+<script>
+const COLUNAS = [
+  { src: 'colunas/meta/',     largura: 852 },
+  { src: 'colunas/noticias/', largura: 851 },
+  { src: 'colunas/mural/',    largura: 851 },
+];   // 852 + 851 + 851 + 2 divisórias de 3 px = 2560
+const t = document.getElementById('telao');
+COLUNAS.forEach((c, i) => {
+  if (i) { const d = document.createElement('div'); d.className = 'div'; t.appendChild(d); }
+  const f = document.createElement('iframe'); f.src = c.src; f.style.width = c.largura + 'px'; f.title = c.src; t.appendChild(f);
+});
+function fit() { const s = Math.min(innerWidth / 2560, innerHeight / 512); t.style.transform = `scale(${s})`; }
+addEventListener('resize', fit); fit();
+// se uma coluna travar, só ela é recarregada (as outras seguem rodando)
+setInterval(() => document.querySelectorAll('iframe').forEach(f => { try { if (!f.contentDocument || !f.contentDocument.body.childElementCount) f.src = f.src; } catch (e) {} }), 5 * 60000);
+</script>
+</body>
+</html>

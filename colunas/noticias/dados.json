@@ -1,0 +1,111 @@
+{
+ "data": "2026-09-30",
+ "itens": [
+  {
+   "categoria": "comissao",
+   "plataforma": "tiktokshop",
+   "manchete": "TikTok Shop: comissão segue o preço após o seu desconto",
+   "detalhe": "A partir de R$ 50: 6% + R$ 6 · regra vale desde 15/07",
+   "numero": "10%",
+   "legenda": "+ R$ 4 abaixo de R$ 50",
+   "fonte": "Economic News Brasil",
+   "data_fonte": "30/09"
+  },
+  {
+   "categoria": "logistica",
+   "plataforma": "mercadolivre",
+   "manchete": "Mercado Livre lança entrega em até 1 hora em São Paulo",
+   "detalhe": "Envios Agora · itens de até 15 kg, qualquer categoria",
+   "numero": "1 hora",
+   "legenda": "Envios Agora",
+   "fonte": "Valor Econômico",
+   "data_fonte": "24/09"
+  },
+  {
+   "categoria": "campanha",
+   "plataforma": "tiktokshop",
+   "manchete": "TikTok Shop põe R$ 100 milhões em cupons na Black Friday",
+   "detalhe": "Descontos de até 70%, de 27/10 a 12/12",
+   "numero": "R$ 100 mi",
+   "legenda": "em cupons",
+   "fonte": "PEGN e Mercado&Consumo",
+   "data_fonte": "30/09"
+  },
+  {
+   "categoria": "movimento",
+   "plataforma": "shopee",
+   "manchete": "Shopee abre exportação para Argentina e México",
+   "detalhe": "Por convite na Central do Vendedor, sem custo extra de adesão",
+   "numero": "150 mil",
+   "legenda": "sellers, ou mais",
+   "fonte": "Exame",
+   "data_fonte": "29/09"
+  },
+  {
+   "categoria": "movimento",
+   "plataforma": "mercadolivre",
+   "manchete": "Importados dominam os novos anúncios no Mercado Livre",
+   "detalhe": "Estudo com 12 mil produtos · EUA têm 25,9% do cross-border",
+   "numero": "77,5%",
+   "legenda": "dos novos anúncios",
+   "fonte": "iG Economia, dados JoomPulse",
+   "data_fonte": "28/09"
+  },
+  {
+   "categoria": "movimento",
+   "plataforma": "amazon",
+   "manchete": "Amazon chega a 100 mil vendedores no Brasil",
+   "detalhe": "300 centros de distribuição e 150 milhões de produtos",
+   "numero": "100 mil",
+   "legenda": "vendedores parceiros",
+   "fonte": "Giro News",
+   "data_fonte": "24/09"
+  },
+  {
+   "categoria": "evento",
+   "plataforma": "geral",
+   "manchete": "ABRH-SP realiza o 5º Congresso Gente&Gestão",
+   "detalhe": "Inteligência, performance e bem-estar · grátis para associados",
+   "numero": "14/10",
+   "legenda": "RH · ABRH-SP",
+   "fonte": "Agenda ABRH-SP",
+   "data_fonte": "30/09",
+   "tag": "RH"
+  },
+  {
+   "categoria": "evento",
+   "plataforma": "geral",
+   "manchete": "E-Commerce Brasil leva TikTok Shop e dados do RS a Porto Alegre",
+   "detalhe": "Estudo Neotrust do e-commerce gaúcho · Multiplan Hall",
+   "numero": "20/10",
+   "legenda": "Porto Alegre",
+   "fonte": "Site oficial E-Commerce Brasil",
+   "data_fonte": "30/09",
+   "tag": "E-commerce"
+  },
+  {
+   "categoria": "evento",
+   "plataforma": "geral",
+   "manchete": "Summit Indústria Digital da E-Commerce Brasil",
+   "detalhe": "Da fábrica ao consumidor · sede da E-Commerce Brasil",
+   "numero": "28/10",
+   "legenda": "São Paulo",
+   "fonte": "Site oficial E-Commerce Brasil",
+   "data_fonte": "30/09",
+   "tag": "E-commerce"
+  },
+  {
+   "categoria": "evento",
+   "plataforma": "geral",
+   "manchete": "Movimat e Fenatran reúnem a logística no São Paulo Expo",
+   "detalhe": "Mais de 70 mil profissionais esperados, com varejo e e-commerce",
+   "numero": "09–13/11",
+   "legenda": "São Paulo Expo",
+   "fonte": "Site oficial Movimat",
+   "data_fonte": "30/09",
+   "tag": "Logística"
+  }
+ ],
+ "_info": "Coluna 2 · Notícias (Radar marketplaces). Gerado pela rotina diária. Formato igual ao do Jornal da Bomus.",
+ "atualizado_em": "2026-09-30T08:00:00-03:00"
+}

@@ -1,0 +1,76 @@
+{
+ "_info": "Coluna 3 · Alertas de ruptura. Gerado pelo Apps Script a partir da PAC (aba Gustavo). Não editar à mão.",
+ "atualizado_em": "2026-10-02T09:10:00-03:00",
+ "base": "SC · carteira Gustavo",
+ "fonte": "PAC · Processo Avançado de Compras - SC",
+ "skus_ativos": 1175,
+ "skus_ruptura": 291,
+ "pct_ruptura": 24.77,
+ "perda_dia_custo": 50748.98,
+ "pct_perda": 11.51,
+ "sem_oc": 204,
+ "curvas": {
+  "AA": {
+   "ativos": 15,
+   "ruptura": 0,
+   "perda": 0
+  },
+  "A": {
+   "ativos": 54,
+   "ruptura": 11,
+   "perda": 24158.05
+  },
+  "B": {
+   "ativos": 165,
+   "ruptura": 35,
+   "perda": 15927.28
+  },
+  "C": {
+   "ativos": 261,
+   "ruptura": 48,
+   "perda": 6180.41
+  },
+  "D": {
+   "ativos": 680,
+   "ruptura": 197,
+   "perda": 4483.25
+  }
+ },
+ "top_fornecedores": [
+  {
+   "nome": "Ventisol",
+   "perda": 17306.81
+  },
+  {
+   "nome": "O.V.D. (Vonder)",
+   "perda": 7170.85
+  },
+  {
+   "nome": "Elgin Amazônia",
+   "perda": 5121.65
+  }
+ ],
+ "top_skus": [
+  {
+   "sku": "CLIMATIZADOR-CLIN60PRO-220V",
+   "titulo": "Climatizador 60 L CLIN60PRO 220V",
+   "curva": "A",
+   "perda": 4068,
+   "oc": 0
+  },
+  {
+   "sku": "CLIMATIZADOR-CLIN35PRO-220V",
+   "titulo": "Climatizador 35 L CLIN35PRO 220V",
+   "curva": "A",
+   "perda": 3907,
+   "oc": 0
+  },
+  {
+   "sku": "CLIMATIZADOR-CLIN60PRO-127V",
+   "titulo": "Climatizador 60 L CLIN60PRO 127V",
+   "curva": "A",
+   "perda": 3486,
+   "oc": 0
+  }
+ ]
+}

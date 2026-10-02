@@ -1,0 +1,78 @@
+{
+ "_info": "Coluna 1 · Meta e faturamento. Gerado pela rotina diária a partir do Preço Certo (D+1). A meta vem de metas.json.",
+ "atualizado_em": "2026-10-02T12:32:23-03:00",
+ "referencia": "2026-10-01",
+ "mes": "2026-10",
+ "meta_mes": 21000000,
+ "meta_exemplo": true,
+ "realizado_mes": 779670.54,
+ "dias": [
+  {
+   "data": "2026-10-01",
+   "receita": 779670.54
+  }
+ ],
+ "ontem": {
+  "data": "2026-10-01",
+  "receita": 779670.54,
+  "pedidos": 2921,
+  "ticket": 266.92,
+  "margem_pct": 9.95
+ },
+ "canais": [
+  {
+   "canal": "Shopee",
+   "receita": 474214.65,
+   "pedidos": 1787
+  },
+  {
+   "canal": "Mercado Livre Fulfillment - SC",
+   "receita": 142615.76,
+   "pedidos": 460
+  },
+  {
+   "canal": "Mercado Livre",
+   "receita": 114526.17,
+   "pedidos": 443
+  },
+  {
+   "canal": "TikTok Shop",
+   "receita": 24019.02,
+   "pedidos": 162
+  },
+  {
+   "canal": "ML_DOMUS UTILIDADES",
+   "receita": 13347.16,
+   "pedidos": 27
+  },
+  {
+   "canal": "Amazon",
+   "receita": 6375.06,
+   "pedidos": 19
+  },
+  {
+   "canal": "Magalu Marketplace",
+   "receita": 1688.7,
+   "pedidos": 4
+  },
+  {
+   "canal": "Sem canal vinculado",
+   "receita": 1321.37,
+   "pedidos": 4
+  },
+  {
+   "canal": "Mercado Livre Fulfillment",
+   "receita": 1090.86,
+   "pedidos": 4
+  },
+  {
+   "canal": "Amazon FBA Onsite",
+   "receita": 471.79,
+   "pedidos": 11
+  }
+ ],
+ "mes_anterior": {
+  "mes": "2026-09",
+  "receita": 20047236.2
+ }
+}
