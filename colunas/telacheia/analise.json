@@ -1,7 +1,7 @@
 {
  "_info": "Análise do dia (tela cheia): gráficos escolhidos pela rotina do Claude a partir do Preço Certo e da Análise Gold da PAC. Formato validado por automacao/validar_analise.py.",
  "data": "2026-10-02",
- "atualizado_em": "2026-10-02T19:30:00-03:00",
+ "atualizado_em": "2026-10-02T20:26:25-03:00",
  "cenas": [
   {
    "tipo": "colunas",
@@ -10,10 +10,10 @@
    "escopo": "Domus",
    "tom": "bem",
    "numero": "R$ 24,2 mi",
-   "insight": "Com 1 dia de dados, outubro passa a meta de R$ 22 mi.",
+   "insight": "Com 1 dia de dados, outubro passa a meta de R$ 21 mi.",
    "formato": "brl",
    "referencia": {
-    "valor": 22000000,
+    "valor": 21000000,
     "rotulo": "Meta"
    },
    "itens": [
@@ -183,6 +183,70 @@
     }
    ],
    "total": -7.4
+  },
+  {
+   "tipo": "barras",
+   "titulo": "Venda perdida por ruptura",
+   "subtitulo": "R$ por dia · PAC 02/10 · Domus",
+   "escopo": "Domus",
+   "tom": "alerta",
+   "numero": "R$ 66,8 mil",
+   "formato": "brl",
+   "insight": "Quatro dos cinco maiores buracos são climatizadores sem OC.",
+   "itens": [
+    {
+     "rotulo": "Cômoda D. Sonho",
+     "valor": 7235,
+     "cor": "laranja",
+     "extra": "AA · OC 160"
+    },
+    {
+     "rotulo": "Climat. 60L 220V",
+     "valor": 4068,
+     "cor": "coral",
+     "extra": "A · sem OC"
+    },
+    {
+     "rotulo": "Climat. 35L 220V",
+     "valor": 3907,
+     "cor": "coral",
+     "extra": "A · sem OC"
+    },
+    {
+     "rotulo": "Climat. 60L 127V",
+     "valor": 3486,
+     "cor": "coral",
+     "extra": "A · sem OC"
+    },
+    {
+     "rotulo": "Climat. 35L 127V",
+     "valor": 2675,
+     "cor": "coral",
+     "extra": "A · sem OC"
+    }
+   ]
+  },
+  {
+   "tipo": "barras",
+   "titulo": "Excesso acima do Emax",
+   "subtitulo": "estoque em R$ · Londrina parcial",
+   "escopo": "Filiais",
+   "tom": "alerta",
+   "numero": "R$ 7,3 mi",
+   "formato": "brl",
+   "insight": "Itajaí concentra o excesso em valor; Londrina tem o parado.",
+   "itens": [
+    {
+     "rotulo": "Itajaí",
+     "valor": 5110536,
+     "cor": "lima"
+    },
+    {
+     "rotulo": "Londrina",
+     "valor": 2223523,
+     "cor": "ciano"
+    }
+   ]
   }
  ]
 }
