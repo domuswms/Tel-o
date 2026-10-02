@@ -1,7 +1,7 @@
 {
- "_info": "Meta de faturamento por mês (R$), da empresa toda (Itajaí + Londrina). 'exemplo': true mostra o selo 'exemplo' no telão. A rotina copia para dados.json.",
+ "_info": "Meta de faturamento por mês (R$), da empresa toda (Itajaí + Londrina). Gerado pela aba Metas da planilha do telão. Não editar à mão.",
  "2026-10": {
-  "meta": 21000000,
-  "exemplo": true
+  "meta": 23000000,
+  "exemplo": false
  }
 }
