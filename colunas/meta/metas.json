@@ -1,5 +1,5 @@
 {
- "_info": "Meta de faturamento por mês (R$), da empresa toda (Itajaí + Londrina). Gerado pela aba Metas da planilha do telão. Não editar à mão.",
+ "_info": "Metas de faturamento por mês (R$), da Domus (Itajaí + Londrina): meta, super (Super meta) e mega (Mega meta). Gerado pela aba Metas da planilha do telão. Não editar à mão.",
  "2026-10": {
   "meta": 22000000,
   "exemplo": false
