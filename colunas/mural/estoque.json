@@ -1,88 +1,102 @@
 {
  "_info": "Coluna 3 · Estoque por filial (quantidade e qualidade). Gerado pelo Apps Script a partir das PACs. Não editar à mão. 'total' só aparece quando todas as filiais têm PAC.",
- "atualizado_em": "2026-10-02T14:00:00-03:00",
+ "atualizado_em": "2026-10-02T15:49:27-03:00",
  "filiais": {
   "itajai": {
    "nome": "Itajaí",
    "base": "SC",
    "fonte": "PAC SC · aba Gustavo",
-   "skus": 2109,
-   "skus_com_estoque": 1155,
-   "unidades": 64844,
-   "valor_custo": 10256664.55,
+   "skus": 2112,
+   "skus_com_estoque": 1168,
+   "unidades": 65563,
+   "valor_custo": 10298934,
    "cobertura_dias": 23.2,
-   "venda_dia_custo": 441195.97,
-   "saudavel_valor": 4843914.86,
-   "excesso_valor": 4873557.47,
-   "excesso_skus": 597,
-   "parado_valor": 539192.22,
-   "parado_skus": 270,
-   "skus_ativos": 1178,
-   "skus_ruptura": 293,
-   "pct_ruptura": 24.87,
-   "perda_dia_custo": 50798.62,
+   "venda_dia_custo": 444874.36,
+   "saudavel_valor": 4765488.91,
+   "excesso_valor": 4860987.39,
+   "excesso_skus": 609,
+   "parado_valor": 672457.7,
+   "parado_skus": 284,
+   "skus_ativos": 1180,
+   "skus_ruptura": 296,
+   "pct_ruptura": 25.08,
+   "perda_dia_custo": 53477.17,
    "sem_oc": 206,
    "curvas": {
     "AA": {
-     "ativos": 15,
-     "ruptura": 0,
-     "perda": 0
+     "ativos": 18,
+     "ruptura": 1,
+     "perda": 2825.59
     },
     "A": {
-     "ativos": 54,
-     "ruptura": 11,
-     "perda": 24158.05
+     "ativos": 62,
+     "ruptura": 12,
+     "perda": 23749.68
     },
     "B": {
-     "ativos": 165,
-     "ruptura": 35,
-     "perda": 15937.77
+     "ativos": 213,
+     "ruptura": 41,
+     "perda": 17805.7
     },
     "C": {
-     "ativos": 263,
-     "ruptura": 49,
-     "perda": 6233.44
+     "ativos": 299,
+     "ruptura": 73,
+     "perda": 6313.34
     },
     "D": {
-     "ativos": 681,
-     "ruptura": 198,
-     "perda": 4469.37
+     "ativos": 588,
+     "ruptura": 169,
+     "perda": 2782.85
     }
    },
    "top_fornecedores": [
     {
      "nome": "Ventisol",
-     "perda": 17306.81
+     "perda": 17309.21
     },
     {
-     "nome": "O.V.D.",
-     "perda": 7205.19
+     "nome": "O.v.d.",
+     "perda": 7276.99
     },
     {
      "nome": "Elgin",
-     "perda": 5121.65
+     "perda": 5116.72
     }
    ],
    "top_skus": [
     {
      "sku": "CLIMATIZADOR-CLIN60PRO-220V",
-     "titulo": "Climatizador 60 L CLIN60PRO 220V",
+     "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60P",
      "curva": "A",
-     "perda": 4068,
+     "perda": 4069,
      "oc": 0
     },
     {
      "sku": "CLIMATIZADOR-CLIN35PRO-220V",
-     "titulo": "Climatizador 35 L CLIN35PRO 220V",
+     "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO V",
      "curva": "A",
-     "perda": 3907,
+     "perda": 3909,
      "oc": 0
     },
     {
      "sku": "CLIMATIZADOR-CLIN60PRO-127V",
-     "titulo": "Climatizador 60 L CLIN60PRO 127V",
+     "titulo": "Climatizador 60 Litros 150W Branco/Cinza CLIN60P",
      "curva": "A",
      "perda": 3486,
+     "oc": 0
+    },
+    {
+     "sku": "MOP-PRO",
+     "titulo": "Mop Giratório Balde Cesto Inox Limpeza Esfregão ",
+     "curva": "AA",
+     "perda": 2826,
+     "oc": 300
+    },
+    {
+     "sku": "CLIMATIZADOR-CLIN35PRO-127V",
+     "titulo": "Climatizador 35L 150W Branco / Cinza CLIN35PRO V",
+     "curva": "A",
+     "perda": 2675,
      "oc": 0
     }
    ]
@@ -92,97 +106,97 @@
    "base": "PR",
    "fonte": "PAC PR · aba COMPRAS",
    "skus": 453,
-   "skus_com_estoque": 220,
-   "unidades": 9713,
-   "valor_custo": 2595047.97,
-   "cobertura_dias": 58.9,
-   "venda_dia_custo": 44026.8,
-   "saudavel_valor": 367673.8,
-   "excesso_valor": 557006.08,
-   "excesso_skus": 81,
+   "skus_com_estoque": 223,
+   "unidades": 9687,
+   "valor_custo": 2589469.97,
+   "cobertura_dias": 58.5,
+   "venda_dia_custo": 44286.18,
+   "saudavel_valor": 368020.5,
+   "excesso_valor": 551081.38,
+   "excesso_skus": 79,
    "parado_valor": 1670368.09,
    "parado_skus": 96,
    "skus_ativos": 163,
-   "skus_ruptura": 39,
-   "pct_ruptura": 23.93,
-   "perda_dia_custo": 18558.26,
+   "skus_ruptura": 36,
+   "pct_ruptura": 22.09,
+   "perda_dia_custo": 7933.56,
    "sem_oc": 31,
    "curvas": {
     "AA": {
      "ativos": 5,
-     "ruptura": 3,
-     "perda": 11491.22
+     "ruptura": 1,
+     "perda": 2410.2
     },
     "A": {
      "ativos": 11,
-     "ruptura": 2,
-     "perda": 3029.6
+     "ruptura": 1,
+     "perda": 1479.19
     },
     "B": {
      "ativos": 25,
      "ruptura": 7,
-     "perda": 3147.82
+     "perda": 3168.24
     },
     "C": {
-     "ativos": 43,
+     "ativos": 44,
      "ruptura": 6,
-     "perda": 572.37
+     "perda": 571.07
     },
     "D": {
-     "ativos": 79,
+     "ativos": 78,
      "ruptura": 21,
-     "perda": 317.24
+     "perda": 304.85
     }
    },
    "top_fornecedores": [
     {
+     "nome": "Aramoveis",
+     "perda": 2417.62
+    },
+    {
      "nome": "Qmovi",
-     "perda": 10292.69
+     "perda": 1506.98
     },
     {
-     "nome": "Demobile",
-     "perda": 2469.01
-    },
-    {
-     "nome": "Aramóveis",
-     "perda": 2418.03
+     "nome": "Fabr.espumas Colchoes N.paranaense",
+     "perda": 882.63
     }
    ],
    "top_skus": [
     {
-     "sku": "COMODA-DOCE.SONHO-SAPAT-BRA",
-     "titulo": "Cômoda Doce Sonho 4 Gvt Sapateira",
-     "curva": "AA",
-     "perda": 7235,
-     "oc": 160
-    },
-    {
      "sku": "PANELEIRO-4PORT-BRA",
-     "titulo": "Paneleiro 4 Portas 1 Gaveta MDP Branco",
+     "titulo": "Paneleiro 4 Portas 1 Gaveta MDP Branco Aramóveis",
      "curva": "AA",
      "perda": 2410,
      "oc": 200
     },
     {
-     "sku": "ESCRIVANINHA_VITORIA_BRA",
-     "titulo": "Escrivaninha Vitória 1 Gaveta 1 Porta",
-     "curva": "AA",
-     "perda": 1846,
-     "oc": 170
-    },
-    {
-     "sku": "COMODA-MESA-GIRAT-GAMER-BRA",
-     "titulo": "Cômoda 3 Gavetas com Mesa Giratória Gamer",
-     "curva": "A",
-     "perda": 1551,
-     "oc": 70
-    },
-    {
      "sku": "COMODA-DOCE.SONHO-BRA",
-     "titulo": "Cômoda Doce Sonho 4 Gavetas",
+     "titulo": "Cômoda Doce Sonho 4 Gavetas Puxadores de Estrela",
      "curva": "A",
-     "perda": 1478,
+     "perda": 1479,
      "oc": 100
+    },
+    {
+     "sku": "PISCINA-INFANTIL-253L",
+     "titulo": "Piscina Infantil Inflável De Plástico Pequena 25",
+     "curva": "B",
+     "perda": 650,
+     "oc": 0
+    },
+    {
+     "sku": "ESCRIVANINHA_VITORIA_AME",
+     "titulo": "Escrivaninha Vitória 1 Gaveta 1 Porta Em MDP Dem",
+     "curva": "B",
+     "perda": 645,
+     "oc": 100
+    },
+    {
+     "sku": "MESA-CABEC-DM111-BRA",
+     "titulo": "Mesa de Cabeceira Ditália DM-111 com 3 Gavetas e",
+     "curva": "B",
+     "perda": 558,
+     "oc": 0
     }
    ]
   }
@@ -190,61 +204,61 @@
  "total": {
   "nome": "Domus",
   "base": "Itajaí + Londrina",
-  "skus": 2562,
-  "skus_com_estoque": 1375,
-  "unidades": 74557,
-  "valor_custo": 12851712.52,
-  "venda_dia_custo": 485222.77,
-  "saudavel_valor": 5211588.66,
-  "excesso_valor": 5430563.55,
-  "excesso_skus": 678,
-  "parado_valor": 2209560.31,
-  "parado_skus": 366,
-  "skus_ativos": 1341,
+  "skus": 2565,
+  "skus_com_estoque": 1391,
+  "unidades": 75250,
+  "valor_custo": 12888403.97,
+  "venda_dia_custo": 489160.54,
+  "saudavel_valor": 5133509.41,
+  "excesso_valor": 5412068.77,
+  "excesso_skus": 688,
+  "parado_valor": 2342825.79,
+  "parado_skus": 380,
+  "skus_ativos": 1343,
   "skus_ruptura": 332,
-  "perda_dia_custo": 69356.88,
+  "perda_dia_custo": 61410.73,
   "sem_oc": 237,
   "curvas": {
    "AA": {
-    "ativos": 20,
-    "ruptura": 3,
-    "perda": 11491.22
+    "ativos": 23,
+    "ruptura": 2,
+    "perda": 5235.79
    },
    "A": {
-    "ativos": 65,
+    "ativos": 73,
     "ruptura": 13,
-    "perda": 27187.65
+    "perda": 25228.87
    },
    "B": {
-    "ativos": 190,
-    "ruptura": 42,
-    "perda": 19085.59
+    "ativos": 238,
+    "ruptura": 48,
+    "perda": 20973.94
    },
    "C": {
-    "ativos": 306,
-    "ruptura": 55,
-    "perda": 6805.81
+    "ativos": 343,
+    "ruptura": 79,
+    "perda": 6884.41
    },
    "D": {
-    "ativos": 760,
-    "ruptura": 219,
-    "perda": 4786.61
+    "ativos": 666,
+    "ruptura": 190,
+    "perda": 3087.7
    }
   },
-  "pct_ruptura": 24.76,
-  "cobertura_dias": 26.5,
+  "pct_ruptura": 24.72,
+  "cobertura_dias": 26.3,
   "top_fornecedores": [
    {
     "nome": "Ventisol",
-    "perda": 17306.81
+    "perda": 17309.21
    },
    {
-    "nome": "Qmovi",
-    "perda": 10292.69
+    "nome": "O.v.d.",
+    "perda": 7276.99
    },
    {
-    "nome": "O.V.D.",
-    "perda": 7205.19
+    "nome": "Elgin",
+    "perda": 5116.72
    }
   ]
  }
