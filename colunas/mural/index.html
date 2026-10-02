@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Telão · Mural e ruptura</title>
-<!-- Coluna 3 · autônoma: lê ./ruptura.json (PAC) e ./mural.json (formulário dos analistas), alternando os dois. -->
+<!-- Coluna 3 · autônoma: lê ./estoque.json (PACs por filial) e ./mural.json (formulário dos analistas), alternando os dois. -->
 <style>
   @font-face { font-family:'Archivo'; src:url(archivo.woff2) format('woff2-variations'), url(archivo.woff2) format('woff2'); font-weight:100 900; font-stretch:62% 125%; font-display:block; }
   :root { --ink:#212121; --lime:#ECFC30; --g3:#BDBDBD; --red:#F25C5C; --W:853px; }
@@ -35,6 +35,9 @@
   .on .txt .ln > span { transform:translateY(0); }
   .out .txt .ln > span { transform:translateY(-115%); transition:transform .45s; }
   .foot { position:absolute; left:60px; bottom:36px; font-size:44px; color:var(--g3); white-space:nowrap; }
+  .qbar { position:absolute; left:60px; right:60px; top:404px; height:16px; border-radius:8px; overflow:hidden; display:flex; background:#2E2E2E; }
+  .qbar > div { width:0; transition:width 1.3s cubic-bezier(.2,.9,.25,1) .5s; }
+  .on .qbar > div { width:var(--w); }
   .media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .media-cap { position:absolute; left:0; right:0; bottom:0; padding:22px 60px 30px; background:linear-gradient(transparent, rgba(20,20,20,.92) 40%); }
   #prog { position:absolute; left:0; bottom:0; height:8px; width:0; }
@@ -51,7 +54,7 @@ const $ = s => document.querySelector(s);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const ease = x => 1 - Math.pow(1 - x, 3), eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const eback = (x, s = 1.9) => { x -= 1; return x * x * ((s + 1) * x + s) + 1; };
-function tween(ms, fn) { return new Promise(res => { const t0 = performance.now(); (function f(t) { const p = Math.min(1, (t - t0) / ms); fn(p); p < 1 ? requestAnimationFrame(f) : res(); })(t0); }); }
+function tween(ms, fn) { return new Promise(res => { const t0 = performance.now(); (function f(t) { const p = Math.max(0, Math.min(1, (t - t0) / ms)); fn(p); p < 1 ? requestAnimationFrame(f) : res(); })(t0); }); }
 function fit() { const s = Math.min(innerWidth / 853, innerHeight / 512); $('#stage').style.transform = `scale(${s})`; }
 addEventListener('resize', fit); fit();
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -70,6 +73,7 @@ const TIPOS = {
   alerta:      { rot: 'Alerta',       cor: '#F25C5C', fg: '#FFFFFF', fx: 'pulso' },
   comemoracao: { rot: 'Comemoração',  cor: '#ECFC30', fg: '#212121', fx: 'eixo' },
   aviso:       { rot: 'Aviso',        cor: '#FF9F43', fg: '#212121', fx: 'nenhum' },
+  estoque:     { rot: 'Estoque',      cor: '#ECFC30', fg: '#212121', fx: 'nenhum' },
 };
 
 // ---------- efeitos (derivados das elipses do símbolo) ----------
@@ -95,20 +99,36 @@ function efeito(tipo, cor, vivo) {
 }
 
 // ---------- dados ----------
-let RUP = null, MUR = null;
+let EST = null, MUR = null;
+// cores fixas por filial em todo o telão; qualidade do estoque: saudável / excesso / parado
+const FIL = { itajai: '#ECFC30', londrina: '#7FD6FF', total: '#FFFFFF' };
+const Q = { saudavel: '#8BD17C', excesso: '#FF9F43', parado: '#6E6E6E' };
 async function getj(f) { try { const r = await fetch(f + '?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) return await r.json(); } catch (e) { } return null; }
-async function load() { RUP = (await getj('ruptura.json')) || RUP; MUR = (await getj('mural.json')) || MUR; }
+async function load() { EST = (await getj('estoque.json')) || EST; MUR = (await getj('mural.json')) || MUR; }
 const hoje = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
 
-function cardsRuptura() {
-  if (!RUP) return [];
-  const a = RUP.curvas?.A || { ruptura: 0, perda: 0 };
-  return [
-    { tipo: 'alerta', selo: 'Alerta', meta: RUP.base, titulo: 'Ruptura de estoque', numero: pct(RUP.pct_ruptura), cor_num: '#F25C5C',
-      texto: `${fmtBRL(RUP.perda_dia_custo)} por dia de venda perdida`, foot: `A custo · ${RUP.skus_ruptura} de ${RUP.skus_ativos.toLocaleString('pt-BR')} SKUs com venda` },
-    { tipo: 'alerta', selo: 'Curva A', meta: RUP.base, titulo: 'Curva A sem estoque', numero: a.ruptura + ' SKUs', cor_num: '#F25C5C',
-      texto: `${fmtBRL(a.perda)}/dia · maior: ${RUP.top_fornecedores?.[0]?.nome || '-'}`, foot: `${RUP.sem_oc} SKUs sem OC em trânsito` },
-  ];
+// por filial (e o total, quando todas as filiais têm PAC): quantidade, qualidade e ruptura
+function cardsEstoque() {
+  if (!EST) return [];
+  const blocos = Object.entries(EST.filiais || {}).filter(([, f]) => f);
+  if (EST.total && blocos.length > 1) blocos.push(['total', EST.total]);
+  const cards = [];
+  for (const [k, f] of blocos) {
+    const cor = FIL[k] || '#FFFFFF', v = f.valor_custo || 1;
+    const q = [['saudavel', f.saudavel_valor], ['excesso', f.excesso_valor], ['parado', f.parado_valor]].map(([n, x]) => ({ n, w: x / v * 100, cor: Q[n] }));
+    cards.push({ tipo: 'estoque', selo: f.nome, cor_selo: cor, meta: k === 'total' ? f.base : 'Estoque a custo', titulo: k === 'total' ? 'Estoque total a custo' : `Estoque ${f.nome}`,
+      numero: fmtBRL(f.valor_custo), cor_num: cor,
+      texto: `${f.unidades.toLocaleString('pt-BR')} unidades · ${Math.round(f.cobertura_dias)} dias de cobertura`,
+      barra: q, foot: `${Math.round(q[1].w)}% em excesso · ${Math.round(q[2].w)}% parado` });
+    cards.push({ tipo: 'alerta', selo: f.nome, cor_selo: cor, meta: 'Ruptura', titulo: 'SKUs com venda sem estoque', numero: pct(f.pct_ruptura), cor_num: '#F25C5C',
+      texto: `${fmtBRL(f.perda_dia_custo)} por dia de venda perdida`, foot: `A custo · ${f.skus_ruptura} de ${f.skus_ativos.toLocaleString('pt-BR')} SKUs` });
+    // curvas AA e A juntas: os itens que mais vendem
+    const aa = f.curvas?.AA || { ruptura: 0, perda: 0 }, a1 = f.curvas?.A || { ruptura: 0, perda: 0 };
+    const nA = aa.ruptura + a1.ruptura, pA = aa.perda + a1.perda;
+    if (nA) cards.push({ tipo: 'alerta', selo: f.nome, cor_selo: cor, meta: 'Curvas AA e A', titulo: 'Mais vendidos sem estoque', numero: nA + ' SKUs', cor_num: '#F25C5C',
+      texto: `${fmtBRL(pA)}/dia` + (f.top_fornecedores?.[0] ? ` · maior: ${f.top_fornecedores[0].nome}` : ''), foot: `${f.sem_oc} SKUs em ruptura sem OC` });
+  }
+  return cards;
 }
 function cardsMural() {
   if (!MUR) return [];
@@ -145,10 +165,11 @@ async function mostra(c) {
       <div class="tit" style="font-size:54px;margin-top:12px">${linhas(c.titulo, 54, 600, 1)}</div></div>`;
   } else {
     card.innerHTML = `
-      <div class="top"><span class="badge" style="background:${T.cor};color:${T.fg}">${esc(c.selo)}</span><span class="meta-l mask d1"><span>${esc(c.meta || '')}</span></span></div>
+      <div class="top"><span class="badge" style="background:${c.cor_selo || T.cor};color:${c.cor_selo ? '#212121' : T.fg}">${esc(c.selo)}</span><span class="meta-l mask d1"><span>${esc(c.meta || '')}</span></span></div>
       ${titBloco(c.titulo, temNum)}
       ${temNum ? `<div class="num mask d2" style="color:${c.cor_num || T.cor}"><span class="nv">${esc(c.numero)}</span></div>` : ''}
-      ${txtBloco(c.legenda && !c.texto ? c.legenda : c.texto, temNum, c.foot)}`;
+      ${txtBloco(c.legenda && !c.texto ? c.legenda : c.texto, temNum, c.foot)}
+      ${c.barra ? `<div class="qbar">${c.barra.map(b => `<div style="--w:${b.w.toFixed(2)}%;background:${b.cor}"></div>`).join('')}</div>` : ''}`;
   }
   $('#host').innerHTML = ''; $('#host').appendChild(card);
   let vivo = true;
@@ -168,8 +189,8 @@ async function mostra(c) {
 
 async function loop() {
   await load();
-  const r = cardsRuptura(), m = cardsMural();
-  // intercala: ruptura, publicação, ruptura, publicação...
+  const r = cardsEstoque(), m = cardsMural();
+  // intercala: estoque, publicação, estoque, publicação...
   let seq = [];
   if (!m.length) seq = r;
   else if (!r.length) seq = m;

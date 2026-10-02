@@ -1,4 +1,7 @@
 {
- "_info": "Meta de faturamento por mês (R$). Edite aqui; a rotina diária copia para dados.json. 'exemplo': true mostra o selo 'exemplo' no telão.",
- "2026-10": {"meta": 21000000, "exemplo": true}
+ "_info": "Meta de faturamento por mês (R$), da empresa toda (Itajaí + Londrina). 'exemplo': true mostra o selo 'exemplo' no telão. A rotina copia para dados.json.",
+ "2026-10": {
+  "meta": 21000000,
+  "exemplo": true
+ }
 }

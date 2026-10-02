@@ -1,0 +1,251 @@
+{
+ "_info": "Coluna 3 · Estoque por filial (quantidade e qualidade). Gerado pelo Apps Script a partir das PACs. Não editar à mão. 'total' só aparece quando todas as filiais têm PAC.",
+ "atualizado_em": "2026-10-02T14:00:00-03:00",
+ "filiais": {
+  "itajai": {
+   "nome": "Itajaí",
+   "base": "SC",
+   "fonte": "PAC SC · aba Gustavo",
+   "skus": 2109,
+   "skus_com_estoque": 1155,
+   "unidades": 64844,
+   "valor_custo": 10256664.55,
+   "cobertura_dias": 23.2,
+   "venda_dia_custo": 441195.97,
+   "saudavel_valor": 4843914.86,
+   "excesso_valor": 4873557.47,
+   "excesso_skus": 597,
+   "parado_valor": 539192.22,
+   "parado_skus": 270,
+   "skus_ativos": 1178,
+   "skus_ruptura": 293,
+   "pct_ruptura": 24.87,
+   "perda_dia_custo": 50798.62,
+   "sem_oc": 206,
+   "curvas": {
+    "AA": {
+     "ativos": 15,
+     "ruptura": 0,
+     "perda": 0
+    },
+    "A": {
+     "ativos": 54,
+     "ruptura": 11,
+     "perda": 24158.05
+    },
+    "B": {
+     "ativos": 165,
+     "ruptura": 35,
+     "perda": 15937.77
+    },
+    "C": {
+     "ativos": 263,
+     "ruptura": 49,
+     "perda": 6233.44
+    },
+    "D": {
+     "ativos": 681,
+     "ruptura": 198,
+     "perda": 4469.37
+    }
+   },
+   "top_fornecedores": [
+    {
+     "nome": "Ventisol",
+     "perda": 17306.81
+    },
+    {
+     "nome": "O.V.D.",
+     "perda": 7205.19
+    },
+    {
+     "nome": "Elgin",
+     "perda": 5121.65
+    }
+   ],
+   "top_skus": [
+    {
+     "sku": "CLIMATIZADOR-CLIN60PRO-220V",
+     "titulo": "Climatizador 60 L CLIN60PRO 220V",
+     "curva": "A",
+     "perda": 4068,
+     "oc": 0
+    },
+    {
+     "sku": "CLIMATIZADOR-CLIN35PRO-220V",
+     "titulo": "Climatizador 35 L CLIN35PRO 220V",
+     "curva": "A",
+     "perda": 3907,
+     "oc": 0
+    },
+    {
+     "sku": "CLIMATIZADOR-CLIN60PRO-127V",
+     "titulo": "Climatizador 60 L CLIN60PRO 127V",
+     "curva": "A",
+     "perda": 3486,
+     "oc": 0
+    }
+   ]
+  },
+  "londrina": {
+   "nome": "Londrina",
+   "base": "PR",
+   "fonte": "PAC PR · aba COMPRAS",
+   "skus": 453,
+   "skus_com_estoque": 220,
+   "unidades": 9713,
+   "valor_custo": 2595047.97,
+   "cobertura_dias": 58.9,
+   "venda_dia_custo": 44026.8,
+   "saudavel_valor": 367673.8,
+   "excesso_valor": 557006.08,
+   "excesso_skus": 81,
+   "parado_valor": 1670368.09,
+   "parado_skus": 96,
+   "skus_ativos": 163,
+   "skus_ruptura": 39,
+   "pct_ruptura": 23.93,
+   "perda_dia_custo": 18558.26,
+   "sem_oc": 31,
+   "curvas": {
+    "AA": {
+     "ativos": 5,
+     "ruptura": 3,
+     "perda": 11491.22
+    },
+    "A": {
+     "ativos": 11,
+     "ruptura": 2,
+     "perda": 3029.6
+    },
+    "B": {
+     "ativos": 25,
+     "ruptura": 7,
+     "perda": 3147.82
+    },
+    "C": {
+     "ativos": 43,
+     "ruptura": 6,
+     "perda": 572.37
+    },
+    "D": {
+     "ativos": 79,
+     "ruptura": 21,
+     "perda": 317.24
+    }
+   },
+   "top_fornecedores": [
+    {
+     "nome": "Qmovi",
+     "perda": 10292.69
+    },
+    {
+     "nome": "Demobile",
+     "perda": 2469.01
+    },
+    {
+     "nome": "Aramóveis",
+     "perda": 2418.03
+    }
+   ],
+   "top_skus": [
+    {
+     "sku": "COMODA-DOCE.SONHO-SAPAT-BRA",
+     "titulo": "Cômoda Doce Sonho 4 Gvt Sapateira",
+     "curva": "AA",
+     "perda": 7235,
+     "oc": 160
+    },
+    {
+     "sku": "PANELEIRO-4PORT-BRA",
+     "titulo": "Paneleiro 4 Portas 1 Gaveta MDP Branco",
+     "curva": "AA",
+     "perda": 2410,
+     "oc": 200
+    },
+    {
+     "sku": "ESCRIVANINHA_VITORIA_BRA",
+     "titulo": "Escrivaninha Vitória 1 Gaveta 1 Porta",
+     "curva": "AA",
+     "perda": 1846,
+     "oc": 170
+    },
+    {
+     "sku": "COMODA-MESA-GIRAT-GAMER-BRA",
+     "titulo": "Cômoda 3 Gavetas com Mesa Giratória Gamer",
+     "curva": "A",
+     "perda": 1551,
+     "oc": 70
+    },
+    {
+     "sku": "COMODA-DOCE.SONHO-BRA",
+     "titulo": "Cômoda Doce Sonho 4 Gavetas",
+     "curva": "A",
+     "perda": 1478,
+     "oc": 100
+    }
+   ]
+  }
+ },
+ "total": {
+  "nome": "Domus",
+  "base": "Itajaí + Londrina",
+  "skus": 2562,
+  "skus_com_estoque": 1375,
+  "unidades": 74557,
+  "valor_custo": 12851712.52,
+  "venda_dia_custo": 485222.77,
+  "saudavel_valor": 5211588.66,
+  "excesso_valor": 5430563.55,
+  "excesso_skus": 678,
+  "parado_valor": 2209560.31,
+  "parado_skus": 366,
+  "skus_ativos": 1341,
+  "skus_ruptura": 332,
+  "perda_dia_custo": 69356.88,
+  "sem_oc": 237,
+  "curvas": {
+   "AA": {
+    "ativos": 20,
+    "ruptura": 3,
+    "perda": 11491.22
+   },
+   "A": {
+    "ativos": 65,
+    "ruptura": 13,
+    "perda": 27187.65
+   },
+   "B": {
+    "ativos": 190,
+    "ruptura": 42,
+    "perda": 19085.59
+   },
+   "C": {
+    "ativos": 306,
+    "ruptura": 55,
+    "perda": 6805.81
+   },
+   "D": {
+    "ativos": 760,
+    "ruptura": 219,
+    "perda": 4786.61
+   }
+  },
+  "pct_ruptura": 24.76,
+  "cobertura_dias": 26.5,
+  "top_fornecedores": [
+   {
+    "nome": "Ventisol",
+    "perda": 17306.81
+   },
+   {
+    "nome": "Qmovi",
+    "perda": 10292.69
+   },
+   {
+    "nome": "O.V.D.",
+    "perda": 7205.19
+   }
+  ]
+ }
+}

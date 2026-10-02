@@ -42,7 +42,7 @@
 const $ = s => document.querySelector(s);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const ease = x => 1 - Math.pow(1 - x, 3), eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-function tween(ms, fn) { return new Promise(res => { const t0 = performance.now(); (function f(t) { const p = Math.min(1, (t - t0) / ms); fn(p); p < 1 ? requestAnimationFrame(f) : res(); })(t0); }); }
+function tween(ms, fn) { return new Promise(res => { const t0 = performance.now(); (function f(t) { const p = Math.max(0, Math.min(1, (t - t0) / ms)); fn(p); p < 1 ? requestAnimationFrame(f) : res(); })(t0); }); }
 function fit() { const s = Math.min(innerWidth / 854, innerHeight / 512); $('#stage').style.transform = `scale(${s})`; }
 addEventListener('resize', fit); fit();
 

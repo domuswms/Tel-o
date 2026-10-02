@@ -4,15 +4,33 @@ Página do telão de LED (2560 × 512) em três colunas **autônomas**:
 
 | Coluna | Pasta | Dados | Quem atualiza | Quando |
 |---|---|---|---|---|
-| 1 · Meta e faturamento | `colunas/meta/` | `dados.json`, `metas.json` | Rotina do Claude (Preço Certo, D+1) | todo dia 06h15 |
+| 1 · Faturamento e margem (empresa, filial, canal) | `colunas/meta/` | `dados.json`, `metas.json` | Rotina do Claude (Preço Certo, D+1) | todo dia 06h15 |
 | 2 · Notícias | `colunas/noticias/` | `dados.json` | Rotina do Claude (pesquisa na web) | todo dia 06h15 |
-| 3 · Ruptura + mural | `colunas/mural/` | `ruptura.json`, `mural.json`, `midia/` | Apps Script (PAC + formulário) | ruptura 06h00 · mural a cada 10 min |
+| 3 · Estoque por filial + mural | `colunas/mural/` | `estoque.json`, `mural.json`, `midia/` | Apps Script (PACs + formulário) | estoque 06h00 · mural a cada 10 min |
 
 Cada coluna é uma página independente com código, fonte e dados próprios. Mudar uma não altera as outras; dá até para abrir uma sozinha (`/colunas/meta/`). O `index.html` da raiz só junta as três, e a ordem fica na lista `COLUNAS`.
 
-A meta do mês fica em `colunas/meta/metas.json`. Edite ali (pelo próprio GitHub) e tire `"exemplo": true` quando for a meta oficial.
+## O que o telão mede
 
-E-mail das 07h30 (notícias + resumo de meta e ruptura) sai do Apps Script, pela conta Google da empresa de quem instalou o script.
+Todo slide traz no canto superior direito o **escopo** do número: **Domus** (Itajaí + Londrina somadas), **Itajaí** ou **Londrina**. Cores fixas em todo o telão: Itajaí lima, Londrina azul-claro.
+
+**Faturamento e margem** (coluna 1 · Preço Certo, D+1). Filiais = empresas do Preço Certo: Itajaí (31540) e Londrina (31639). Margem = margem de contribuição do Preço Certo.
+1. Realizado no mês da Domus × meta, com margem e o acumulado diário.
+2. Filiais no mês: receita, % da empresa e margem de cada uma.
+3. Ontem: empresa e cada filial.
+4. Canais no mês · Domus: os cinco marketplaces (Shopee, Mercado Livre, Amazon, Magalu, TikTok Shop), sempre todos, com barra empilhada Itajaí + Londrina, receita e margem.
+5. Canais no mês · Itajaí e 6. Canais no mês · Londrina: mesma tabela por filial.
+7. Um slide de foco por canal: receita e margem da Domus no canal, e de cada filial.
+- Agrupamento dos canais do Preço Certo (em `automacao/atualizar_meta.py`): Mercado Livre = "Mercado Livre" + "Mercado Livre Fulfillment - SC" (Meli Full SC) + "Mercado Livre Fulfillment" + "ML_DOMUS UTILIDADES"; Amazon = "Amazon" + "Amazon FBA Onsite"; "Sem canal vinculado" vai para Outros (só no e-mail).
+
+**Estoque** (coluna 3 · PACs): Itajaí = PAC SC, aba Gustavo (estoque inteiro da filial); Londrina = PAC PR, aba COMPRAS. Para cada filial e para a Domus (total):
+- Quantidade: valor a custo, unidades e dias de cobertura (valor ÷ venda média diária a custo).
+- Qualidade: saudável, em excesso (acima do Emax da PAC) e parado (com estoque e sem venda), em barra.
+- Ruptura: % dos SKUs com venda sem estoque, venda perdida por dia a custo, curvas AA e A sem estoque e SKUs em ruptura sem OC.
+
+A meta do mês é da empresa toda e fica em `colunas/meta/metas.json`. Edite ali (pelo próprio GitHub) e tire `"exemplo": true` quando for a meta oficial.
+
+E-mail das 07h30 (notícias + faturamento por canal × filial + estoque por filial) sai do Apps Script, pela conta Google da empresa de quem instalou o script.
 
 ---
 
@@ -59,7 +77,7 @@ E-mail das 07h30 (notícias + resumo de meta e ruptura) sai do Apps Script, pela
 
 ### 4. Apps Script (ruptura, mural e e-mail)
 
-Com a conta da empresa que **tem acesso à PAC**:
+Com a conta da empresa que **tem acesso às duas PACs** (SC e PR):
 
 1. [script.google.com](https://script.google.com) → **Novo projeto** → nome `Telão WeAxis` → cole `automacao/apps-script/Codigo.gs`.
 2. No topo do código, preencha `GITHUB_OWNER` (nome da organização) e a lista `EMAILS`.
@@ -68,6 +86,12 @@ Com a conta da empresa que **tem acesso à PAC**:
 5. Abra o formulário criado → **Adicionar pergunta → Upload de arquivo** → título `Mídia (opcional)` → tipos: vídeo e imagem, até 1 arquivo, 100 MB. (O Apps Script não cria esse tipo de pergunta sozinho.)
 6. Envie o link do formulário aos analistas. Para moderar antes de ir ao ar, mude `APROVACAO_AUTOMATICA` para `false` e escreva `sim` na coluna **Aprovado** da planilha.
 7. Teste: rode **atualizarRuptura**, **publicarMural** e **enviarEmailDiario** uma vez cada.
+
+### 4.1 Se o Apps Script não funcionar
+Rode a função **diagnostico** e abra **Registro de execução**. Cada linha diz OK ou ERRO com o motivo. Os erros mais comuns:
+- **Sem acesso à PAC**: o script roda com a conta da empresa; as PACs precisam estar compartilhadas com ela (hoje podem estar só na conta pessoal).
+- **"Este app está bloqueado"** na autorização: o administrador do Google Workspace precisa liberar Apps Script para a sua conta (Admin → Segurança → Controles de API).
+- **Nenhum gatilho**: rode **configurarTudo** de novo (não duplica nada).
 
 ### 5. Rotina diária do Claude (meta e notícias)
 

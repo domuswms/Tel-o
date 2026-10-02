@@ -2,9 +2,15 @@
  * Telão WeAxis · automação no Google (Apps Script)
  *
  * Faz, sem ninguém mexer:
- *   1. atualizarRuptura()   todo dia às 06h  · lê a PAC (aba Gustavo) e publica colunas/mural/ruptura.json
+ *   1. atualizarEstoque()   todo dia às 06h  · lê as PACs (Itajaí e Londrina) e publica colunas/mural/estoque.json
  *   2. publicarMural()      a cada 10 min    · lê as respostas do formulário e publica colunas/mural/mural.json
- *   3. enviarEmailDiario()  todo dia às 07h30 · e-mail com notícias + resumo de meta e ruptura, do seu e-mail da empresa
+ *   3. enviarEmailDiario()  todo dia às 07h30 · e-mail com notícias + resumo de faturamento e estoque, do seu e-mail da empresa
+ *   4. publicarMetas()      ao editar a aba Metas · publica colunas/meta/metas.json (a meta aparece no telão em ~1 min)
+ *   Menu "Telão" na planilha de metas: atualizar agora, pedir notícias novas, enviar e-mail, diagnóstico.
+ *   Algo falhou? Rode diagnostico() e veja o Registro de execução.
+ *
+ * Sem o GitHub configurado, o e-mail já funciona (estoque direto das PACs + metas da planilha);
+ * o telão passa a receber os dados quando GITHUB_OWNER e GITHUB_TOKEN forem preenchidos.
  *
  * Instalação (uma vez só): veja automacao/README.md, passo "Apps Script".
  * O token do GitHub fica em Propriedades do script (GITHUB_TOKEN), nunca no código.
@@ -14,9 +20,12 @@ const CFG = {
   GITHUB_OWNER: 'NOME-DA-ORGANIZACAO',      // ex.: domuscommerce
   GITHUB_REPO: 'telao-weaxis',
   GITHUB_BRANCH: 'main',
-  PAC_ID: '17xjD_hJq1V_vpydBPeY25NQWbL9F9GwlQqM2HhIymPE',
-  PAC_ABA: 'Gustavo',
-  PAC_BASE: 'SC · carteira Gustavo',
+  // uma PAC por filial. Filial sem 'id' fica de fora até ser preenchida (e o total só aparece com todas)
+  PACS: {
+    // a aba de cada PAC tem o estoque inteiro da filial (as abas com nome de analista são só divisão de leitura)
+    itajai:   { nome: 'Itajaí',   id: '17xjD_hJq1V_vpydBPeY25NQWbL9F9GwlQqM2HhIymPE', aba: 'Gustavo', base: 'SC' },
+    londrina: { nome: 'Londrina', id: '1f-JzRrFNtKh_EUzeLcgvszLkibvvYP4KDcupJzL4tnw', aba: 'COMPRAS', base: 'PR' },
+  },
   EMAILS: ['joao.vitor@domuscommerce.com'],  // quem recebe o e-mail das 07h30
   APROVACAO_AUTOMATICA: true,                // false = só vai ao telão quem tiver "sim" na coluna Aprovado
   MIDIA_MAX_MB: 25,
@@ -25,10 +34,11 @@ const CFG = {
 
 // ===================================================================== instalação
 
-/** Rode uma vez. Cria o formulário dos analistas, a planilha de respostas e os gatilhos. */
+/** Rode uma vez (pode rodar de novo sem duplicar nada). Cria o formulário, a planilha do telão (respostas + aba Metas) e os gatilhos. */
 function configurarTudo() {
   const props = PropertiesService.getScriptProperties();
-  if (!props.getProperty('GITHUB_TOKEN')) throw new Error('Defina GITHUB_TOKEN em Configurações do projeto > Propriedades do script.');
+  if (!props.getProperty('GITHUB_TOKEN')) Logger.log('Aviso: GITHUB_TOKEN ainda não definido. E-mail funciona; o telão só recebe dados depois do token.');
+  if (props.getProperty('FORM_ID')) { instalarGatilhos_(SpreadsheetApp.openById(props.getProperty('RESPOSTAS_ID'))); return Logger.log('Já configurado. Gatilhos reinstalados. Planilha: ' + SpreadsheetApp.openById(props.getProperty('RESPOSTAS_ID')).getUrl()); }
 
   const form = FormApp.create('Telão · publicar no mural');
   form.setDescription('O que você enviar aqui aparece na coluna da direita do telão (em até 10 minutos). Seja curto: o telão lê como faixa.');
@@ -47,25 +57,135 @@ function configurarTudo() {
     .setValidation(FormApp.createTextValidation().requireTextLengthLessThanOrEqualTo(30).build());
   form.addDateItem().setTitle('Fica no ar até').setRequired(true);
 
-  const ss = SpreadsheetApp.create('Telão · respostas do mural');
+  const ss = SpreadsheetApp.create('Telão WeAxis · metas e mural');
   form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
   props.setProperty('FORM_ID', form.getId());
   props.setProperty('RESPOSTAS_ID', ss.getId());
-
-  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
-  ScriptApp.newTrigger('publicarMural').timeBased().everyMinutes(10).create();
-  ScriptApp.newTrigger('atualizarRuptura').timeBased().atHour(6).nearMinute(0).everyDays(1).inTimezone(CFG.FUSO).create();
-  ScriptApp.newTrigger('enviarEmailDiario').timeBased().atHour(7).nearMinute(30).everyDays(1).inTimezone(CFG.FUSO).create();
+  criarAbaMetas_(ss);
+  instalarGatilhos_(ss);
 
   Logger.log('Formulário (para os analistas): ' + form.getPublishedUrl());
   Logger.log('Edição do formulário: ' + form.getEditUrl());
-  Logger.log('Planilha de respostas: ' + ss.getUrl());
+  Logger.log('Planilha do telão (aba Metas = onde você altera a meta): ' + ss.getUrl());
+  Logger.log('Diagnóstico:\n' + diagnostico());
   Logger.log('FALTA 1 PASSO MANUAL: no formulário, adicione a pergunta "Upload de arquivo" com o título "Mídia (opcional)" (o Apps Script não consegue criar esse tipo).');
+}
+
+function instalarGatilhos_(ss) {
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('publicarMural').timeBased().everyMinutes(10).create();
+  ScriptApp.newTrigger('atualizarEstoque').timeBased().atHour(6).nearMinute(0).everyDays(1).inTimezone(CFG.FUSO).create();
+  ScriptApp.newTrigger('enviarEmailDiario').timeBased().atHour(7).nearMinute(30).everyDays(1).inTimezone(CFG.FUSO).create();
+  ScriptApp.newTrigger('publicarMetas').forSpreadsheet(ss).onEdit().create();
+  ScriptApp.newTrigger('montarMenu').forSpreadsheet(ss).onOpen().create();
+}
+
+// ===================================================================== metas (aba Metas da planilha do telão)
+
+function criarAbaMetas_(ss) {
+  const sh = ss.getSheetByName('Metas') || ss.insertSheet('Metas', 0);
+  sh.clear();
+  sh.getRange(1, 1, 1, 4).setValues([['Mês (AAAA-MM)', 'Meta da Domus (R$)', 'Exemplo? (sim/não)', 'Observação']]).setFontWeight('bold').setBackground('#212121').setFontColor('#ECFC30');
+  sh.getRange(2, 1, 1, 4).setValues([['2026-10', 21000000, 'sim', 'Itajaí + Londrina somadas']]);
+  sh.getRange('A:A').setNumberFormat('@'); sh.getRange('B:B').setNumberFormat('"R$" #,##0');
+  sh.setColumnWidths(1, 4, 190); sh.setFrozenRows(1);
+  sh.getRange('F1').setValue('Edite a linha do mês. O telão atualiza a meta, a projeção e o ritmo em cerca de 1 minuto.');
+}
+
+/** Lê a aba Metas: { 'AAAA-MM': { meta, exemplo } } */
+function lerMetas_() {
+  const id = PropertiesService.getScriptProperties().getProperty('RESPOSTAS_ID'); if (!id) return {};
+  const sh = SpreadsheetApp.openById(id).getSheetByName('Metas'); if (!sh) return {};
+  const out = {};
+  sh.getDataRange().getValues().slice(1).forEach(r => {
+    let mes = r[0] instanceof Date ? Utilities.formatDate(r[0], CFG.FUSO, 'yyyy-MM') : String(r[0]).trim();
+    const meta = typeof r[1] === 'number' ? r[1] : parseFloat(String(r[1]).replace(/R\$|\s|\./g, '').replace(',', '.'));
+    if (/^\d{4}-\d{2}$/.test(mes) && meta > 0) out[mes] = { meta, exemplo: /^s/i.test(String(r[2]).trim()) };
+  });
+  return out;
+}
+
+function publicarMetas(e) {
+  if (e && e.range && e.range.getSheet().getName() !== 'Metas') return;
+  const m = lerMetas_();
+  const out = Object.assign({ _info: 'Meta de faturamento por mês (R$), da empresa toda (Itajaí + Londrina). Gerado pela aba Metas da planilha do telão. Não editar à mão.' }, m);
+  Logger.log(publicar_('colunas/meta/metas.json', JSON.stringify(out, null, 1), 'metas: ' + Object.entries(m).map(([k, v]) => `${k} ${v.meta}`).join(', ')));
+}
+
+/** Projeção linear no ritmo atual e ritmo necessário até o fim do mês. */
+function projecao_(realizado, meta, refISO) {
+  const [y, mo, d] = refISO.split('-').map(Number), dias = new Date(y, mo, 0).getDate();
+  const ritmo = realizado / d, proj = ritmo * dias, falta = Math.max(0, meta - realizado), rest = dias - d;
+  return { dias, dia: d, ritmo, proj, pct_proj: proj / meta * 100, necessario: rest > 0 ? falta / rest : 0, restantes: rest };
+}
+
+/** Abre a aba da PAC com mensagem clara quando falta acesso ou o nome da aba mudou. */
+function abrirPac_(p) {
+  let ss;
+  try { ss = SpreadsheetApp.openById(p.id); }
+  catch (e) { throw new Error(`Sem acesso à PAC de ${p.nome}. Abra a planilha com a conta ${Session.getEffectiveUser().getEmail()} ou peça ao dono para compartilhar com ela. (${e.message})`); }
+  const sh = ss.getSheetByName(p.aba) || ss.getSheets().find(x => x.getName().trim().toLowerCase() === p.aba.trim().toLowerCase());
+  if (!sh) throw new Error(`Aba "${p.aba}" não existe na PAC de ${p.nome}. Abas: ${ss.getSheets().map(x => x.getName()).join(', ')}`);
+  return sh;
+}
+
+// ===================================================================== diagnóstico e atualização manual
+
+/** Rode quando algo não funcionar: testa cada etapa e diz o que falta, sem parar no primeiro erro. */
+function diagnostico() {
+  const ok = [], erro = [];
+  const t = (nome, fn) => { try { const r = fn(); ok.push(`OK  ${nome}${r ? ' · ' + r : ''}`); } catch (e) { erro.push(`ERRO ${nome} · ${e.message}`); } };
+  t('Conta que roda o script', () => Session.getEffectiveUser().getEmail());
+  Object.values(CFG.PACS).forEach(p => t(`PAC ${p.nome} (aba ${p.aba})`, () => { const v = abrirPac_(p).getDataRange().getValues(); const e = calcEstoque_(v, p.nome, p.base, p.aba); return `${e.skus} SKUs · estoque R$ ${Math.round(e.valor_custo).toLocaleString('pt-BR')} · ruptura ${e.pct_ruptura}%`; }));
+  t('Planilha do telão (metas e mural)', () => { const id = PropertiesService.getScriptProperties().getProperty('RESPOSTAS_ID'); if (!id) throw new Error('ainda não criada: rode configurarTudo'); return SpreadsheetApp.openById(id).getUrl(); });
+  t('Metas', () => JSON.stringify(lerMetas_()));
+  t('Gatilhos automáticos', () => { const g = ScriptApp.getProjectTriggers().map(x => x.getHandlerFunction()); if (!g.length) throw new Error('nenhum: rode configurarTudo'); return g.join(', '); });
+  t('GitHub', () => { if (!githubOk_()) throw new Error('falta GITHUB_OWNER no código e/ou GITHUB_TOKEN nas propriedades (o e-mail funciona sem isso)'); const r = gh_('README.md', 'get'); if (r.code !== 200) throw new Error('resposta ' + r.code + ' (token sem acesso ao repositório?)'); return 'acesso ok'; });
+  t('Cota de e-mail hoje', () => MailApp.getRemainingDailyQuota() + ' envios restantes');
+  const txt = [...ok, ...erro].join('\n');
+  Logger.log(txt);
+  return txt;
+}
+
+/** Menu "Telão" na planilha de metas e mural (instalado por configurarTudo). */
+function montarMenu() {
+  SpreadsheetApp.getUi().createMenu('Telão')
+    .addItem('Atualizar estoque agora', 'atualizarEstoque')
+    .addItem('Publicar mural agora', 'publicarMural')
+    .addItem('Publicar metas agora', 'publicarMetas')
+    .addItem('Enviar e-mail agora', 'enviarEmailDiario')
+    .addSeparator()
+    .addItem('Pedir notícias e análises novas', 'pedirAtualizacao')
+    .addItem('Atualizar tudo agora (Google) + pedir notícias', 'atualizarTudoAgora')
+    .addSeparator()
+    .addItem('Diagnóstico', 'diagnosticoNaTela')
+    .addToUi();
+}
+
+function diagnosticoNaTela() { SpreadsheetApp.getUi().alert('Diagnóstico do telão', diagnostico(), SpreadsheetApp.getUi().ButtonSet.OK); }
+
+/** Grava automacao/pedido.json no repositório. A rotina do Claude verifica esse pedido a cada hora (08h–19h) e roda faturamento + notícias na hora. */
+function pedirAtualizacao() {
+  const quem = Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail();
+  const r = publicar_('automacao/pedido.json', JSON.stringify({ pedido_em: agoraISO_(), por: quem, o_que: ['faturamento', 'noticias'] }, null, 1), `pedido de atualização manual (${quem})`);
+  const msg = r === 'sem GitHub' ? 'GitHub ainda não configurado: o pedido não pôde ser enviado.' : 'Pedido enviado. Notícias e faturamento entram no telão em até 1 hora.';
+  try { SpreadsheetApp.getActive().toast(msg, 'Telão', 8); } catch (e) { }
+  Logger.log(msg);
+}
+
+function atualizarTudoAgora() {
+  const passos = [['estoque', atualizarEstoque], ['metas', publicarMetas], ['mural', publicarMural], ['pedido de notícias', pedirAtualizacao]];
+  const res = passos.map(([n, fn]) => { try { fn(); return `OK ${n}`; } catch (e) { return `ERRO ${n}: ${e.message}`; } });
+  try { SpreadsheetApp.getActive().toast(res.join(' · '), 'Telão', 10); } catch (e) { }
+  Logger.log(res.join('\n'));
 }
 
 // ===================================================================== GitHub
 
+const githubOk_ = () => !!PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN') && CFG.GITHUB_OWNER !== 'NOME-DA-ORGANIZACAO';
+
 function gh_(path, method, body) {
+  if (!githubOk_()) return { code: 0, json: null };
   const url = `https://api.github.com/repos/${CFG.GITHUB_OWNER}/${CFG.GITHUB_REPO}/contents/${path}`;
   const r = UrlFetchApp.fetch(url + (method === 'get' ? `?ref=${CFG.GITHUB_BRANCH}` : ''), {
     method, muteHttpExceptions: true, contentType: 'application/json',
@@ -77,6 +197,7 @@ function gh_(path, method, body) {
 
 /** Grava (cria ou substitui) um arquivo no repositório. Só faz commit se o conteúdo mudou. */
 function publicar_(path, bytesOuTexto, msg) {
+  if (!githubOk_()) { Logger.log('GitHub ainda não configurado: não publiquei ' + path); return 'sem GitHub'; }
   const atual = gh_(path, 'get');
   const b64 = typeof bytesOuTexto === 'string'
     ? Utilities.base64Encode(bytesOuTexto, Utilities.Charset.UTF_8)
@@ -96,49 +217,77 @@ function lerRepo_(path) {
 const agoraISO_ = () => Utilities.formatDate(new Date(), CFG.FUSO, "yyyy-MM-dd'T'HH:mm:ssXXX");
 const hoje_ = () => Utilities.formatDate(new Date(), CFG.FUSO, 'yyyy-MM-dd');
 
-// ===================================================================== 1. ruptura (PAC)
+// ===================================================================== 1. estoque por filial (PACs)
 
-function calcularRuptura_() {
-  const sh = SpreadsheetApp.openById(CFG.PAC_ID).getSheetByName(CFG.PAC_ABA);
-  const v = sh.getDataRange().getValues();
-  // acha a linha de cabeçalho (a que contém "MVD") e as colunas pelo nome
+/** Quantidade e qualidade do estoque de uma PAC (matriz de valores com a linha de cabeçalho que contém "MVD"). */
+function calcEstoque_(v, nome, base, fonte) {
   const hi = v.findIndex(r => r.some(c => String(c).trim() === 'MVD'));
   const H = v[hi].map(c => String(c).trim());
-  const col = nome => { const i = H.indexOf(nome); return i >= 0 ? i : H.findIndex(h => h.endsWith(nome)); };
-  const C = { sku: col('SKU'), tit: col('Título'), forn: col('Fornecedor'), custo: col('Custo'), est: col('Estoque'), oc: col('OC Trânsito'), curva: col('Curva'), mvd: col('MVD') };
+  const col = n => { const i = H.indexOf(n); return i >= 0 ? i : H.findIndex(h => h.endsWith(n)); };
+  const C = { sku: col('SKU'), tit: col('Título'), forn: col('Fornecedor'), custo: col('Custo'), est: col('Estoque'), oc: col('OC Trânsito'), curva: col('Curva'), mvd: col('MVD'), emax: col('Emax') };
   const num = x => typeof x === 'number' ? x : (parseFloat(String(x).replace(/R\$|\s|\./g, '').replace(',', '.')) || 0);
-  const itens = v.slice(hi + 1).filter(r => r[C.sku]).map(r => ({
-    sku: String(r[C.sku]).trim(), titulo: String(r[C.tit]), forn: String(r[C.forn]), custo: num(r[C.custo]),
-    est: num(r[C.est]), oc: num(r[C.oc]), curva: String(r[C.curva]).trim() || '?', mvd: num(r[C.mvd]),
-  }));
-  const ativos = itens.filter(x => x.mvd > 0), rup = ativos.filter(x => x.est <= 0);
-  const perda = x => x.mvd * x.custo;
-  const soma = a => a.reduce((s, x) => s + perda(x), 0);
-  const curvas = {};
-  ['AA', 'A', 'B', 'C', 'D'].forEach(k => {
-    const a = ativos.filter(x => x.curva === k), r = a.filter(x => x.est <= 0);
-    curvas[k] = { ativos: a.length, ruptura: r.length, perda: Math.round(soma(r) * 100) / 100 };
-  });
-  const porForn = {};
-  rup.forEach(x => porForn[x.forn] = (porForn[x.forn] || 0) + perda(x));
-  const curto = n => n.replace(/\s+(INDUSTRIA|INDUSTRIAL|IMPORTADORA|DISTRIBUIDORA|ELETRODOMESTICOS|COMERCIO|LTDA|S\.?\s?A\.?|E|DA|DE|DO).*$/i, '').replace(/^O\.V\.D\.?$/i, 'O.V.D. (Vonder)');
+  const it = v.slice(hi + 1).filter(r => r[C.sku]).map(r => ({ sku: String(r[C.sku]).trim(), titulo: String(r[C.tit]), forn: String(r[C.forn]), custo: num(r[C.custo]), est: num(r[C.est]), oc: num(r[C.oc]), curva: String(r[C.curva]).trim() || '?', mvd: num(r[C.mvd]), emax: num(r[C.emax]) }));
+  const r2 = x => Math.round(x * 100) / 100;
+  const ativos = it.filter(x => x.mvd > 0), rup = ativos.filter(x => x.est <= 0);
+  const perda = x => x.mvd * x.custo, soma = (a, f) => a.reduce((s, x) => s + f(x), 0);
+  const comEst = it.filter(x => x.est > 0);
+  const valor = soma(comEst, x => x.est * x.custo);
+  const parado = comEst.filter(x => x.mvd <= 0);
+  const exc = comEst.filter(x => x.mvd > 0 && x.emax > 0 && x.est > x.emax);
+  const vParado = soma(parado, x => x.est * x.custo), vExc = soma(exc, x => (x.est - x.emax) * x.custo);
+  const vendaDiaCusto = soma(ativos, perda);
+  const curvas = {}; ['AA', 'A', 'B', 'C', 'D'].forEach(k => { const a = ativos.filter(x => x.curva === k), r = a.filter(x => x.est <= 0); curvas[k] = { ativos: a.length, ruptura: r.length, perda: r2(soma(r, perda)) }; });
+  const porForn = {}; rup.forEach(x => porForn[x.forn] = (porForn[x.forn] || 0) + perda(x));
+  const curto = n => n.replace(/\s+(INDUSTRIA|INDUSTRIAL|IMPORTADORA|DISTRIBUIDORA|ELETRODOMESTICOS|COMERCIO|LTDA|S\.?\s?A\.?|E|DA|DE|DO)\b.*$/i, '');
   return {
-    _info: 'Coluna 3 · Alertas de ruptura. Gerado pelo Apps Script a partir da PAC. Não editar à mão.',
-    atualizado_em: agoraISO_(), base: CFG.PAC_BASE, fonte: 'PAC · Processo Avançado de Compras - SC',
-    skus_ativos: ativos.length, skus_ruptura: rup.length,
-    pct_ruptura: Math.round(rup.length / Math.max(1, ativos.length) * 10000) / 100,
-    perda_dia_custo: Math.round(soma(rup) * 100) / 100,
-    pct_perda: Math.round(soma(rup) / Math.max(1, soma(ativos)) * 10000) / 100,
-    sem_oc: rup.filter(x => x.oc <= 0).length,
-    curvas,
-    top_fornecedores: Object.entries(porForn).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, p]) => ({ nome: curto(n), perda: Math.round(p * 100) / 100 })),
+    nome, base, fonte,
+    skus: it.length, skus_com_estoque: comEst.length, unidades: Math.round(soma(comEst, x => x.est)), valor_custo: r2(valor),
+    cobertura_dias: vendaDiaCusto ? Math.round(valor / vendaDiaCusto * 10) / 10 : null,
+    venda_dia_custo: r2(vendaDiaCusto),
+    saudavel_valor: r2(valor - vParado - vExc), excesso_valor: r2(vExc), excesso_skus: exc.length, parado_valor: r2(vParado), parado_skus: parado.length,
+    skus_ativos: ativos.length, skus_ruptura: rup.length, pct_ruptura: r2(rup.length / Math.max(1, ativos.length) * 100),
+    perda_dia_custo: r2(soma(rup, perda)), sem_oc: rup.filter(x => x.oc <= 0).length, curvas,
+    top_fornecedores: Object.entries(porForn).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, p]) => ({ nome: curto(n), perda: r2(p) })),
     top_skus: rup.sort((a, b) => perda(b) - perda(a)).slice(0, 5).map(x => ({ sku: x.sku, titulo: x.titulo.slice(0, 48), curva: x.curva, perda: Math.round(perda(x)), oc: x.oc })),
   };
 }
+// soma das filiais (contagens de SKU somadas por filial; cobertura recalculada pelo valor total)
+function totalEstoque_(fs) {
+  const s = k => fs.reduce((a, f) => a + (f[k] || 0), 0), r2 = x => Math.round(x * 100) / 100;
+  const curvas = {}; ['AA', 'A', 'B', 'C', 'D'].forEach(k => curvas[k] = { ativos: fs.reduce((a, f) => a + f.curvas[k].ativos, 0), ruptura: fs.reduce((a, f) => a + f.curvas[k].ruptura, 0), perda: r2(fs.reduce((a, f) => a + f.curvas[k].perda, 0)) });
+  const t = { nome: 'Domus', base: fs.map(f => f.nome).join(' + '), skus: s('skus'), skus_com_estoque: s('skus_com_estoque'), unidades: s('unidades'), valor_custo: r2(s('valor_custo')), venda_dia_custo: r2(s('venda_dia_custo')),
+    saudavel_valor: r2(s('saudavel_valor')), excesso_valor: r2(s('excesso_valor')), excesso_skus: s('excesso_skus'), parado_valor: r2(s('parado_valor')), parado_skus: s('parado_skus'),
+    skus_ativos: s('skus_ativos'), skus_ruptura: s('skus_ruptura'), perda_dia_custo: r2(s('perda_dia_custo')), sem_oc: s('sem_oc'), curvas };
+  t.pct_ruptura = r2(t.skus_ruptura / Math.max(1, t.skus_ativos) * 100);
+  t.cobertura_dias = t.venda_dia_custo ? Math.round(t.valor_custo / t.venda_dia_custo * 10) / 10 : null;
+  return t;
+}
 
-function atualizarRuptura() {
-  const r = calcularRuptura_();
-  Logger.log(publicar_('colunas/mural/ruptura.json', JSON.stringify(r, null, 1), `ruptura: ${r.pct_ruptura}% (${hoje_()})`));
+function calcularEstoque_() {
+  const filiais = {};
+  Object.entries(CFG.PACS).forEach(([k, p]) => {
+    if (!p.id) { filiais[k] = null; return; }
+    const v = abrirPac_(p).getDataRange().getValues();
+    const e = calcEstoque_(v, p.nome, p.base, `PAC ${p.base} · aba ${p.aba}`);
+    e.top_fornecedores.forEach(f => f.nome = f.nome.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()));
+    filiais[k] = e;
+  });
+  const ok = Object.values(filiais).filter(Boolean);
+  return {
+    _info: "Coluna 3 · Estoque por filial (quantidade e qualidade). Gerado pelo Apps Script a partir das PACs. Não editar à mão. 'total' só aparece quando todas as filiais têm PAC.",
+    atualizado_em: agoraISO_(), filiais,
+    total: ok.length === Object.keys(CFG.PACS).length && ok.length > 1 ? (() => {
+      const t = totalEstoque_(ok); t.base = ok.map(f => f.nome).join(' + ');
+      const pf = {}; ok.forEach(f => f.top_fornecedores.forEach(x => pf[x.nome] = (pf[x.nome] || 0) + x.perda));
+      t.top_fornecedores = Object.entries(pf).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([nome, perda]) => ({ nome, perda }));
+      return t; })() : null,
+  };
+}
+
+function atualizarEstoque() {
+  const e = calcularEstoque_();
+  const resumo = Object.values(e.filiais).filter(Boolean).map(f => `${f.nome} ${f.pct_ruptura}%`).join(', ');
+  Logger.log(publicar_('colunas/mural/estoque.json', JSON.stringify(e, null, 1), `estoque: ruptura ${resumo} (${hoje_()})`));
 }
 
 // ===================================================================== 2. mural (formulário)
@@ -203,25 +352,45 @@ function subirMidia_(id, url) {
 function enviarEmailDiario() {
   const meta = lerRepo_('colunas/meta/dados.json');
   const news = lerRepo_('colunas/noticias/dados.json');
-  let rup; try { rup = calcularRuptura_(); } catch (e) { rup = lerRepo_('colunas/mural/ruptura.json'); }
+  let est; try { est = calcularEstoque_(); } catch (e) { est = lerRepo_('colunas/mural/estoque.json'); }
   const brl = v => v >= 1e6 ? 'R$ ' + (v / 1e6).toFixed(2).replace('.', ',') + ' mi' : 'R$ ' + (v / 1e3).toFixed(1).replace('.', ',') + ' mil';
-  const pc = v => v.toFixed(1).replace('.', ',') + '%';
+  const pc = v => v == null ? '–' : v.toFixed(1).replace('.', ',') + '%';
   const ddmm = s => s.slice(8, 10) + '/' + s.slice(5, 7);
+  const th = 'style="text-align:right;padding:4px 10px;border-bottom:1px solid #ddd"', tl = 'style="text-align:left;padding:4px 10px;border-bottom:1px solid #ddd"';
+  const tabela = (cab, linhas) => `<table style="border-collapse:collapse;margin-top:8px;font-size:14px"><tr>${cab.map((c, i) => `<th ${i ? th : tl}>${c}</th>`).join('')}</tr>${linhas.map(l => `<tr>${l.map((c, i) => `<td ${i ? th : tl}>${c}</td>`).join('')}</tr>`).join('')}</table>`;
   const L = [];
-  L.push(`<div style="font-family:Arial,sans-serif;max-width:640px;color:#212121">`);
+  L.push(`<div style="font-family:Arial,sans-serif;max-width:680px;color:#212121">`);
   L.push(`<div style="background:#212121;color:#fff;padding:18px 22px;border-radius:10px 10px 0 0"><b style="color:#ECFC30;font-size:20px">Telão WeAxis</b><br>Resumo de ${Utilities.formatDate(new Date(), CFG.FUSO, 'dd/MM/yyyy')}</div>`);
   if (meta) {
-    const p = meta.realizado_mes / meta.meta_mes * 100, o = meta.ontem;
-    L.push(`<h3 style="margin:22px 0 6px">Meta do mês</h3><p style="margin:0">Realizado: <b>${brl(meta.realizado_mes)}</b> · ${pc(p)} da meta de ${brl(meta.meta_mes)}${meta.meta_exemplo ? ' (meta de exemplo)' : ''}<br>Ontem (${ddmm(o.data)}): <b>${brl(o.receita)}</b> · ${o.pedidos.toLocaleString('pt-BR')} pedidos · ticket R$ ${o.ticket.toFixed(2).replace('.', ',')}</p>`);
+    const mt = lerMetas_()[meta.mes]; if (mt) { meta.meta_mes = mt.meta; meta.meta_exemplo = mt.exemplo; }
+    const p = meta.realizado_mes / meta.meta_mes * 100, F = meta.filiais || {};
+    const pj = projecao_(meta.realizado_mes, meta.meta_mes, meta.referencia);
+    L.push(`<h3 style="margin:22px 0 6px">Faturamento · Domus (Itajaí + Londrina)</h3><p style="margin:0">No mês: <b>${brl(meta.realizado_mes)}</b>${meta.margem_pct_mes != null ? ' · margem ' + pc(meta.margem_pct_mes) : ''} · ${pc(p)} da meta de ${brl(meta.meta_mes)}${meta.meta_exemplo ? ' (meta de exemplo)' : ''}<br>Ontem (${ddmm(meta.ontem.data)}): <b>${brl(meta.ontem.receita)}</b> · ${meta.ontem.pedidos.toLocaleString('pt-BR')} pedidos<br>Projeção no ritmo atual (${brl(pj.ritmo)}/dia): <b>${brl(pj.proj)}</b> · ${pc(pj.pct_proj)} da meta${pj.restantes ? `<br>Para bater a meta: <b>${brl(pj.necessario)}/dia</b> nos ${pj.restantes} dias restantes` : ''}</p>`);
+    const ks = Object.keys(F);
+    const cel = v => v && v.receita ? `${brl(v.receita)} <span style="color:#777">· ${pc(v.margem_pct)}</span>` : '–';
+    if (meta.canais_mes) L.push(`<p style="margin:12px 0 0;color:#555">Canais no mês: receita · margem</p>` + tabela(['Canal', ...ks.map(k => F[k].nome), 'Domus'],
+      [...meta.canais_mes.map(c => [c.canal, ...ks.map(k => cel(c[k])), `<b>${cel(c.total)}</b>`]),
+       ['<b>Total</b>', ...ks.map(k => `<b>${cel({ receita: F[k].realizado_mes, margem_pct: F[k].margem_pct_mes })}</b>`), `<b>${cel({ receita: meta.realizado_mes, margem_pct: meta.margem_pct_mes })}</b>`]]));
   }
-  if (rup) {
-    L.push(`<h3 style="margin:22px 0 6px">Ruptura · ${rup.base}</h3><p style="margin:0"><b style="color:#D93838">${pc(rup.pct_ruptura)}</b> dos SKUs com venda estão sem estoque (${rup.skus_ruptura} de ${rup.skus_ativos})<br>Venda perdida a custo: <b>${brl(rup.perda_dia_custo)}/dia</b> · ${rup.sem_oc} sem OC em trânsito<br>Curva A em ruptura: ${rup.curvas.A.ruptura} SKUs (${brl(rup.curvas.A.perda)}/dia)</p>`);
-    L.push(`<ul style="margin:8px 0 0;padding-left:18px">${rup.top_skus.slice(0, 5).map(s => `<li>${s.titulo} · curva ${s.curva} · ${brl(s.perda)}/dia${s.oc ? ' · OC ' + s.oc : ' · sem OC'}</li>`).join('')}</ul>`);
+  if (est) {
+    const bl = Object.values(est.filiais).filter(Boolean); if (est.total) bl.push(est.total);
+    L.push(`<h3 style="margin:22px 0 6px">Estoque</h3>`);
+    L.push(tabela(['', ...bl.map(f => f.nome)], [
+      ['Valor a custo', ...bl.map(f => brl(f.valor_custo))],
+      ['Unidades', ...bl.map(f => f.unidades.toLocaleString('pt-BR'))],
+      ['Cobertura', ...bl.map(f => Math.round(f.cobertura_dias) + ' dias')],
+      ['Em excesso', ...bl.map(f => `${brl(f.excesso_valor)} (${pc(f.excesso_valor / f.valor_custo * 100)})`)],
+      ['Parado (sem venda)', ...bl.map(f => `${brl(f.parado_valor)} (${f.parado_skus} SKUs)`)],
+      ['<b style="color:#D93838">Ruptura</b>', ...bl.map(f => `<b style="color:#D93838">${pc(f.pct_ruptura)}</b> (${f.skus_ruptura} SKUs)`)],
+      ['Venda perdida/dia', ...bl.map(f => brl(f.perda_dia_custo))],
+      ['Curvas AA e A sem estoque', ...bl.map(f => `${f.curvas.AA.ruptura + f.curvas.A.ruptura} SKUs (${brl(f.curvas.AA.perda + f.curvas.A.perda)}/dia)`)],
+    ]));
+    Object.values(est.filiais).filter(Boolean).forEach(f => L.push(`<p style="margin:12px 0 0"><b>Maiores perdas · ${f.nome}</b></p><ul style="margin:4px 0 0;padding-left:18px">${f.top_skus.slice(0, 5).map(s => `<li>${s.titulo} · curva ${s.curva} · ${brl(s.perda)}/dia${s.oc ? ' · OC ' + s.oc : ' · sem OC'}</li>`).join('')}</ul>`));
   }
   if (news && news.itens) {
     L.push(`<h3 style="margin:22px 0 6px">Notícias de marketplaces</h3>`);
     news.itens.forEach(n => L.push(`<p style="margin:0 0 12px"><b>${n.manchete}</b><br>${n.detalhe || ''}<br><span style="color:#777">${n.fonte}${n.data_fonte ? ' · ' + n.data_fonte : ''}${n.url ? ` · <a href="${n.url}">ler</a>` : ''}</span></p>`));
   }
-  L.push(`<p style="color:#888;font-size:12px;margin-top:24px">Gerado automaticamente. Faturamento é D+1 (Preço Certo); ruptura vem da PAC.</p></div>`);
+  L.push(`<p style="color:#888;font-size:12px;margin-top:24px">Gerado automaticamente. Faturamento é D+1 (Preço Certo); estoque vem das PACs. Valores de estoque a custo.</p></div>`);
   MailApp.sendEmail({ to: CFG.EMAILS.join(','), subject: `Telão · resumo do dia ${Utilities.formatDate(new Date(), CFG.FUSO, 'dd/MM')}`, htmlBody: L.join('\n'), name: 'Telão WeAxis' });
 }
