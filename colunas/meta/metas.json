@@ -1,0 +1,8 @@
+{
+ "_info": "Metas de faturamento por mês (R$), da Domus (Itajaí + Londrina): meta = Meta 1, super = Meta 2, mega = Meta 3. Gerado pela aba Metas da planilha do telão. Não editar à mão.",
+ "2026-10": {
+  "meta": 21000000,
+  "super": 23000000,
+  "mega": 25000000
+ }
+}
