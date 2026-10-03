@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telão · Meta e faturamento</title>
+<!-- Coluna 1 · autônoma: só lê ./dados.json. Alterar este arquivo não afeta as outras colunas. -->
+<style>
+  @font-face { font-family:'Archivo'; src:url(archivo.woff2) format('woff2-variations'), url(archivo.woff2) format('woff2'); font-weight:100 900; font-stretch:62% 125%; font-display:block; }
+  :root { --ink:#212121; --deep:#141414; --lime:#ECFC30; --g3:#BDBDBD; --g2:#DCDCDC; --white:#fff; --line:#3A3A3A; --lo:#7FD6FF; --W:853px; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { width:100%; height:100%; background:var(--ink); overflow:hidden; }
+  body { font-family:'Archivo',sans-serif; color:var(--white); -webkit-font-smoothing:antialiased; }
+  #stage { position:absolute; left:0; top:0; width:var(--W); height:512px; transform-origin:0 0; background:var(--ink); overflow:hidden; }
+  .slide { position:absolute; inset:0; padding:60px 60px 0 60px; opacity:0; }
+  .slide.on { opacity:1; }
+  .mask { overflow:hidden; display:block; }
+  .mask > span { display:inline-block; transform:translateY(110%); transition:transform .8s cubic-bezier(.2,.9,.25,1); }
+  .on .mask > span { transform:translateY(0); }
+  .logo { height:40px; width:auto; color:var(--white); display:block; }
+  .top { display:flex; justify-content:space-between; align-items:center; height:48px; }
+  .badge { background:var(--lime); color:var(--ink); font-weight:600; font-size:44px; line-height:1; padding:6px 16px 9px; border-radius:8px; }
+  .lbl { font-size:46px; font-weight:500; color:var(--g3); margin-top:22px; line-height:1.05; }
+  .big { font-size:150px; font-weight:700; font-variation-settings:'wdth' 80; letter-spacing:-.02em; line-height:.95; margin-top:4px; white-space:nowrap; }
+  .sub { font-size:46px; font-weight:600; color:var(--lime); margin-top:10px; line-height:1.05; white-space:nowrap; }
+  .sub.grey { color:var(--g3); font-weight:500; }
+  svg.chart { position:absolute; left:60px; bottom:34px; width:733px; height:110px; overflow:visible; }
+  .bar-row { display:flex; align-items:center; gap:18px; height:78px; }
+  .bar-name { width:310px; font-size:44px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:clip; }
+  .bar-track { flex:1; height:26px; position:relative; }
+  .bar-fill { position:absolute; left:0; top:0; height:100%; background:var(--lime); border-radius:13px; width:0; transition:width 1.4s cubic-bezier(.2,.9,.25,1); }
+  .bar-val { width:150px; text-align:right; font-size:44px; font-weight:600; font-variation-settings:'wdth' 80; }
+  .top .ttl { font-size:46px; font-weight:600; white-space:nowrap; }
+  .chip { font-size:44px; font-weight:600; line-height:1; padding:8px 16px 10px; border-radius:30px; white-space:nowrap; }
+  .chip.emp { border:3px solid #fff; color:#fff; padding:5px 16px 7px 12px; }
+  .chip.emp i { display:inline-block; width:18px; height:18px; border-radius:50%; margin-right:6px; vertical-align:1px; }
+  .ex { font-size:36px; font-weight:600; background:var(--lime); color:var(--ink); padding:2px 10px 4px; border-radius:6px; margin-left:8px; vertical-align:4px; }
+  .dotc { display:inline-block; width:26px; height:26px; border-radius:50%; margin-right:14px; vertical-align:0; }
+  .fl-row { font-size:46px; font-weight:500; margin-top:10px; white-space:nowrap; }
+  .fl-row b { font-weight:600; margin-right:10px; } .fl-row em { font-style:normal; color:var(--g3); margin-left:18px; }
+  .cx-h { display:flex; justify-content:flex-end; gap:16px; font-size:44px; color:var(--g3); margin-top:14px; height:46px; }
+  .cx-h span:first-child { width:190px; text-align:right; } .cx-h span:last-child { width:130px; text-align:right; }
+  .cx-mg { width:130px; text-align:right; font-size:44px; font-weight:600; font-variation-settings:'wdth' 80; color:var(--g3); white-space:nowrap; }
+  .cx-name i { display:inline-block; width:16px; height:16px; border-radius:50%; margin-right:10px; vertical-align:4px; }
+  .cx-row { display:flex; align-items:center; gap:16px; height:64px; }
+  .cx-name { width:272px; font-size:44px; font-weight:600; font-variation-settings:'wdth' 76; white-space:nowrap; }
+  .cx-track { flex:1; height:22px; display:flex; border-radius:15px; overflow:hidden; background:#2E2E2E; }
+  .cx-it, .cx-lo { height:100%; width:0; transition:width 1.4s cubic-bezier(.2,.9,.25,1); }
+  .cx-it { background:var(--lime); } .cx-lo { background:var(--lo); }
+  .cx-val { width:190px; text-align:right; font-size:44px; font-weight:600; font-variation-settings:'wdth' 80; white-space:nowrap; }
+  .leg { display:flex; gap:26px; font-size:44px; font-weight:500; color:var(--g3); }
+  .leg i { display:inline-block; width:22px; height:22px; border-radius:50%; margin-right:10px; vertical-align:-1px; }
+  .fil { display:flex; align-items:baseline; justify-content:space-between; margin-top:16px; }
+  .fil-n { font-size:48px; font-weight:600; color:var(--g3); }
+  .fil-v { font-size:92px; font-weight:700; font-variation-settings:'wdth' 80; letter-spacing:-.02em; line-height:1; }
+  .fil-p { font-size:44px; font-weight:600; margin-top:0; white-space:nowrap; }
+  .split { display:flex; height:16px; border-radius:8px; overflow:hidden; margin-top:18px; background:#2E2E2E; }
+  .split > div { width:0; transition:width 1.4s cubic-bezier(.2,.9,.25,1); }
+  .dg { margin-top:16px; }
+  .dg-l { display:flex; align-items:baseline; gap:18px; font-size:46px; font-weight:600; white-space:nowrap; }
+  .dg-n { width:270px; } .dg-v { font-variation-settings:'wdth' 80; flex:1; } .dg-p { font-variation-settings:'wdth' 80; color:var(--g3); }
+  .dg-t { position:relative; height:20px; margin-top:8px; background:#2E2E2E; border-radius:10px; overflow:hidden; }
+  .dg-f, .dg-proj { position:absolute; left:0; top:0; height:100%; width:0; border-radius:10px; transition:width 1.4s cubic-bezier(.2,.9,.25,1); }
+  .dg-proj { border:3px dashed; box-sizing:border-box; } .on .dg-f, .on .dg-proj { width:var(--w); }
+  #wipe { position:absolute; inset:0; pointer-events:none; }
+  #prog { position:absolute; left:0; bottom:0; height:8px; background:var(--lime); width:0; }
+  .stale { position:absolute; right:60px; bottom:20px; font-size:28px; color:#ff8a80; display:none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="slides"></div>
+  <svg id="wipe" viewBox="0 0 853 512" preserveAspectRatio="none"><ellipse id="wipeE" cx="1100" cy="256" rx="0" ry="0" fill="#ECFC30"/></svg>
+  <div id="prog"></div>
+</div>
+<script>
+// ---------- utilidades (cópia local, propositalmente não compartilhada) ----------
+const LOGO = `<svg class="logo" viewBox="0 0 669.56 186.67" xmlns="http://www.w3.org/2000/svg" aria-label="weaxis"><path fill="currentColor" d="M220.4 37.46L239.45 37.46L253.12 125.04L267.61 37.46L288.61 37.46L303.27 125.04L316.78 37.46L335.82 37.46L316.13 143.27L292.68 143.27L278.03 53.9L262.73 143.27L240.26 143.27L220.4 37.46ZM340.32 105.67L340.32 75.06C340.32 49.5 351.72 35.83 375.32 35.83C397.95 35.83 409.51 48.85 409.51 74.9L409.51 94.6L359.86 94.6L359.86 108.92C359.86 123.25 365.06 128.95 375.48 128.95C384.6 128.95 389 124.39 389.32 112.67L389.48 108.51L409.18 108.51L409.18 109.41C408.53 132.37 397.79 144.9 375.32 144.9C351.72 144.9 340.32 131.23 340.32 105.67ZM359.86 80.6L389.97 80.6L389.97 69.85C389.48 56.34 384.27 51.78 375.32 51.78C365.06 51.78 359.86 57.48 359.86 71.97L359.86 80.6ZM467.18 143.27L467.18 128.46C462.13 140.02 452.53 144.9 441.3 144.9C426.81 144.9 416.88 136.6 416.88 118.2C416.88 99.97 429.57 90.85 440.81 85.64L448.13 82.39C457.58 77.83 466.69 73.6 466.69 64.48L466.69 63.01C466.69 56.67 463.44 51.78 453.67 51.78C443.58 51.78 438.37 56.83 438.37 66.76L438.45 72.47L419.24 72.47L419.16 69.53C419.16 49.18 429.25 35.83 453.51 35.83C477.76 35.83 485.74 48.2 485.74 67.25L485.74 143.27L467.18 143.27ZM436.25 115.44C436.25 123.58 440.32 127.97 448.3 127.97C459.53 127.97 466.69 118.2 466.69 101.11L466.69 85.32C465.06 90.04 460.02 92.48 453.83 95.9L447.65 99.16C440.64 103.06 436.25 107.78 436.25 115.44ZM490.99 143.27L517.36 88.57L493.1 37.46L513.94 37.46L529.41 72.29L544.87 37.46L564.57 37.46L540.15 88.57L566.53 143.27L545.69 143.27L528.11 104.85L510.69 143.27L490.99 143.27ZM572.22 37.46L591.26 37.46L591.26 143.27L572.22 143.27L572.22 37.46ZM650.68 86.46C664.03 93.46 669.56 100.95 669.56 114.62C669.56 130.9 661.58 144.9 635.86 144.9C612.74 144.9 601.19 134.16 601.19 113.48L601.19 108.4L620.72 108.4L620.72 113.16C620.72 124.39 625.28 128.95 636.02 128.95C646.44 128.95 650.02 124.55 650.02 115.76C650.02 108.6 647.58 105.02 637.65 99.16L621.53 90.36C609.49 84.67 602.49 77.18 602.49 63.67C602.49 49.18 610.79 35.83 635.37 35.83C658.65 35.83 668.75 47.22 668.75 65.94L668.63 72.52L649.1 72.52L649.21 66.11C649.21 55.53 644.49 51.78 635.21 51.78C626.91 51.78 622.02 55.36 622.02 62.85C622.02 68.88 624.79 72.13 632.12 76.04L650.68 86.46ZM581.49 1.95C588.5 1.95 594.18 7.12 594.18 13.49C594.18 19.86 588.5 25.03 581.49 25.03C574.48 25.03 568.8 19.86 568.8 13.49C568.8 7.12 574.48 1.95 581.49 1.95ZM118.47 87.27C135.63 117.2 126.85 154.5 98.87 170.58C70.89 186.67 34.3 175.45 17.15 145.52C0 115.6 8.77 78.3 36.75 62.21C64.73 46.13 101.32 57.35 118.47 87.27ZM189.75 82.13C194.81 116.44 186.85 146.03 171.97 148.23C157.09 150.43 140.93 124.41 135.87 90.1C130.81 55.79 138.77 26.2 153.65 24C168.52 21.8 184.69 47.82 189.75 82.13ZM81.12 38.63C47.42 47.68 18.38 48.59 16.26 40.67C14.14 32.75 39.75 19.01 73.45 9.96C107.15 0.92 136.19 0 138.31 7.92C140.42 15.84 114.82 29.59 81.12 38.63Z"/></svg>`;
+const $ = s => document.querySelector(s);
+const fmtBRL = v => {
+  if (v >= 1e6) return 'R$ ' + (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: v >= 1e7 ? 1 : 2, minimumFractionDigits: 1 }) + ' mi';
+  if (v >= 1e3) return 'R$ ' + (v / 1e3).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' mil';
+  return 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+};
+const fmtC = v => v >= 1e6 ? 'R$ ' + (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mi' : v >= 1e4 ? 'R$ ' + Math.round(v / 1e3) + ' mil' : v >= 1e3 ? 'R$ ' + (v / 1e3).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mil' : 'R$ ' + Math.round(v);
+const FIL = [['itajai', 'Itajaí', '#ECFC30'], ['londrina', 'Londrina', '#7FD6FF']];   // cores fixas por filial em todo o telão
+const pct = v => v.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+const ddmm = iso => iso.slice(8, 10) + '/' + iso.slice(5, 7);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const ease = x => 1 - Math.pow(1 - x, 3);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+function tween(ms, fn) { return new Promise(res => { const t0 = performance.now(); (function f(t) { const p = Math.max(0, Math.min(1, (t - t0) / ms)); fn(p); p < 1 ? requestAnimationFrame(f) : res(); })(t0); }); }
+function fit() { const s = Math.min(innerWidth / 853, innerHeight / 512); $('#stage').style.transform = `scale(${s})`; }
+addEventListener('resize', fit); fit();
+// contagem do número (formato brasileiro)
+function countUp(el, target, ms = 1600) { tween(ms, p => el.textContent = fmtBRL(target * ease(p))); }
+
+// ---------- dados ----------
+let D = null;
+async function load() {
+  try { const r = await fetch('dados.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) D = await r.json(); } catch (e) { }
+  // a meta vem de metas.json (aba Metas da planilha): muda no telão sem esperar a rotina do dia seguinte
+  try { const r = await fetch('metas.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok && D) { const m = (await r.json())[D.mes]; if (m && m.meta) { D.meta_mes = m.meta; D.niveis = NIVEIS.filter(([k]) => m[k] > 0).map(([k, nome, cor]) => ({ k, nome, cor, valor: m[k] })); } } } catch (e) { }
+  return D;
+}
+// projeção linear no ritmo atual e ritmo necessário até o fim do mês
+function projecao() {
+  const n = diasNoMes(D.mes), d = Number(D.referencia.slice(8, 10));
+  const ritmo = D.realizado_mes / d, proj = ritmo * n, rest = n - d;
+  return { n, d, ritmo, proj, pct: proj / D.meta_mes * 100, rest, necessario: rest > 0 ? Math.max(0, D.meta_mes - D.realizado_mes) / rest : 0 };
+}
+
+// ---------- slides ----------
+function diasNoMes(mes) { const [y, m] = mes.split('-').map(Number); return new Date(y, m, 0).getDate(); }
+
+// ---------- cabeçalho com escopo: deixa claro se o número é da empresa toda ou de uma filial ----------
+// meta escalonada: Meta 1, Meta 2 e Meta 3 (no JSON: meta, super, mega)
+const NIVEIS = [['meta', 'Meta 1', '#ECFC30'], ['super', 'Meta 2', '#7FD6FF'], ['mega', 'Meta 3', '#FF9F43']];
+const niveis = () => (D.niveis && D.niveis.length) ? D.niveis : [{ k: 'meta', nome: 'Meta 1', cor: '#ECFC30', valor: D.meta_mes }];
+const COR_CANAL = { 'Shopee': '#EE4D2D', 'Mercado Livre': '#FFE600', 'Amazon': '#FF9900', 'Magalu': '#0086FF', 'TikTok Shop': '#FE2C55', 'Outros': '#BDBDBD' };
+const CANAIS = ['Shopee', 'Mercado Livre', 'Amazon', 'Magalu', 'TikTok Shop'];   // sempre os cinco, mesmo zerados
+function chip(esc) {
+  if (esc === 'itajai') return `<span class="chip" style="background:#ECFC30;color:#212121">Itajaí</span>`;
+  if (esc === 'londrina') return `<span class="chip" style="background:#7FD6FF;color:#212121">Londrina</span>`;
+  return `<span class="chip emp"><i style="background:#ECFC30"></i><i style="background:#7FD6FF"></i>Domus</span>`;
+}
+const head = (titulo, esc) => `<div class="top"><span class="ttl">${titulo}</span>${chip(esc)}</div>`;
+const mg = v => v == null ? '–' : v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+const canal = (lista, nome) => (lista || []).find(c => c.canal === nome) || { canal: nome, itajai: { receita: 0 }, londrina: { receita: 0 }, total: { receita: 0 } };
+
+function slideMes() {
+  const n = diasNoMes(D.mes), meta = D.meta_mes, real = D.realizado_mes;
+  const p = real / meta * 100;
+  const el = document.createElement('div'); el.className = 'slide';
+  el.innerHTML = `
+    <div class="top">${LOGO}<span>${chip('empresa')}</span></div>
+    <div class="lbl mask"><span>Realizado no mês${D.margem_pct_mes != null ? ` · margem ${mg(D.margem_pct_mes)}` : ''}</span></div>
+    <div class="big mask"><span class="num">R$ 0</span></div>
+    <div class="sub mask"><span>${pct(p)} da Meta 1 de ${fmtBRL(meta)}</span></div>
+    <svg class="chart" viewBox="0 0 733 110" preserveAspectRatio="none"></svg>`;
+  // gráfico: acumulado real (lima) e ritmo necessário (tracejado) até a meta
+  const svg = el.querySelector('svg.chart');
+  let acc = 0; const pts = [[0, 0]];
+  const dias = [...D.dias].sort((a, b) => a.data.localeCompare(b.data));
+  for (const d of dias) { acc += d.receita; pts.push([Number(d.data.slice(8, 10)), acc]); }
+  const topo = Math.max(...niveis().map(x => x.valor));
+  const X = d => d / n * 733, Y = v => 104 - Math.min(1.05, v / topo) * 100;
+  const real_d = 'M' + pts.map(([d, v]) => `${X(d).toFixed(1)} ${Y(v).toFixed(1)}`).join(' L');
+  const last = pts[pts.length - 1];
+  svg.innerHTML = `
+    ${niveis().map(x => `<line x1="0" y1="${Y(0)}" x2="733" y2="${Y(x.valor)}" stroke="${x.cor}" stroke-opacity=".55" stroke-width="4" stroke-dasharray="18 16"/>`).join('')}
+    <path class="rl" d="${real_d}" fill="none" stroke="#ECFC30" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle class="dot" cx="${X(last[0])}" cy="${Y(last[1])}" r="0" fill="#ECFC30"/>`;
+  el._play = async () => {
+    countUp(el.querySelector('.num'), real);
+    const path = svg.querySelector('.rl'); const L = path.getTotalLength() || 1;
+    path.style.strokeDasharray = L; path.style.strokeDashoffset = L;
+    await sleep(500);
+    await tween(1400, q => path.style.strokeDashoffset = L * (1 - eio(q)));
+    const c = svg.querySelector('.dot');
+    await tween(500, q => { const k = q < 1 ? 1 + 0.6 * Math.sin(q * Math.PI) : 1; c.setAttribute('r', 11 * Math.min(1, q * 2) * k); });
+  };
+  return el;
+}
+
+function slideProjecao() {
+  const P = projecao(), nv = niveis();
+  const alc = nv.filter(x => P.proj >= x.valor).pop(), prox = nv.find(x => P.proj < x.valor);
+  const el = document.createElement('div'); el.className = 'slide';
+  el.innerHTML = `
+    ${head('Projeção do mês', 'empresa')}
+    <div class="lbl mask"><span>Fechamento no ritmo atual</span></div>
+    <div class="big mask"><span class="num">R$ 0</span></div>
+    <div class="sub mask" style="color:${alc ? alc.cor : '#F25C5C'}"><span>${alc ? `Bate a ${alc.nome} · ${pct(P.proj / alc.valor * 100)}` : `${pct(P.pct)} da Meta 1`}</span></div>
+    <div class="sub grey mask" style="margin-top:12px"><span>Ritmo atual: ${fmtC(P.ritmo)}/dia</span></div>
+    <div class="sub grey mask" style="margin-top:4px"><span>${P.rest && prox ? `${prox.nome} pede ${fmtC(Math.max(0, prox.valor - D.realizado_mes) / P.rest)}/dia` : (P.rest ? 'Acima da Mega meta' : 'Mês fechado')}</span></div>`;
+  el._play = async () => countUp(el.querySelector('.num'), P.proj);
+  return el;
+}
+
+// os três degraus: quanto já foi feito de cada um e quanto falta por dia
+function slideDegraus() {
+  const nv = niveis(); if (nv.length < 2) return null;
+  const P = projecao();
+  const el = document.createElement('div'); el.className = 'slide';
+  el.innerHTML = `
+    ${head('Degraus da meta', 'empresa')}
+    ${nv.map(x => { const feito = D.realizado_mes / x.valor * 100, proj = P.proj / x.valor * 100;
+      return `<div class="dg"><div class="dg-l"><span class="dg-n" style="color:${x.cor}">${x.nome}</span><span class="dg-v">${fmtBRL(x.valor)}</span><span class="dg-p">${pct(feito)}</span></div>
+        <div class="dg-t"><div class="dg-proj" style="--w:${Math.min(100, proj).toFixed(1)}%;border-color:${x.cor}"></div><div class="dg-f" style="--w:${Math.min(100, feito).toFixed(1)}%;background:${x.cor}"></div></div></div>`; }).join('')}
+    <div class="sub grey mask" style="margin-top:6px;font-size:44px"><span>Cheio = feito · tracejado = projeção</span></div>`;
+  return el;
+}
+
+function slideOntem() {
+  const o = D.ontem, n = diasNoMes(D.mes);
+  const ritmo = o.receita / (D.meta_mes / n) * 100;
+  const el = document.createElement('div'); el.className = 'slide';
+  el.innerHTML = `
+    ${head(`Ontem · ${ddmm(o.data)} · D+1`, 'empresa')}
+    <div class="lbl mask"><span>Faturamento · Itajaí + Londrina</span></div>
+    <div class="big mask"><span class="num">R$ 0</span></div>
+    <div class="sub mask"><span>${pct(ritmo)} do ritmo da meta</span></div>
+    <div class="sub grey mask" style="margin-top:14px"><span>${FIL.map(([k, nm]) => `${nm} ${fmtC(D.filiais[k].ontem.receita).replace('R$ ', '')}`).join(' · ')}</span></div>`;
+  el._play = async () => countUp(el.querySelector('.num'), o.receita);
+  return el;
+}
+
+function slideFiliais() {
+  const F = D.filiais; if (!F) return null;
+  const tot = D.realizado_mes || 1;
+  const el = document.createElement('div'); el.className = 'slide';
+  el.innerHTML = `
+    ${head('Filiais · no mês', 'empresa')}
+    ${FIL.map(([k, nm, cor]) => { const f = F[k];
+      return `<div class="fil"><div class="fil-n mask"><span>${nm}</span></div><div class="fil-v mask"><span class="num" data-v="${f.realizado_mes}">R$ 0</span></div></div>
+        <div class="fil-p mask" style="color:${cor}"><span>${pct(f.realizado_mes / tot * 100)} da Domus · margem ${mg(f.margem_pct_mes)}</span></div>`; }).join('')}
+    <div class="split">${FIL.map(([k, , cor]) => `<div style="background:${cor}" data-w="${(F[k].realizado_mes / tot * 100).toFixed(2)}"></div>`).join('')}</div>`;
+  el._play = async () => {
+    el.querySelectorAll('.num').forEach(n => countUp(n, Number(n.dataset.v)));
+    await sleep(400); el.querySelectorAll('.split > div').forEach(b => b.style.width = b.dataset.w + '%');
+  };
+  return el;
+}
+
+// tabela de canais: receita (barra) e margem. esc = 'empresa' (barra empilhada Itajaí + Londrina) | 'itajai' | 'londrina'
+function slideCanais(esc) {
+  const lista = D.canais_mes || [];
+  const linhas = CANAIS.map(n => canal(lista, n));
+  const val = c => esc === 'empresa' ? c.total : (c[esc] || { receita: 0 });
+  const maior = Math.max(...linhas.map(c => val(c).receita)) || 1;
+  const el = document.createElement('div'); el.className = 'slide';
+  el.innerHTML = `
+    ${head('Canais · mês', esc)}
+    <div class="cx-h"><span>receita</span><span>margem</span></div>
+    ${linhas.map(c => { const v = val(c);
+      const barras = esc === 'empresa'
+        ? `<div class="cx-it" data-w="${((c.itajai?.receita || 0) / maior * 100).toFixed(2)}"></div><div class="cx-lo" data-w="${((c.londrina?.receita || 0) / maior * 100).toFixed(2)}"></div>`
+        : `<div class="${esc === 'itajai' ? 'cx-it' : 'cx-lo'}" data-w="${(v.receita / maior * 100).toFixed(2)}"></div>`;
+      return `<div class="cx-row"><div class="cx-name"><i style="background:${COR_CANAL[c.canal]}"></i>${c.canal}</div>
+        <div class="cx-track">${barras}</div>
+        <div class="cx-val">${v.receita ? fmtC(v.receita) : '–'}</div><div class="cx-mg">${v.receita ? mg(v.margem_pct) : '–'}</div></div>`; }).join('')}`;
+  el._play = async () => { await sleep(300); el.querySelectorAll('.cx-row').forEach((r, i) => setTimeout(() => r.querySelectorAll('[data-w]').forEach(b => b.style.width = b.dataset.w + '%'), i * 120)); };
+  return el;
+}
+
+// foco num canal: total da empresa no canal + cada filial, sempre com margem
+function slideCanal(nome) {
+  const c = canal(D.canais_mes, nome);
+  if (!c.total.receita) return null;   // canal sem venda no mês não ganha slide de foco (aparece zerado na tabela)
+  const el = document.createElement('div'); el.className = 'slide';
+  el.innerHTML = `
+    ${head(`<i class="dotc" style="background:${COR_CANAL[nome]}"></i>${nome} · mês`, 'empresa')}
+    <div class="lbl mask"><span>Receita do canal · Itajaí + Londrina</span></div>
+    <div class="big mask" style="font-size:132px"><span class="num">R$ 0</span></div>
+    <div class="sub mask"><span>margem ${mg(c.total.margem_pct)} · ${c.total.pedidos.toLocaleString('pt-BR')} pedidos</span></div>
+    ${FIL.map(([k, nm, cor]) => { const v = c[k] || { receita: 0 };
+      return `<div class="fl-row mask"><span><b style="color:${cor}">${nm}</b> ${v.receita ? fmtC(v.receita) : '–'}<em>${v.receita ? 'margem ' + mg(v.margem_pct) : 'sem venda'}</em></span></div>`; }).join('')}`;
+  el._play = async () => countUp(el.querySelector('.num'), c.total.receita);
+  return el;
+}
+
+// passagem entre slides: a elipse vertical do símbolo ("o próximo passo") cruza a coluna
+async function passagem(trocar) {
+  const e = $('#wipeE');
+  await tween(520, p => { const k = eio(p); e.setAttribute('cx', 1000 - k * 570); e.setAttribute('rx', 40 + k * 640); e.setAttribute('ry', 240 + k * 420); });
+  trocar();
+  await tween(520, p => { const k = eio(p); e.setAttribute('cx', 430 - k * 1100); e.setAttribute('rx', 680 - k * 640); e.setAttribute('ry', 660 - k * 420); });
+  e.setAttribute('rx', 0);
+}
+
+const DUR = 11000;
+async function loop() {
+  await load();
+  if (!D) { await sleep(5000); return loop(); }
+  const host = $('#slides');
+  const seq = [slideMes, slideProjecao, slideDegraus, slideFiliais, slideOntem,
+    () => slideCanais('empresa'), () => slideCanais('itajai'), () => slideCanais('londrina'),
+    ...CANAIS.map(n => () => slideCanal(n))];
+  for (const make of seq) {
+    let el; try { el = make(); } catch (e) { console.error(e); continue; }
+    if (!el) continue;
+    await passagem(() => { host.innerHTML = ''; host.appendChild(el); void el.offsetWidth; el.classList.add('on'); });
+    el._play && el._play();
+    const pr = $('#prog'); pr.style.width = '0';
+    await tween(DUR, p => pr.style.width = (p * 100) + '%');
+  }
+  loop();
+}
+loop();
+// recarrega a página toda madrugada para pegar mudanças de código
+setInterval(() => { const h = new Date(); if (h.getHours() === 5 && h.getMinutes() === 30) location.reload(); }, 60000);
+</script>
+</body>
+</html>

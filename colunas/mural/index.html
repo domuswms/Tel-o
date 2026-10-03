@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telão · Mural e ruptura</title>
+<!-- Coluna 3 · autônoma: lê ./estoque.json (PACs por filial) e ./mural.json (formulário dos analistas), alternando os dois. -->
+<style>
+  @font-face { font-family:'Archivo'; src:url(archivo.woff2) format('woff2-variations'), url(archivo.woff2) format('woff2'); font-weight:100 900; font-stretch:62% 125%; font-display:block; }
+  :root { --ink:#212121; --lime:#ECFC30; --g3:#BDBDBD; --red:#F25C5C; --W:853px; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { width:100%; height:100%; background:var(--ink); overflow:hidden; }
+  body { font-family:'Archivo',sans-serif; color:#fff; -webkit-font-smoothing:antialiased; }
+  #stage { position:absolute; left:0; top:0; width:var(--W); height:512px; transform-origin:0 0; overflow:hidden; background:var(--ink); }
+  #fx { position:absolute; inset:0; pointer-events:none; }
+  .card { position:absolute; inset:0; padding:56px 60px 0 60px; }
+  .mask { overflow:hidden; display:block; padding-bottom:.06em; }
+  .mask > span { display:inline-block; transform:translateY(115%); transition:transform .75s cubic-bezier(.2,.9,.25,1); }
+  .on .mask > span { transform:translateY(0); }
+  .out .mask > span { transform:translateY(-115%); transition:transform .45s cubic-bezier(.6,0,.8,.3); }
+  .d1 > span { transition-delay:.12s } .d2 > span { transition-delay:.24s } .d3 > span { transition-delay:.36s } .d4 > span { transition-delay:.48s }
+  .top { display:flex; align-items:center; gap:22px; height:60px; white-space:nowrap; }
+  .badge { font-size:42px; font-weight:600; line-height:1; padding:9px 18px 11px; border-radius:8px; transform:scaleX(0); transform-origin:0 50%; transition:transform .5s cubic-bezier(.2,.9,.25,1); }
+  .on .badge { transform:scaleX(1); }
+  .meta-l { font-size:44px; font-weight:500; color:var(--g3); overflow:hidden; text-overflow:ellipsis; }
+  .tit { font-size:58px; font-weight:600; line-height:1.08; margin-top:20px; }
+  .tit .ln { display:block; overflow:hidden; white-space:nowrap; }
+  .tit .ln > span { display:inline-block; transform:translateY(115%); transition:transform .75s cubic-bezier(.2,.9,.25,1) .15s; }
+  .on .tit .ln > span { transform:translateY(0); }
+  .out .tit .ln > span { transform:translateY(-115%); transition:transform .45s; }
+  .num { font-size:130px; font-weight:700; font-variation-settings:'wdth' 80; letter-spacing:-.02em; line-height:1; margin-top:6px; white-space:nowrap; }
+  .txt { font-size:46px; font-weight:500; line-height:1.12; margin-top:8px; }
+  .txt .ln { display:block; overflow:hidden; white-space:nowrap; }
+  .txt .ln > span { display:inline-block; transform:translateY(115%); transition:transform .75s cubic-bezier(.2,.9,.25,1) .45s; }
+  .on .txt .ln > span { transform:translateY(0); }
+  .out .txt .ln > span { transform:translateY(-115%); transition:transform .45s; }
+  .foot { position:absolute; left:60px; bottom:36px; font-size:44px; color:var(--g3); white-space:nowrap; }
+  .qbar { position:absolute; left:60px; right:60px; top:404px; height:16px; border-radius:8px; overflow:hidden; display:flex; background:#2E2E2E; }
+  .qbar > div { width:0; transition:width 1.3s cubic-bezier(.2,.9,.25,1) .5s; }
+  .on .qbar > div { width:var(--w); }
+  .lst { margin-top:12px; } .li { font-size:44px; font-weight:500; line-height:1.22; white-space:nowrap; }
+  .media { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .media-cap { position:absolute; left:0; right:0; bottom:0; padding:22px 60px 30px; background:linear-gradient(transparent, rgba(20,20,20,.92) 40%); }
+  #prog { position:absolute; left:0; bottom:0; height:8px; width:0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="fx" viewBox="0 0 853 512" preserveAspectRatio="none"></svg>
+  <div id="host"></div>
+  <div id="prog"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const ease = x => 1 - Math.pow(1 - x, 3), eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eback = (x, s = 1.9) => { x -= 1; return x * x * ((s + 1) * x + s) + 1; };
+function tween(ms, fn) { return new Promise(res => { const t0 = performance.now(); (function f(t) { const p = Math.max(0, Math.min(1, (t - t0) / ms)); fn(p); p < 1 ? requestAnimationFrame(f) : res(); })(t0); }); }
+function fit() { const s = Math.min(innerWidth / 853, innerHeight / 512); $('#stage').style.transform = `scale(${s})`; }
+addEventListener('resize', fit); fit();
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtBRL = v => v >= 1e6 ? 'R$ ' + (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' mi' : v >= 1e3 ? 'R$ ' + (v / 1e3).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' mil' : 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+const nSku = n => `${(n || 0).toLocaleString('pt-BR')} ${n === 1 ? 'SKU' : 'SKUs'}`;
+const pct = v => v.toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%';
+function conta(s, p) { const m = s.match(/\d+(?:[.,]\d+)?/); if (!m || s.includes('/')) return s; const raw = m[0], dec = raw.includes(',') ? raw.split(',')[1].length : 0; const v = parseFloat(raw.replace(/\./g, '').replace(',', '.')); if (v < 10 && !dec) return s; const c = v * p; const t = dec ? c.toFixed(dec).replace('.', ',') : String(Math.round(c)); return s.slice(0, m.index) + t + s.slice(m.index + raw.length); }
+const M = document.createElement('span'); M.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;font-family:Archivo'; document.body.appendChild(M);
+function mw(s, z, w) { M.style.fontSize = z + 'px'; M.style.fontWeight = w; M.textContent = s; return M.offsetWidth * 1.03; }
+function quebra(s, z, w, maxw, max) { const L = []; let a = ''; for (const p of String(s).split(/\s+/)) { const t = (a + ' ' + p).trim(); if (mw(t, z, w) <= maxw) a = t; else { if (a) L.push(a); a = p; } } if (a) L.push(a); return L.slice(0, max); }
+const linhas = (s, z, w, max) => quebra(s, z, w, 853 - 120, max).map(l => `<span class="ln"><span>${esc(l)}</span></span>`).join('');
+
+// estilo por tipo de publicação: cor do selo e animação de fundo
+const TIPOS = {
+  meta:        { rot: 'Meta batida',  cor: '#ECFC30', fg: '#212121', fx: 'disco' },
+  acao:        { rot: 'Ação tomada',  cor: '#7FD6FF', fg: '#212121', fx: 'passo' },
+  alerta:      { rot: 'Alerta',       cor: '#F25C5C', fg: '#FFFFFF', fx: 'pulso' },
+  comemoracao: { rot: 'Comemoração',  cor: '#ECFC30', fg: '#212121', fx: 'eixo' },
+  aviso:       { rot: 'Aviso',        cor: '#FF9F43', fg: '#212121', fx: 'nenhum' },
+  estoque:     { rot: 'Estoque',      cor: '#ECFC30', fg: '#212121', fx: 'nenhum' },
+};
+
+// ---------- efeitos (derivados das elipses do símbolo) ----------
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, at) { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); $('#fx').appendChild(e); return e; }
+function efeito(tipo, cor, vivo) {
+  $('#fx').innerHTML = '';
+  if (tipo === 'disco') {           // o círculo ("o presente") cresce com overshoot no canto
+    const c = el('circle', { cx: 760, cy: 470, r: 0, fill: cor, opacity: .16 });
+    tween(1100, p => c.setAttribute('r', 260 * Math.max(0, eback(p))));
+  } else if (tipo === 'passo') {    // a elipse vertical ("o próximo passo") atravessa e fica respirando à direita
+    const e = el('ellipse', { cx: -200, cy: 256, rx: 90, ry: 300, fill: cor, opacity: .18, transform: 'rotate(12 0 0)' });
+    tween(1300, p => e.setAttribute('cx', -200 + eio(p) * 1000)).then(() => {
+      const t0 = performance.now(); (function f(t) { if (!vivo()) return; e.setAttribute('ry', 300 + 12 * Math.sin((t - t0) / 700)); requestAnimationFrame(f); })(t0);
+    });
+  } else if (tipo === 'pulso') {    // anel de alerta pulsando atrás do número
+    const r = el('circle', { cx: 700, cy: 300, r: 60, fill: 'none', stroke: cor, 'stroke-width': 6 });
+    const t0 = performance.now(); (function f(t) { if (!vivo()) return; const q = ((t - t0) / 1300) % 1; r.setAttribute('r', 70 + q * 130); r.setAttribute("opacity", (1 - q) * .45); requestAnimationFrame(f); })(t0);
+  } else if (tipo === 'eixo') {     // as três elipses do símbolo entram girando
+    const E = [[700, 120, 230, 60, -15], [690, 330, 130, 130, 0], [800, 300, 60, 150, 14]].map(([x, y, rx, ry, a]) => [el('ellipse', { cx: x, cy: y, rx: 0, ry: 0, fill: cor, opacity: .2 }), x, y, rx, ry, a]);
+    E.forEach(([e, x, y, rx, ry, a], i) => setTimeout(() => tween(900, p => { const k = Math.max(0, eback(p)); e.setAttribute('rx', rx * k); e.setAttribute('ry', ry * k); e.setAttribute('transform', `rotate(${a + (1 - p) * 60} ${x} ${y})`); }), i * 160));
+  }
+}
+
+// ---------- dados ----------
+let EST = null, MUR = null;
+// cores fixas por filial em todo o telão; qualidade do estoque: saudável / excesso / parado
+const FIL = { itajai: '#ECFC30', londrina: '#7FD6FF', total: '#FFFFFF' };
+const Q = { saudavel: '#8BD17C', excesso: '#FF9F43', parado: '#6E6E6E' };
+async function getj(f) { try { const r = await fetch(f + '?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) return await r.json(); } catch (e) { } return null; }
+async function load() { EST = (await getj('estoque.json')) || EST; MUR = (await getj('mural.json')) || MUR; }
+const hoje = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+
+// por filial (e o total, quando todas as filiais têm PAC): quantidade, qualidade e ruptura
+function cardsEstoque() {
+  if (!EST) return [];
+  const blocos = Object.entries(EST.filiais || {}).filter(([, f]) => f);
+  if (EST.total && blocos.length > 1) blocos.push(['total', EST.total]);
+  const cards = [];
+  for (const [k, f] of blocos) {
+    const cor = FIL[k] || '#FFFFFF', v = f.valor_custo || 1;
+    const q = [['saudavel', f.saudavel_valor], ['excesso', f.excesso_valor], ['parado', f.parado_valor]].map(([n, x]) => ({ n, w: x / v * 100, cor: Q[n] }));
+    cards.push({ tipo: 'estoque', selo: f.nome, cor_selo: cor, meta: k === 'total' ? f.base : 'Estoque a custo', titulo: k === 'total' ? 'Estoque total a custo' : `Estoque ${f.nome}`,
+      numero: fmtBRL(f.valor_custo), cor_num: cor,
+      texto: `DIO ${String(Math.round(f.cobertura_dias * 10) / 10).replace('.', ',')} dias · ${(f.skus || 0).toLocaleString('pt-BR')} SKUs`,
+      barra: q, foot: `${Math.round(q[1].w)}% em excesso · ${Math.round(q[2].w)}% parado` });
+    cards.push({ tipo: 'alerta', selo: f.nome, cor_selo: cor, meta: 'Ruptura', titulo: 'Ruptura da demanda', numero: pct(f.pct_ruptura), cor_num: '#F25C5C',
+      texto: `${fmtBRL(f.perda_dia_custo)}/dia de MVD perdida`, foot: `${f.skus_ruptura} SKUs sem estoque · ${f.rupturas_com_oc ?? (f.skus_ruptura - f.sem_oc)} com OC` });
+    // curvas AA e A juntas: os itens que mais vendem
+    const aa = f.curvas?.AA || { ruptura: 0, perda: 0 }, a1 = f.curvas?.A || { ruptura: 0, perda: 0 };
+    const nA = aa.ruptura + a1.ruptura, pA = aa.perda + a1.perda;
+    if (nA) cards.push({ tipo: 'alerta', selo: f.nome, cor_selo: cor, meta: 'Curvas AA e A', titulo: 'Mais vendidos sem estoque', numero: nA + ' SKUs', cor_num: '#F25C5C',
+      texto: `${fmtBRL(pA)}/dia` + (f.top_fornecedores?.[0] ? ` · maior: ${f.top_fornecedores[0].nome}` : ''), foot: `${f.sem_oc} SKUs em ruptura sem OC` });
+    // lista com nome dos AA/A sem estoque: só por filial, 4 por card, até 3 cards
+    const L = k !== 'total' ? (f.ruptura_aa_a || []) : [];
+    for (let i = 0; i < Math.min(L.length, 12); i += 4) cards.push({ tipo: 'estoque', lista: L.slice(i, i + 4), selo: f.nome, cor_selo: cor, meta: `Sem estoque · AA e A${L.length > 4 ? ` · ${i / 4 + 1}/${Math.ceil(Math.min(L.length, 12) / 4)}` : ''}`,
+      titulo: i ? 'Mais itens sem estoque' : `${f.skus_ruptura_aa_a ?? L.length} mais vendidos zerados` });
+    // Gold+: estoque congelado, lento, excesso, vai romper e OCs acima do Emax
+    if (f.sem_giro > 0) cards.push({ tipo: 'aviso', selo: f.nome, cor_selo: cor, meta: 'Estoque congelado', titulo: 'Parado, sem nenhuma venda', numero: fmtBRL(f.sem_giro), cor_num: Q.excesso,
+      texto: nSku(f.skus_congelados) + (f.pct_congelado != null ? ` · ${pct(f.pct_congelado)} do estoque` : ''), foot: f.congelados?.[0] ? `Maior: ${f.congelados[0].titulo}` : '' });
+    if (f.lento_valor > 0) cards.push({ tipo: 'aviso', selo: f.nome, cor_selo: cor, meta: 'Estoque lento', titulo: 'Mais de 120 dias de cobertura', numero: fmtBRL(f.lento_valor), cor_num: Q.excesso,
+      texto: `${nSku(f.lento_skus)} vendendo devagar`, foot: f.lentos?.[0] ? `Maior: ${f.lentos[0].titulo}` : '' });
+    if (f.excesso > 0) cards.push({ tipo: 'aviso', selo: f.nome, cor_selo: cor, meta: 'Excesso', titulo: 'Acima do estoque máximo', numero: fmtBRL(f.excesso), cor_num: Q.excesso,
+      texto: (f.pct_excesso != null ? `${pct(f.pct_excesso)} do estoque` : 'a custo') + (f.forn_excesso?.[0] ? ` · ${f.forn_excesso[0].nome}` : ''),
+      foot: f.oc_acima_emax > 0 ? `${fmtBRL(f.oc_acima_emax)} em OCs passam do Emax` : '' });
+    if (f.vai_romper_skus > 0) cards.push({ tipo: 'alerta', selo: f.nome, cor_selo: cor, meta: 'Vai romper', titulo: 'Acaba antes da reposição', numero: nSku(f.vai_romper_skus), cor_num: '#F25C5C',
+      texto: `${fmtBRL(f.vai_romper_giro)}/dia em risco, sem OC`, foot: f.vai_romper?.[0] ? `Primeiro: ${f.vai_romper[0].titulo}` : '' });
+    if (f.nivel_servico != null) cards.push({ tipo: 'estoque', selo: f.nome, cor_selo: cor, meta: 'Nível de serviço', titulo: 'Itens que vendem e têm estoque', numero: pct(f.nivel_servico), cor_num: cor,
+      texto: `Ruptura de ${pct(f.pct_ruptura ?? 0)} da demanda`, foot: '' });
+  }
+  return cards;
+}
+function cardsMural() {
+  if (!MUR) return [];
+  const h = hoje();
+  const ok = x => { const t = String(x == null ? '' : x).trim(); return t && !/^(undefined|null)$/i.test(t); };
+  return (MUR.posts || []).filter(p => (!p.ate || p.ate >= h) && ok(p.titulo) && ok(p.texto)).map(p => {
+    const T = TIPOS[p.tipo] || TIPOS.aviso;
+    return { tipo: p.tipo, selo: T.rot, meta: p.autor, titulo: p.titulo, numero: p.numero, legenda: p.legenda, texto: p.texto, midia: p.midia, foot: `Publicado por ${p.autor}` };
+  });
+}
+
+// título: com número precisa caber em 1 linha (58 → 44 px); sem número, até 2 linhas
+function titBloco(t, temNum) {
+  const maxw = 853 - 120; let z = 58;
+  if (temNum) while (z > 44 && mw(t, z, 600) > maxw) z -= 2;
+  return `<div class="tit" style="font-size:${z}px">${linhas(t, z, 600, temNum ? 1 : 2)}</div>`;
+}
+// texto de apoio: com número, tenta 1 linha (46 → 40 px); sem número, até 2 linhas. Se não couber, o rodapé sai.
+function txtBloco(t, temNum, foot) {
+  const maxw = 853 - 120; let z = 46;
+  if (temNum) { while (z > 40 && mw(t, z, 500) > maxw) z -= 2; }
+  const L = quebra(t, z, 500, maxw, 3);
+  const cabeRodape = temNum ? L.length <= 1 : L.length <= 2;
+  const ls = L.slice(0, temNum ? 2 : 3).map(l => `<span class="ln"><span>${esc(l)}</span></span>`).join('');
+  return `<div class="txt" style="font-size:${z}px">${ls}</div>` + (cabeRodape && foot ? `<div class="foot mask d4"><span>${esc(foot)}</span></div>` : '');
+}
+async function mostra(c) {
+  const T = TIPOS[c.tipo] || TIPOS.aviso;
+  const card = document.createElement('div'); card.className = 'card';
+  const temNum = !!c.numero;
+  const video = c.midia && /\.(mp4|webm|mov)$/i.test(c.midia), imagem = c.midia && !video;
+  if (c.midia) {
+    card.innerHTML = `${video ? `<video class="media" src="${esc(c.midia)}" muted playsinline autoplay></video>` : `<img class="media" src="${esc(c.midia)}" alt="">`}
+      <div class="media-cap"><div class="top"><span class="badge" style="background:${T.cor};color:${T.fg}">${esc(c.selo)}</span><span class="meta-l mask d1"><span>${esc(c.meta || '')}</span></span></div>
+      <div class="tit" style="font-size:54px;margin-top:12px">${linhas(c.titulo, 54, 600, 1)}</div></div>`;
+  } else if (c.lista) {
+    const maxw = 853 - 120, z = 44;
+    const corte = (t, w) => { t = String(t); if (mw(t, z, 500) <= w) return t; while (t.length > 4 && mw(t + '…', z, 500) > w) t = t.slice(0, -1); return t.trim() + '…'; };
+    const ln = c.lista.map((x, i) => { const st = x.oc > 0 ? '' : ' · sem OC'; const pre = x.curva + '  ';
+      return `<div class="li mask d${Math.min(4, i + 1)}"><span><b style="color:${x.curva === 'AA' ? '#F25C5C' : '#FF9F43'}">${esc(x.curva)}</b> ${esc(corte(x.titulo, maxw - mw(pre, z, 700) - (st ? mw(st, z, 500) : 0)))}<span style="color:#BDBDBD">${st}</span></span></div>`; }).join('');
+    card.innerHTML = `
+      <div class="top"><span class="badge" style="background:${c.cor_selo};color:#212121">${esc(c.selo)}</span><span class="meta-l mask d1"><span>${esc(c.meta || '')}</span></span></div>
+      <div class="tit" style="font-size:50px;margin-top:16px">${linhas(c.titulo, 50, 600, 1)}</div>
+      <div class="lst">${ln}</div>`;
+  } else {
+    card.innerHTML = `
+      <div class="top"><span class="badge" style="background:${c.cor_selo || T.cor};color:${c.cor_selo ? '#212121' : T.fg}">${esc(c.selo)}</span><span class="meta-l mask d1"><span>${esc(c.meta || '')}</span></span></div>
+      ${titBloco(c.titulo, temNum)}
+      ${temNum ? `<div class="num mask d2" style="color:${c.cor_num || T.cor}"><span class="nv">${esc(c.numero)}</span></div>` : ''}
+      ${txtBloco(c.legenda && !c.texto ? c.legenda : c.texto, temNum, c.foot)}
+      ${c.barra ? `<div class="qbar">${c.barra.map(b => `<div style="--w:${b.w.toFixed(2)}%;background:${b.cor}"></div>`).join('')}</div>` : ''}`;
+  }
+  $('#host').innerHTML = ''; $('#host').appendChild(card);
+  let vivo = true;
+  efeito(T.fx, T.cor, () => vivo);
+  void card.offsetWidth; card.classList.add('on');
+  const nv = card.querySelector('.nv'); if (nv) setTimeout(() => tween(1500, p => nv.textContent = conta(c.numero, ease(p))), 250);
+  // duração: vídeo toca inteiro (até 20 s); demais ficam 11 s
+  let dur = 11000;
+  const v = card.querySelector('video');
+  if (v) { await new Promise(r => { v.onloadedmetadata = r; v.onerror = r; setTimeout(r, 3000); }); if (v.duration) dur = Math.min(20000, Math.max(6000, v.duration * 1000)); }
+  const pr = $('#prog'); pr.style.background = T.cor;
+  await tween(dur - 700, p => pr.style.width = (p * 100) + '%');
+  card.classList.remove('on'); card.classList.add('out'); pr.style.width = 0;
+  await tween(500, p => $('#fx').style.opacity = 1 - p);
+  vivo = false; $('#fx').innerHTML = ''; $('#fx').style.opacity = 1;
+}
+
+async function loop() {
+  await load();
+  const r = cardsEstoque(), m = cardsMural();
+  // intercala: estoque, publicação, estoque, publicação...
+  let seq = [];
+  if (!m.length) seq = r;
+  else if (!r.length) seq = m;
+  else m.forEach((p, i) => seq.push(r[i % r.length], p));
+  if (m.length && r.length && m.length < r.length) seq.push(...r.slice(m.length));
+  if (!seq.length) { await sleep(5000); return loop(); }
+  const fix = new URLSearchParams(location.search).get('card'); if (fix !== null && seq[+fix]) seq = [seq[+fix]];   // ?card=N: teste de um card
+  for (const c of seq) { try { await mostra(c); } catch (e) { console.error(e); } }
+  loop();
+}
+document.fonts.load('600 58px Archivo').finally(loop);
+setInterval(() => { const h = new Date(); if (h.getHours() === 5 && h.getMinutes() === 30) location.reload(); }, 60000);
+</script>
+</body>
+</html>

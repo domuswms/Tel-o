@@ -28,7 +28,7 @@ const COLUNAS = [
   { src: 'colunas/mural/',    largura: 851 },
 ];   // 852 + 851 + 851 + 2 divisórias de 3 px = 2560
 // tela cheia (2560 px, cobre as três colunas): entra de tempos em tempos com cenas da PAC e mensagens
-const TELA_CHEIA = { src: 'colunas/telacheia/', a_cada_min: 3, limite_s: 120 };
+const TELA_CHEIA = { src: 'colunas/telacheia/', a_cada_min: 2, limite_s: 120 };
 const t = document.getElementById('telao');
 COLUNAS.forEach((c, i) => {
   if (i) { const d = document.createElement('div'); d.className = 'div'; t.appendChild(d); }
