@@ -1,0 +1,90 @@
+{
+ "_info": "Coluna 2 · Radar marketplaces. Gerado pela rotina diária (pesquisa na web, só fontes lidas). Itens: categoria, plataforma, manchete (<=62), detalhe (<=62, vai no e-mail), numero, legenda (<=24), fonte, data_fonte, url.",
+ "data": "2026-10-02",
+ "atualizado_em": "2026-10-02T22:10:00-03:00",
+ "itens": [
+  {
+   "categoria": "politica",
+   "plataforma": "mercadolivre",
+   "manchete": "Anvisa notifica Mercado Livre sobre venda de remédios",
+   "detalhe": "ML quer abrir marketplace de farmácias em meados de outubro",
+   "numero": "20 redes",
+   "legenda": "farmácias previstas",
+   "fonte": "InvestNews",
+   "data_fonte": "30/09",
+   "url": "https://investnews.com.br/negocios/venda-de-medicamentos-pelo-mercado-livre-tem-um-obstaculo-a-anvisa/"
+  },
+  {
+   "categoria": "campanha",
+   "plataforma": "amazon",
+   "manchete": "Amazon faz Mega Oferta Prime de 5 a 11 de outubro",
+   "detalhe": "Evento só para Prime, com descontos de até 80%",
+   "numero": "até 80%",
+   "legenda": "5 a 11/10, só Prime",
+   "fonte": "E-Commerce Brasil",
+   "data_fonte": "02/10",
+   "url": "https://www.ecommercebrasil.com.br/noticias/mega-oferta-amazon-prime-outubro-2026"
+  },
+  {
+   "categoria": "logistica",
+   "plataforma": "shopee",
+   "manchete": "Shopee lança exportação para Argentina e México",
+   "detalhe": "Piloto teve 19 mil sellers e 1,4 mi de itens; vai a 150 mil",
+   "numero": "150 mil",
+   "legenda": "sellers na expansão",
+   "fonte": "O Povo",
+   "data_fonte": "29/09",
+   "url": "https://www.opovo.com.br/noticias/economia/2026/09/29/shopee-lanca-plataforma-de-exportacao-para-pequenas-e-medias-empresas-do-brasil.html"
+  },
+  {
+   "categoria": "logistica",
+   "plataforma": "mercadolivre",
+   "manchete": "Mercado Livre inaugura centro logístico em São Bernardo",
+   "detalhe": "Dois galpões, 600 vagas hoje e 1.500 até o fim do ano",
+   "numero": "100 mil m²",
+   "legenda": "2 galpões em SP",
+   "fonte": "Diário do Grande ABC",
+   "data_fonte": "02/10",
+   "url": "https://www.dgabc.com.br/Noticia/4350394/mercado-livre-inaugura-centro-logistico-com-600-vagas-em-sao-bernardo"
+  },
+  {
+   "categoria": "politica",
+   "plataforma": "geral",
+   "manchete": "PL 484 exige 90 dias de aviso para subir comissão",
+   "detalhe": "Projeto na Câmara limita taxa fixa por item a 10% do preço",
+   "numero": "90 dias",
+   "legenda": "aviso prévio ao seller",
+   "fonte": "Câmara dos Deputados",
+   "data_fonte": "12/08",
+   "url": "https://www.camara.leg.br/noticias/1295173-projeto-regulamenta-relacao-entre-plataformas-de-comercio-eletronico-e-vendedores"
+  },
+  {
+   "categoria": "movimento",
+   "plataforma": "tiktokshop",
+   "manchete": "Shiseido fez 35% das vendas mensais no TikTok Shop",
+   "detalhe": "Perfumaria de luxo avança nos marketplaces com lives",
+   "numero": "35%",
+   "legenda": "vendas no 1º mês",
+   "fonte": "E-Commerce Brasil",
+   "data_fonte": "02/10",
+   "url": "https://www.ecommercebrasil.com.br/noticias/perfumaria-luxo-marketplaces-tiktok-shop-mercado-livre"
+  }
+ ],
+ "mais_links": [
+  {
+   "titulo": "Anvisa notifica Mercado Livre e dá 3 dias úteis para documentos",
+   "fonte": "Olhar Digital",
+   "url": "https://olhardigital.com.br/2026/09/29/pro/anvisa-notifica-mercado-livre-por-venda-de-medicamentos-em-marketplace"
+  },
+  {
+   "titulo": "Privalia lança vitrines de afiliados no app, no passo das concorrentes",
+   "fonte": "E-Commerce Brasil",
+   "url": "https://www.ecommercebrasil.com.br/noticias/no-passo-das-concorrentes-privalia-aposta-em-canal-de-afiliados"
+  },
+  {
+   "titulo": "Shopee abre 10 centros de distribuição e vai a 26 no Brasil",
+   "fonte": "Times Brasil",
+   "url": "https://timesbrasil.com.br/empresas-e-negocios/shopee-anuncia-novos-centros-de-distribuicao-brasil/"
+  }
+ ]
+}
