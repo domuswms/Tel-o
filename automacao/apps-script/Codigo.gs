@@ -575,7 +575,8 @@ function publicarMural() {
   const hoje = hoje_();
   const posts = [];
   v.slice(1).forEach((r, i) => {
-    if (c('Título') < 0 || !String(r[c('Título')] || '').trim()) return;   // linha vazia ou aba errada: ignora
+    const tit0 = String(r[c('Título')] == null ? '' : r[c('Título')]).trim();
+    if (c('Título') < 0 || !tit0 || /^(undefined|null)$/i.test(tit0)) return;   // linha vazia, aba errada ou "undefined": ignora
     const aprov = String(r[ap] || '').trim().toLowerCase();
     if (CFG.APROVACAO_AUTOMATICA ? aprov === 'não' || aprov === 'nao' : aprov !== 'sim') return;
     const ate = r[c('Fica no ar até')] instanceof Date ? Utilities.formatDate(r[c('Fica no ar até')], CFG.FUSO, 'yyyy-MM-dd') : String(r[c('Fica no ar até')] || '');

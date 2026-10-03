@@ -151,7 +151,8 @@ function cardsEstoque() {
 function cardsMural() {
   if (!MUR) return [];
   const h = hoje();
-  return (MUR.posts || []).filter(p => !p.ate || p.ate >= h).map(p => {
+  const vazio = x => !String(x == null ? '' : x).trim() || /^(undefined|null)$/i.test(String(x).trim());
+  return (MUR.posts || []).filter(p => (!p.ate || p.ate >= h) && !(vazio(p.titulo) && vazio(p.texto))).map(p => {
     const T = TIPOS[p.tipo] || TIPOS.aviso;
     return { tipo: p.tipo, selo: T.rot, meta: p.autor, titulo: p.titulo, numero: p.numero, legenda: p.legenda, texto: p.texto, midia: p.midia, foot: p.exemplo ? 'exemplo de publicação' : `Publicado por ${p.autor}` };
   });
