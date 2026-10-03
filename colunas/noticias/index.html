@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telão · Notícias</title>
+<!-- Coluna 2 · autônoma: só lê ./dados.json (formato do Radar / Jornal da Bomus). -->
+<style>
+  @font-face { font-family:'Archivo'; src:url(archivo.woff2) format('woff2-variations'), url(archivo.woff2) format('woff2'); font-weight:100 900; font-stretch:62% 125%; font-display:block; }
+  :root { --ink:#212121; --lime:#ECFC30; --g3:#BDBDBD; --W:854px; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { width:100%; height:100%; background:#0A0A0A; overflow:hidden; }
+  body { font-family:'Archivo',sans-serif; color:#fff; -webkit-font-smoothing:antialiased; }
+  #stage { position:absolute; left:0; top:0; width:var(--W); height:512px; transform-origin:0 0; overflow:hidden; background:var(--ink); }
+  #bg { position:absolute; inset:0; }
+  .item { position:absolute; inset:0; padding:56px 56px 0 56px; }
+  .mask { overflow:hidden; display:block; padding-bottom:.08em; }
+  .mask > span { display:inline-block; transform:translateY(115%); transition:transform .75s cubic-bezier(.2,.9,.25,1); }
+  .on .mask > span { transform:translateY(0); }
+  .out .mask > span { transform:translateY(-115%); transition:transform .5s cubic-bezier(.6,0,.8,.3); }
+  .kicker { font-size:44px; font-weight:600; line-height:1.1; white-space:nowrap; }
+  .numrow { display:flex; align-items:baseline; gap:28px; margin-top:4px; height:150px; }
+  .num { font-size:140px; font-weight:700; font-variation-settings:'wdth' 80; letter-spacing:-.02em; line-height:1; white-space:nowrap; }
+  .leg { font-size:44px; font-weight:600; line-height:1.05; }
+  .head { font-weight:600; line-height:1.06; margin-top:6px; }
+  .head .w { display:inline-block; transform:translateY(115%); transition:transform .7s cubic-bezier(.2,.9,.25,1); }
+  .on .head .w { transform:translateY(0); }
+  .out .head .w { transform:translateY(-115%); transition:transform .45s cubic-bezier(.6,0,.8,.3); }
+  .head .ln { display:block; overflow:hidden; white-space:nowrap; }
+  .src { position:absolute; left:56px; bottom:36px; font-size:44px; font-weight:500; white-space:nowrap; }
+  #prog { position:absolute; left:0; bottom:0; height:8px; width:0; }
+  .ring { position:absolute; border-radius:50%; border:6px solid; pointer-events:none; opacity:0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="bg" viewBox="0 0 854 512" preserveAspectRatio="none"><rect id="bgr" width="854" height="512" fill="#212121"/><ellipse id="bge" cx="760" cy="256" rx="0" ry="0" fill="#212121"/><ellipse id="ghost" cx="740" cy="-30" rx="0" ry="0" fill="#ffffff" opacity=".06"/></svg>
+  <div id="host"></div>
+  <div id="prog"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const ease = x => 1 - Math.pow(1 - x, 3), eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+function tween(ms, fn) { return new Promise(res => { const t0 = performance.now(); (function f(t) { const p = Math.max(0, Math.min(1, (t - t0) / ms)); fn(p); p < 1 ? requestAnimationFrame(f) : res(); })(t0); }); }
+function fit() { const s = Math.min(innerWidth / 854, innerHeight / 512); $('#stage').style.transform = `scale(${s})`; }
+addEventListener('resize', fit); fit();
+
+const CATEGORIAS = { comissao: 'Alerta de comissão', politica: 'Mudança de política', tributario: 'Tributário', logistica: 'Logística', ads: 'Ads e mídia', campanha: 'Campanha', evento: 'Evento', movimento: 'Mercado' };
+const ORDEM = ['comissao', 'politica', 'tributario', 'logistica', 'ads', 'campanha', 'movimento', 'evento'];
+const NOMES = { mercadolivre: 'Mercado Livre', shopee: 'Shopee', tiktokshop: 'TikTok Shop', amazon: 'Amazon', magalu: 'Magalu', geral: 'Marketplaces' };
+// tema por plataforma (guia do telão, seção 4)
+const TEMA = {
+  mercadolivre: { bg: '#FFE600', fg: '#212121', sub: '#4A4A3A', k: '#2D3277', n: '#2D3277', bar: '#2D3277' },
+  shopee:       { bg: '#212121', fg: '#FFFFFF', sub: '#BDBDBD', k: '#EE4D2D', n: '#EE4D2D', bar: '#EE4D2D' },
+  tiktokshop:   { bg: '#0A0A0A', fg: '#FFFFFF', sub: '#BDBDBD', k: '#25F4EE', n: '#FE2C55', bar: '#25F4EE' },
+  amazon:       { bg: '#232F3E', fg: '#FFFFFF', sub: '#BDBDBD', k: '#FF9900', n: '#FF9900', bar: '#FF9900' },
+  magalu:       { bg: '#0086FF', fg: '#FFFFFF', sub: '#D6EBFF', k: '#FFFFFF', n: '#FFFFFF', bar: '#FFFFFF' },
+  geral:        { bg: '#212121', fg: '#FFFFFF', sub: '#BDBDBD', k: '#ECFC30', n: '#ECFC30', bar: '#ECFC30' },
+};
+
+// mede texto para quebrar a manchete em até 2 linhas, reduzindo o corpo se precisar
+const M = document.createElement('span'); M.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;font-family:Archivo'; document.body.appendChild(M);
+function mw(s, z, w) { M.style.fontSize = z + 'px'; M.style.fontWeight = w; M.textContent = s; return M.offsetWidth * 1.03; }
+function quebra(s, size, maxw) { const L = []; let a = ''; for (const p of s.split(' ')) { const t = (a + ' ' + p).trim(); if (mw(t, size, 600) <= maxw) a = t; else { L.push(a); a = p; } } L.push(a); return L.filter(Boolean); }
+function manchete(s, maxw) { for (let z = 60; z >= 48; z -= 2) { const l = quebra(s, z, maxw); if (l.length <= 2) return [l, z]; } return [quebra(s, 48, maxw).slice(0, 2), 48]; }
+function cabe(s, z, wght, maxw, min = 40) { while (z > min && mw(s, z, wght) > maxw) z -= 2; return z; }
+function conta(s, p) { const m = s.match(/\d+(?:[.,]\d+)?/); if (!m || s.includes('/')) return s; const raw = m[0], dec = raw.includes(',') ? raw.split(',')[1].length : 0; const v = parseFloat(raw.replace(/\./g, '').replace(',', '.')); if (v < 10 && !dec) return s; const c = v * p; const t = dec ? c.toFixed(dec).replace('.', ',') : String(Math.round(c)); return s.slice(0, m.index) + t + s.slice(m.index + raw.length); }
+
+let D = null;
+async function load() { try { const r = await fetch('dados.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) D = await r.json(); } catch (e) { } return D; }
+
+async function troca(cor) {
+  // íris: o círculo do símbolo cresce e pinta a coluna com a cor da plataforma
+  const e = $('#bge'); e.setAttribute('fill', cor);
+  await tween(800, p => { const k = eio(p); e.setAttribute('rx', k * 1000); e.setAttribute('ry', k * 1000); });
+  $('#bgr').setAttribute('fill', cor); e.setAttribute('rx', 0);
+}
+
+async function mostra(it) {
+  const plat = it.plataforma || 'geral', th = TEMA[plat] || TEMA.geral, alerta = it.categoria === 'comissao';
+  const dur = alerta ? 14000 : 12000, maxw = 854 - 112;
+  await troca(th.bg);
+  const [linhas, hs] = manchete(it.manchete, maxw);
+  const kicker = `${CATEGORIAS[it.categoria] || 'Mercado'} · ${it.tag || NOMES[plat]}`;
+  const fonte = it.fonte + (it.data_fonte ? ' · ' + it.data_fonte : '');
+  const el = document.createElement('div'); el.className = 'item';
+  el.innerHTML = `
+    <div class="kicker mask" style="color:${th.k};font-size:${cabe(kicker, 44, 600, maxw)}px"><span>${kicker}</span></div>
+    ${it.numero ? `<div class="numrow"><div class="num mask" style="color:${th.n}"><span class="nv">${it.numero}</span></div>${it.legenda ? `<div class="leg mask" style="color:${th.fg}"><span>${it.legenda}</span></div>` : ''}</div>` : '<div style="height:24px"></div>'}
+    <div class="head" style="font-size:${hs}px;color:${th.fg}">${linhas.map(l => `<span class="ln">${l.split(' ').map((w, i) => `<span class="w" style="transition-delay:${(i * 0.05 + 0.25).toFixed(2)}s">${w}&nbsp;</span>`).join('')}</span>`).join('')}</div>
+    <div class="src mask" style="color:${th.sub};font-size:${cabe(fonte, 44, 500, maxw)}px"><span>${fonte}</span></div>`;
+  // se a legenda não couber ao lado do número, ela desce para o espaço do número
+  $('#host').innerHTML = ''; $('#host').appendChild(el);
+  const nr = el.querySelector('.numrow');
+  if (nr && nr.scrollWidth > maxw + 2) { el.querySelector('.num').style.fontSize = '110px'; }
+  void el.offsetWidth; el.classList.add('on');
+  // elipse fantasma respirando ao fundo
+  const g = $('#ghost'); g.setAttribute('fill', th.k);
+  const amb = performance.now();
+  let vivo = true;
+  (function anda(t) { if (!vivo) return; const s = (t - amb) / 1000; g.setAttribute('rx', 300 + 25 * Math.sin(s * .45)); g.setAttribute('ry', 90 + 8 * Math.cos(s * .3)); g.setAttribute('cx', 700 + 30 * Math.sin(s * .35)); requestAnimationFrame(anda); })(amb);
+  const nv = el.querySelector('.nv');
+  if (nv) tween(1500, p => nv.textContent = conta(it.numero, ease(p)));
+  // alerta de comissão: anel pulsante no número
+  if (alerta && nv) {
+    const r = document.createElement('div'); r.className = 'ring'; r.style.borderColor = th.n; el.appendChild(r);
+    const b = nv.parentElement.getBoundingClientRect(), sb = $('#stage').getBoundingClientRect(), sc = sb.width / 854;
+    const cx = (b.left - sb.left) / sc + 70, cy = (b.top - sb.top) / sc + 70;
+    (function pulsa(t) { if (!vivo) return; const q = (t / 1250) % 1; const R = 80 + q * 90; Object.assign(r.style, { left: cx - R + 'px', top: cy - R + 'px', width: 2 * R + 'px', height: 2 * R + 'px', opacity: (1 - q) * .8 }); requestAnimationFrame(pulsa); })(performance.now());
+  }
+  const pr = $('#prog'); pr.style.background = th.bar;
+  await tween(dur - 900, p => pr.style.width = (p * 100) + '%');
+  el.classList.remove('on'); el.classList.add('out'); pr.style.width = 0;
+  await sleep(600); vivo = false;
+}
+
+async function loop() {
+  await load();
+  if (!D || !D.itens || !D.itens.length) { await sleep(5000); return loop(); }
+  const itens = [...D.itens].sort((a, b) => ORDEM.indexOf(a.categoria) - ORDEM.indexOf(b.categoria));
+  for (const it of itens) { try { await mostra(it); } catch (e) { console.error(e); } }
+  loop();
+}
+document.fonts.load('600 60px Archivo').finally(loop);
+setInterval(() => { const h = new Date(); if (h.getHours() === 5 && h.getMinutes() === 30) location.reload(); }, 60000);
+</script>
+</body>
+</html>
