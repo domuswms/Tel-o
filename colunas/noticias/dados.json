@@ -1,13 +1,13 @@
 {
  "_info": "Coluna 2 · Radar marketplaces. Gerado pela rotina diária (pesquisa na web, só fontes lidas). Itens: categoria, plataforma, manchete (<=62), detalhe (<=62, vai no e-mail), numero, legenda (<=24), fonte, data_fonte, url.",
  "data": "2026-10-02",
- "atualizado_em": "2026-10-02T22:10:00-03:00",
+ "atualizado_em": "2026-10-02T22:17:59-03:00",
  "itens": [
   {
    "categoria": "politica",
    "plataforma": "mercadolivre",
    "manchete": "Anvisa notifica Mercado Livre sobre venda de remédios",
-   "detalhe": "ML quer abrir marketplace de farmácias em meados de outubro",
+   "detalhe": "Anvisa vê sem previsão normativa; ML mira ~20 redes em outubro",
    "numero": "20 redes",
    "legenda": "farmácias previstas",
    "fonte": "InvestNews",
@@ -61,10 +61,10 @@
   {
    "categoria": "movimento",
    "plataforma": "tiktokshop",
-   "manchete": "Shiseido fez 35% das vendas mensais no TikTok Shop",
+   "manchete": "Shiseido vendeu 35% do digital no TikTok Shop em maio",
    "detalhe": "Perfumaria de luxo avança nos marketplaces com lives",
    "numero": "35%",
-   "legenda": "vendas no 1º mês",
+   "legenda": "do digital no 1º mês",
    "fonte": "E-Commerce Brasil",
    "data_fonte": "02/10",
    "url": "https://www.ecommercebrasil.com.br/noticias/perfumaria-luxo-marketplaces-tiktok-shop-mercado-livre"
@@ -77,14 +77,14 @@
    "url": "https://olhardigital.com.br/2026/09/29/pro/anvisa-notifica-mercado-livre-por-venda-de-medicamentos-em-marketplace"
   },
   {
-   "titulo": "Privalia lança vitrines de afiliados no app, no passo das concorrentes",
-   "fonte": "E-Commerce Brasil",
-   "url": "https://www.ecommercebrasil.com.br/noticias/no-passo-das-concorrentes-privalia-aposta-em-canal-de-afiliados"
+   "titulo": "Magalu entra no Mercado Livre: o nome do jogo é escala",
+   "fonte": "NeoFeed",
+   "url": "https://neofeed.com.br/negocios/magalu-entra-no-mercado-livre-o-nome-jogo-e-escala-para-as-duas-empresas/"
   },
   {
-   "titulo": "Shopee abre 10 centros de distribuição e vai a 26 no Brasil",
-   "fonte": "Times Brasil",
-   "url": "https://timesbrasil.com.br/empresas-e-negocios/shopee-anuncia-novos-centros-de-distribuicao-brasil/"
+   "titulo": "Magalu venderá itens de Magazine Luiza, KaBuM! e Época no Mercado Livre",
+   "fonte": "Mercado&Consumo",
+   "url": "https://mercadoeconsumo.com.br/02/09/2026/ecommerce/magalu-vendera-itens-do-magazine-luiza-kabum-e-epoca-no-marketplace-do-mercado-livre/"
   }
  ]
 }
