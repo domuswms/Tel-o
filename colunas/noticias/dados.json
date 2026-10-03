@@ -1,18 +1,18 @@
 {
  "_info": "Coluna 2 · Radar marketplaces. Gerado pela rotina diária (pesquisa na web, só fontes lidas). Itens: categoria, plataforma, manchete (<=62), detalhe (<=62, vai no e-mail), numero, legenda (<=24), fonte, data_fonte, url.",
- "data": "2026-10-02",
- "atualizado_em": "2026-10-02T22:17:59-03:00",
+ "data": "2026-10-03",
+ "atualizado_em": "2026-10-03T09:58:00-03:00",
  "itens": [
   {
-   "categoria": "politica",
-   "plataforma": "mercadolivre",
-   "manchete": "Anvisa notifica Mercado Livre sobre venda de remédios",
-   "detalhe": "Anvisa vê sem previsão normativa; ML mira ~20 redes em outubro",
-   "numero": "20 redes",
-   "legenda": "farmácias previstas",
-   "fonte": "InvestNews",
+   "categoria": "campanha",
+   "plataforma": "tiktokshop",
+   "manchete": "TikTok Shop abre Black Friday em 27/10 com R$ 100 mi em cupons",
+   "detalhe": "Vai até 12/12, descontos de até 70%; fase forte em 19/11",
+   "numero": "R$ 100 mi",
+   "legenda": "cupons, 27/10 a 12/12",
+   "fonte": "Central do Varejo",
    "data_fonte": "30/09",
-   "url": "https://investnews.com.br/negocios/venda-de-medicamentos-pelo-mercado-livre-tem-um-obstaculo-a-anvisa/"
+   "url": "https://centraldovarejo.com.br/tiktok-shop-investe-r-100-milhoes-em-cupons-e-estende-black-friday-de-27-de-outubro-a-12-de-dezembro/"
   },
   {
    "categoria": "campanha",
@@ -28,63 +28,52 @@
   {
    "categoria": "logistica",
    "plataforma": "shopee",
-   "manchete": "Shopee lança exportação para Argentina e México",
+   "manchete": "Shopee libera vendas para Argentina e México",
    "detalhe": "Piloto teve 19 mil sellers e 1,4 mi de itens; vai a 150 mil",
    "numero": "150 mil",
-   "legenda": "sellers na expansão",
-   "fonte": "O Povo",
+   "legenda": "sellers por convite",
+   "fonte": "E-Commerce Brasil",
    "data_fonte": "29/09",
-   "url": "https://www.opovo.com.br/noticias/economia/2026/09/29/shopee-lanca-plataforma-de-exportacao-para-pequenas-e-medias-empresas-do-brasil.html"
+   "url": "https://www.ecommercebrasil.com.br/noticias/shopee-amplia-conexao-com-argentina-e-mexico-para-150-mil-vendedores-brasileiros"
   },
   {
    "categoria": "logistica",
    "plataforma": "mercadolivre",
-   "manchete": "Mercado Livre inaugura centro logístico em São Bernardo",
-   "detalhe": "Dois galpões, 600 vagas hoje e 1.500 até o fim do ano",
-   "numero": "100 mil m²",
-   "legenda": "2 galpões em SP",
-   "fonte": "Diário do Grande ABC",
-   "data_fonte": "02/10",
-   "url": "https://www.dgabc.com.br/Noticia/4350394/mercado-livre-inaugura-centro-logistico-com-600-vagas-em-sao-bernardo"
-  },
-  {
-   "categoria": "politica",
-   "plataforma": "geral",
-   "manchete": "PL 484 exige 90 dias de aviso para subir comissão",
-   "detalhe": "Projeto na Câmara limita taxa fixa por item a 10% do preço",
-   "numero": "90 dias",
-   "legenda": "aviso prévio ao seller",
-   "fonte": "Câmara dos Deputados",
-   "data_fonte": "12/08",
-   "url": "https://www.camara.leg.br/noticias/1295173-projeto-regulamenta-relacao-entre-plataformas-de-comercio-eletronico-e-vendedores"
-  },
-  {
-   "categoria": "movimento",
-   "plataforma": "tiktokshop",
-   "manchete": "Shiseido vendeu 35% do digital no TikTok Shop em maio",
-   "detalhe": "Perfumaria de luxo avança nos marketplaces com lives",
-   "numero": "35%",
-   "legenda": "do digital no 1º mês",
+   "manchete": "Mercado Livre lança entrega em 60 min e prevê 72 estruturas",
+   "detalhe": "Envios Agora em SP, itens até 15 kg; 20 novas operações",
+   "numero": "72",
+   "legenda": "estruturas logísticas",
    "fonte": "E-Commerce Brasil",
-   "data_fonte": "02/10",
-   "url": "https://www.ecommercebrasil.com.br/noticias/perfumaria-luxo-marketplaces-tiktok-shop-mercado-livre"
+   "data_fonte": "24/09",
+   "url": "https://www.ecommercebrasil.com.br/noticias/mercado-livre-entrega-uma-hora-medicamentos-2026"
+  },
+  {
+   "categoria": "logistica",
+   "plataforma": "geral",
+   "manchete": "Greve dos Correios acabou, mas entregas normalizam aos poucos",
+   "detalhe": "15 dias parados; plano de saúde segue sem acordo",
+   "numero": "15 dias",
+   "legenda": "greve até 24/09",
+   "fonte": "Exame",
+   "data_fonte": "24/09",
+   "url": "https://exame.com/brasil/greve-dos-correios-chegou-ao-fim-veja-o-que-decidiram-o-tst-e-os-trabalhadores/"
   }
  ],
  "mais_links": [
   {
-   "titulo": "Anvisa notifica Mercado Livre e dá 3 dias úteis para documentos",
-   "fonte": "Olhar Digital",
-   "url": "https://olhardigital.com.br/2026/09/29/pro/anvisa-notifica-mercado-livre-por-venda-de-medicamentos-em-marketplace"
+   "titulo": "Mercado Livre Experience 2026 traz Mercado Livre Live, IA e novidades para vendedores",
+   "fonte": "Exame",
+   "url": "https://exame.com/negocios/mercado-livre-experience-tera-vendas-ao-vivo-ia-e-novidades-para-vendedores/"
   },
   {
-   "titulo": "Magalu entra no Mercado Livre: o nome do jogo é escala",
-   "fonte": "NeoFeed",
-   "url": "https://neofeed.com.br/negocios/magalu-entra-no-mercado-livre-o-nome-jogo-e-escala-para-as-duas-empresas/"
+   "titulo": "Black Friday 2026 cai em 27 de novembro; 2025 fez R$ 4,76 bi no e-commerce",
+   "fonte": "Central do Varejo",
+   "url": "https://centraldovarejo.com.br/black-friday-2026-data-faturamento-e-preparacao-do-varejo/"
   },
   {
-   "titulo": "Magalu venderá itens de Magazine Luiza, KaBuM! e Época no Mercado Livre",
-   "fonte": "Mercado&Consumo",
-   "url": "https://mercadoeconsumo.com.br/02/09/2026/ecommerce/magalu-vendera-itens-do-magazine-luiza-kabum-e-epoca-no-marketplace-do-mercado-livre/"
+   "titulo": "Black Friday do TikTok Shop terá até 70% off de outubro a dezembro",
+   "fonte": "InfoMoney",
+   "url": "https://www.infomoney.com.br/consumo/black-friday-tiktok-shop-tera-outubro-dezembro/"
   }
  ]
 }

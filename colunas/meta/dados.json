@@ -1,24 +1,24 @@
 {
  "_info": "Coluna 1 · Faturamento e margem: empresa (Itajaí + Londrina), por filial e por canal. Gerado pela rotina diária (Preço Certo, D+1). A meta (da empresa) vem de metas.json.",
- "atualizado_em": "2026-10-03T06:16:32-03:00",
+ "atualizado_em": "2026-10-03T09:43:30-03:00",
  "referencia": "2026-10-02",
  "mes": "2026-10",
  "meta_mes": 21000000,
  "meta_herdada": false,
  "escopo": "Domus · Itajaí + Londrina",
- "realizado_mes": 882764.76,
- "margem_mes": 79779.93,
+ "realizado_mes": 1582285.39,
+ "margem_mes": 162660.17,
  "filiais": {
   "itajai": {
    "nome": "Itajaí",
-   "realizado_mes": 717381.04,
-   "margem_mes": 77688.81,
-   "margem_pct_mes": 10.83,
+   "realizado_mes": 1416901.67,
+   "margem_mes": 160569.05,
+   "margem_pct_mes": 11.33,
    "ontem": {
-    "receita": 15405.9,
-    "pedidos": 62,
-    "ticket": 248.48,
-    "margem_pct": 11.27
+    "receita": 692663.51,
+    "pedidos": 2424,
+    "ticket": 285.75,
+    "margem_pct": 10.89
    }
   },
   "londrina": {
@@ -37,33 +37,33 @@
  "dias": [
   {
    "data": "2026-10-01",
-   "itajai": 701975.14,
+   "itajai": 724238.16,
    "londrina": 115275.03,
-   "receita": 817250.17,
-   "pedidos": 3076
+   "receita": 839513.19,
+   "pedidos": 3162
   },
   {
    "data": "2026-10-02",
-   "itajai": 15405.9,
+   "itajai": 692663.51,
    "londrina": 50108.69,
-   "receita": 65514.59,
-   "pedidos": 260
+   "receita": 742772.2,
+   "pedidos": 2622
   }
  ],
  "ontem": {
   "data": "2026-10-02",
-  "receita": 65514.59,
-  "pedidos": 260,
-  "ticket": 251.98
+  "receita": 742772.2,
+  "pedidos": 2622,
+  "ticket": 283.28
  },
  "canais_mes": [
   {
    "canal": "Shopee",
    "itajai": {
-    "receita": 425149.27,
-    "margem": 45210.24,
-    "pedidos": 1568,
-    "margem_pct": 10.63
+    "receita": 902836.81,
+    "margem": 109809.77,
+    "pedidos": 3257,
+    "margem_pct": 12.16
    },
    "londrina": {
     "receita": 137932.95,
@@ -72,19 +72,19 @@
     "margem_pct": 0.96
    },
    "total": {
-    "receita": 563082.22,
-    "margem": 46536.67,
-    "pedidos": 2164,
-    "margem_pct": 8.26
+    "receita": 1040769.76,
+    "margem": 111136.2,
+    "pedidos": 3853,
+    "margem_pct": 10.68
    }
   },
   {
    "canal": "Mercado Livre",
    "itajai": {
-    "receita": 259179.22,
-    "margem": 23181.13,
-    "pedidos": 912,
-    "margem_pct": 8.94
+    "receita": 455836.71,
+    "margem": 42192.55,
+    "pedidos": 1505,
+    "margem_pct": 9.26
    },
    "londrina": {
     "receita": 26129.4,
@@ -93,19 +93,19 @@
     "margem_pct": 2.87
    },
    "total": {
-    "receita": 285308.62,
-    "margem": 23931.29,
-    "pedidos": 966,
-    "margem_pct": 8.39
+    "receita": 481966.11,
+    "margem": 42942.71,
+    "pedidos": 1559,
+    "margem_pct": 8.91
    }
   },
   {
    "canal": "TikTok Shop",
    "itajai": {
-    "receita": 24517.0,
-    "margem": 6785.05,
-    "pedidos": 168,
-    "margem_pct": 27.67
+    "receita": 42373.19,
+    "margem": 4151.87,
+    "pedidos": 306,
+    "margem_pct": 9.8
    },
    "londrina": {
     "receita": 0.0,
@@ -114,19 +114,19 @@
     "margem_pct": null
    },
    "total": {
-    "receita": 24517.0,
-    "margem": 6785.05,
-    "pedidos": 168,
-    "margem_pct": 27.67
+    "receita": 42373.19,
+    "margem": 4151.87,
+    "pedidos": 306,
+    "margem_pct": 9.8
    }
   },
   {
    "canal": "Amazon",
    "itajai": {
-    "receita": 6846.85,
-    "margem": 2222.86,
-    "pedidos": 30,
-    "margem_pct": 32.47
+    "receita": 14120.64,
+    "margem": 4111.38,
+    "pedidos": 57,
+    "margem_pct": 29.12
    },
    "londrina": {
     "receita": 0.0,
@@ -135,19 +135,19 @@
     "margem_pct": null
    },
    "total": {
-    "receita": 6846.85,
-    "margem": 2222.86,
-    "pedidos": 30,
-    "margem_pct": 32.47
+    "receita": 14120.64,
+    "margem": 4111.38,
+    "pedidos": 57,
+    "margem_pct": 29.12
    }
   },
   {
    "canal": "Magalu",
    "itajai": {
-    "receita": 1688.7,
-    "margem": 289.53,
-    "pedidos": 4,
-    "margem_pct": 17.15
+    "receita": 1734.32,
+    "margem": 303.48,
+    "pedidos": 5,
+    "margem_pct": 17.5
    },
    "londrina": {
     "receita": 0.0,
@@ -156,10 +156,10 @@
     "margem_pct": null
    },
    "total": {
-    "receita": 1688.7,
-    "margem": 289.53,
-    "pedidos": 4,
-    "margem_pct": 17.15
+    "receita": 1734.32,
+    "margem": 303.48,
+    "pedidos": 5,
+    "margem_pct": 17.5
    }
   },
   {
@@ -188,10 +188,10 @@
   {
    "canal": "Shopee",
    "itajai": {
-    "receita": 12870.63,
-    "margem": 1367.85,
-    "pedidos": 47,
-    "margem_pct": 10.63
+    "receita": 467615.47,
+    "margem": 53805.85,
+    "pedidos": 1649,
+    "margem_pct": 11.51
    },
    "londrina": {
     "receita": 41446.01,
@@ -200,19 +200,19 @@
     "margem_pct": 0.3
    },
    "total": {
-    "receita": 54316.64,
-    "margem": 1492.88,
-    "pedidos": 227,
-    "margem_pct": 2.75
+    "receita": 509061.48,
+    "margem": 53930.88,
+    "pedidos": 1829,
+    "margem_pct": 10.59
    }
   },
   {
    "canal": "Mercado Livre",
    "itajai": {
-    "receita": 2037.29,
-    "margem": 211.17,
-    "pedidos": 9,
-    "margem_pct": 10.37
+    "receita": 199463.39,
+    "margem": 17730.86,
+    "pedidos": 604,
+    "margem_pct": 8.89
    },
    "londrina": {
     "receita": 8662.68,
@@ -221,19 +221,19 @@
     "margem_pct": 0.12
    },
    "total": {
-    "receita": 10699.97,
-    "margem": 221.32,
-    "pedidos": 27,
-    "margem_pct": 2.07
+    "receita": 208126.07,
+    "margem": 17741.01,
+    "pedidos": 622,
+    "margem_pct": 8.52
    }
   },
   {
    "canal": "TikTok Shop",
    "itajai": {
-    "receita": 497.98,
-    "margem": 157.92,
-    "pedidos": 6,
-    "margem_pct": 31.71
+    "receita": 18265.24,
+    "margem": 1765.24,
+    "pedidos": 143,
+    "margem_pct": 9.66
    },
    "londrina": {
     "receita": 0.0,
@@ -242,40 +242,19 @@
     "margem_pct": null
    },
    "total": {
-    "receita": 497.98,
-    "margem": 157.92,
-    "pedidos": 6,
-    "margem_pct": 31.71
-   }
-  },
-  {
-   "canal": "Magalu",
-   "itajai": {
-    "receita": 0.0,
-    "margem": 0.0,
-    "pedidos": 0,
-    "margem_pct": null
-   },
-   "londrina": {
-    "receita": 0.0,
-    "margem": 0.0,
-    "pedidos": 0,
-    "margem_pct": null
-   },
-   "total": {
-    "receita": 0.0,
-    "margem": 0.0,
-    "pedidos": 0,
-    "margem_pct": null
+    "receita": 18265.24,
+    "margem": 1765.24,
+    "pedidos": 143,
+    "margem_pct": 9.66
    }
   },
   {
    "canal": "Amazon",
    "itajai": {
-    "receita": 0.0,
-    "margem": 0.0,
-    "pedidos": 0,
-    "margem_pct": null
+    "receita": 7273.79,
+    "margem": 2097.47,
+    "pedidos": 27,
+    "margem_pct": 28.84
    },
    "londrina": {
     "receita": 0.0,
@@ -284,14 +263,35 @@
     "margem_pct": null
    },
    "total": {
+    "receita": 7273.79,
+    "margem": 2097.47,
+    "pedidos": 27,
+    "margem_pct": 28.84
+   }
+  },
+  {
+   "canal": "Magalu",
+   "itajai": {
+    "receita": 45.62,
+    "margem": 13.95,
+    "pedidos": 1,
+    "margem_pct": 30.58
+   },
+   "londrina": {
     "receita": 0.0,
     "margem": 0.0,
     "pedidos": 0,
     "margem_pct": null
+   },
+   "total": {
+    "receita": 45.62,
+    "margem": 13.95,
+    "pedidos": 1,
+    "margem_pct": 30.58
    }
   }
  ],
- "margem_pct_mes": 9.04,
+ "margem_pct_mes": 10.28,
  "mes_anterior": {
   "mes": "2026-09",
   "receita": 20047236.2

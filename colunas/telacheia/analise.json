@@ -1,245 +1,280 @@
 {
  "_info": "Análise do dia (tela cheia): gráficos escolhidos pela rotina do Claude a partir do Preço Certo e da Análise Gold da PAC. Formato validado por automacao/validar_analise.py.",
- "data": "2026-10-02",
- "atualizado_em": "2026-10-02T22:17:59-03:00",
+ "data": "2026-10-03",
+ "atualizado_em": "2026-10-03T10:20:00-03:00",
  "cenas": [
   {
    "tipo": "colunas",
-   "titulo": "Faturamento por mês",
-   "subtitulo": "outubro projetado pelo ritmo",
+   "titulo": "Ritmo × necessário por dia",
+   "subtitulo": "outubro, 2 dias de dados · R$/dia",
    "escopo": "Domus",
    "tom": "bem",
-   "numero": "R$ 24,2 mi",
-   "insight": "Com 1 dia de dados, o ritmo aponta a Meta 2 (R$ 23 mi), não a 3.",
+   "numero": "R$ 24,5 mi",
+   "insight": "Projeção bate a Meta 2 (R$ 23 mi); a Meta 3 exige R$ 808 mil/dia.",
    "formato": "brl",
    "referencia": {
-    "valor": 21000000,
-    "rotulo": "Meta"
+    "valor": 791000.0,
+    "rotulo": "ritmo"
    },
    "itens": [
     {
-     "rotulo": "Ago",
-     "valor": 21760616
-    },
-    {
-     "rotulo": "Set",
-     "valor": 20047236
-    },
-    {
-     "rotulo": "Out (proj.)",
-     "valor": 24170000,
+     "rotulo": "Ritmo atual",
+     "valor": 791000.0,
      "destaque": true,
      "cor": "lima"
+    },
+    {
+     "rotulo": "Meta 1",
+     "valor": 670000.0,
+     "cor": "cinza"
+    },
+    {
+     "rotulo": "Meta 2",
+     "valor": 739000.0,
+     "cor": "cinza"
+    },
+    {
+     "rotulo": "Meta 3",
+     "valor": 808000.0,
+     "cor": "laranja"
     }
    ]
   },
   {
    "tipo": "barras",
-   "titulo": "Margem por canal em setembro",
-   "subtitulo": "margem · à direita, fatia da receita",
+   "titulo": "Canais puxam o mês",
+   "subtitulo": "receita de outubro até 02/10",
    "escopo": "Domus",
    "tom": "neutro",
-   "numero": "27,9%",
-   "insight": "TikTok Shop tem a maior margem, mas faz só 3% da receita.",
-   "formato": "pct",
+   "numero": "66%",
+   "insight": "Shopee é 66% da receita do mês, com margem de 10,7%.",
+   "formato": "brl",
    "itens": [
     {
-     "rotulo": "TikTok Shop",
-     "valor": 27.9,
-     "cor": "lima",
-     "extra": "3,0% da receita"
-    },
-    {
-     "rotulo": "Amazon",
-     "valor": 17.7,
-     "cor": "cinza",
-     "extra": "0,6%"
-    },
-    {
-     "rotulo": "Magalu",
-     "valor": 13.7,
-     "cor": "cinza",
-     "extra": "0,2%"
-    },
-    {
      "rotulo": "Shopee",
-     "valor": 13.5,
-     "cor": "cinza",
-     "extra": "55,2%"
+     "valor": 1040770,
+     "cor": "lima",
+     "extra": "10,7% margem"
     },
     {
      "rotulo": "Mercado Livre",
-     "valor": 11.7,
+     "valor": 481966,
+     "cor": "ciano",
+     "extra": "8,9% margem"
+    },
+    {
+     "rotulo": "TikTok Shop",
+     "valor": 42373,
+     "cor": "lilas",
+     "extra": "9,8% margem"
+    },
+    {
+     "rotulo": "Amazon",
+     "valor": 14121,
+     "cor": "laranja",
+     "extra": "29,1% margem"
+    },
+    {
+     "rotulo": "Magalu",
+     "valor": 1734,
+     "cor": "cinza",
+     "extra": "17,5% margem"
+    }
+   ]
+  },
+  {
+   "tipo": "colunas",
+   "titulo": "Margem de Londrina",
+   "subtitulo": "% sobre a receita, mês a mês",
+   "escopo": "Londrina",
+   "tom": "alerta",
+   "numero": "1,3%",
+   "insight": "Margem caiu de 12,5% em agosto para 1,2% em setembro e segue baixa.",
+   "formato": "pct",
+   "itens": [
+    {
+     "rotulo": "Ago",
+     "valor": 12.5,
+     "cor": "cinza"
+    },
+    {
+     "rotulo": "Set",
+     "valor": 1.2,
+     "cor": "coral"
+    },
+    {
+     "rotulo": "Out (até 02)",
+     "valor": 1.3,
      "cor": "coral",
-     "extra": "40,7%"
+     "destaque": true
+    }
+   ]
+  },
+  {
+   "tipo": "colunas",
+   "titulo": "Estoque por cobertura",
+   "subtitulo": "custo · PAC 03/10 · Londrina parcial",
+   "escopo": "Domus",
+   "tom": "alerta",
+   "numero": "R$ 4,3 mi",
+   "insight": "32% do estoque cobre mais de 180 dias ou não vende.",
+   "formato": "brl",
+   "itens": [
+    {
+     "rotulo": "até 15 d",
+     "valor": 1693968,
+     "cor": "lima"
+    },
+    {
+     "rotulo": "15 a 30 d",
+     "valor": 2091150,
+     "cor": "lima"
+    },
+    {
+     "rotulo": "30 a 60 d",
+     "valor": 3005399,
+     "cor": "ciano"
+    },
+    {
+     "rotulo": "60 a 90 d",
+     "valor": 1008965,
+     "cor": "laranja"
+    },
+    {
+     "rotulo": "90 a 180 d",
+     "valor": 1191673,
+     "cor": "laranja"
+    },
+    {
+     "rotulo": "+180 d",
+     "valor": 2041291,
+     "cor": "coral"
+    },
+    {
+     "rotulo": "sem venda",
+     "valor": 2250855,
+     "cor": "coral"
     }
    ]
   },
   {
    "tipo": "barras",
-   "titulo": "Margem de setembro por filial",
-   "subtitulo": "margem · à direita, receita do mês",
-   "escopo": "Filiais",
+   "titulo": "Vai romper sem OC",
+   "subtitulo": "giro/dia a custo · cobertura < LT",
+   "escopo": "Domus",
    "tom": "alerta",
-   "numero": "1,2%",
-   "formato": "pct",
-   "insight": "Londrina tem 16% da receita e só 1,4% da margem.",
+   "numero": "R$ 32 mil",
+   "insight": "42 SKUs vão romper sem OC; 5 respondem por R$ 21 mil/dia.",
+   "formato": "brl",
    "itens": [
     {
-     "rotulo": "Itajaí",
-     "valor": 15.4,
-     "cor": "lima",
-     "extra": "R$ 16,9 mi"
+     "rotulo": "Extrat. 25L 220V",
+     "valor": 4682,
+     "cor": "coral",
+     "extra": "7,7 dias"
     },
     {
-     "rotulo": "Londrina",
-     "valor": 1.2,
+     "rotulo": "Extrat. 25L 127V",
+     "valor": 4663,
      "cor": "coral",
-     "extra": "R$ 3,1 mi"
+     "extra": "0,4 dia"
+    },
+    {
+     "rotulo": "Climat. 60L 220V",
+     "valor": 4560,
+     "cor": "coral",
+     "extra": "0,1 dia"
+    },
+    {
+     "rotulo": "Climat. 60L 127V",
+     "valor": 3840,
+     "cor": "coral",
+     "extra": "2,6 dias"
+    },
+    {
+     "rotulo": "Climat. 35L 220V",
+     "valor": 3535,
+     "cor": "coral",
+     "extra": "5,5 dias"
+    }
+   ]
+  },
+  {
+   "tipo": "barras",
+   "titulo": "Capital em risco de encalhe",
+   "subtitulo": "R$ a custo · PAC 03/10",
+   "escopo": "Domus",
+   "tom": "alerta",
+   "numero": "R$ 8,2 mi",
+   "insight": "Sem venda, lento e OCs acima do Emax: R$ 8,2 mi juntos.",
+   "formato": "brl",
+   "itens": [
+    {
+     "rotulo": "Sem venda",
+     "valor": 2250855,
+     "cor": "coral"
+    },
+    {
+     "rotulo": "Lento (>120 d)",
+     "valor": 2821668,
+     "cor": "laranja"
+    },
+    {
+     "rotulo": "OC acima Emax",
+     "valor": 3141229,
+     "cor": "laranja",
+     "extra": "253 SKUs"
     }
    ]
   },
   {
    "tipo": "comparacao",
-   "titulo": "Itajaí e Londrina no estoque",
-   "subtitulo": "PAC 02/10 · Londrina parcial",
+   "titulo": "Caixa: Itajaí × Londrina",
+   "subtitulo": "PAC 03/10 · Londrina parcial",
    "escopo": "Filiais",
    "tom": "alerta",
-   "numero": "64,5%",
-   "insight": "Londrina: 22% da demanda sem estoque e 65% do estoque parado.",
+   "numero": "R$ 1,7 mi",
+   "insight": "Itajaí é financiada pelo fornecedor; Londrina empata R$ 1,7 mi.",
    "grupos": [
     "Itajaí",
     "Londrina"
    ],
    "metricas": [
     {
-     "rotulo": "Ruptura demanda",
-     "valores": [
-      9.1,
-      22.1
-     ],
-     "formato": "pct",
-     "melhor": "menor"
-    },
-    {
      "rotulo": "DIO",
      "valores": [
-      26.4,
-      74.7
+      27.0,
+      73.6
      ],
      "formato": "dias",
      "melhor": "menor"
+    },
+    {
+     "rotulo": "DPO",
+     "valores": [
+      43.2,
+      36.2
+     ],
+     "formato": "dias",
+     "melhor": "maior"
     },
     {
      "rotulo": "CCC",
      "valores": [
-      -5.7,
-      49.4
+      -5.2,
+      48.4
      ],
      "formato": "dias",
      "melhor": "menor"
     },
     {
-     "rotulo": "% estoque parado",
+     "rotulo": "Capital de giro",
      "valores": [
-      5.2,
-      64.5
+      -2092678,
+      1661176
      ],
-     "formato": "pct",
+     "formato": "brl",
      "melhor": "menor"
-    }
-   ]
-  },
-  {
-   "tipo": "cascata",
-   "titulo": "Ciclo de caixa · Londrina",
-   "subtitulo": "estoque + receber − pagar",
-   "escopo": "Londrina",
-   "tom": "alerta",
-   "numero": "49,4 dias",
-   "formato": "num",
-   "insight": "Estoque de 75 dias: R$ 1,7 mi de capital de giro empatado.",
-   "total_rotulo": "CCC (dias)",
-   "itens": [
-    {
-     "rotulo": "DIO",
-     "valor": 74.7,
-     "cor": "cinza"
-    },
-    {
-     "rotulo": "DSO",
-     "valor": 11,
-     "cor": "cinza"
-    },
-    {
-     "rotulo": "DPO",
-     "valor": -36.3,
-     "cor": "lima"
-    }
-   ],
-   "total": 49.4
-  },
-  {
-   "tipo": "barras",
-   "titulo": "Venda perdida por ruptura",
-   "subtitulo": "R$/dia a custo · PAC 02/10",
-   "escopo": "Domus",
-   "tom": "alerta",
-   "numero": "R$ 50 mil",
-   "formato": "brl",
-   "insight": "Climatizador e ar-condicionado sem OC; os demais já têm reposição.",
-   "itens": [
-    {
-     "rotulo": "Mop Giratório",
-     "valor": 2836,
-     "cor": "laranja",
-     "extra": "AA · OC 300"
-    },
-    {
-     "rotulo": "Climat. 35L 127V",
-     "valor": 2675,
-     "cor": "coral",
-     "extra": "A · sem OC"
-    },
-    {
-     "rotulo": "Ar Split 12000",
-     "valor": 2636,
-     "cor": "coral",
-     "extra": "A · sem OC"
-    },
-    {
-     "rotulo": "Paneleiro 4P",
-     "valor": 2410,
-     "cor": "laranja",
-     "extra": "AA · OC 200"
-    },
-    {
-     "rotulo": "Mixer Turbo Chef",
-     "valor": 1928,
-     "cor": "laranja",
-     "extra": "AA · OC 2000"
-    }
-   ]
-  },
-  {
-   "tipo": "barras",
-   "titulo": "OCs que passam do Emax",
-   "subtitulo": "R$ a custo em trânsito · PAC 02/10",
-   "escopo": "Filiais",
-   "tom": "alerta",
-   "numero": "R$ 3,1 mi",
-   "formato": "brl",
-   "insight": "61% do que está em OC vai chegar acima do estoque máximo.",
-   "itens": [
-    {
-     "rotulo": "Itajaí",
-     "valor": 2464909,
-     "cor": "lima"
-    },
-    {
-     "rotulo": "Londrina",
-     "valor": 602097,
-     "cor": "ciano"
     }
    ]
   }
