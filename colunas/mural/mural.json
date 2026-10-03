@@ -1,0 +1,42 @@
+{
+ "_info": "Coluna 3 · Publicações dos analistas. Gerado pelo Apps Script a partir do formulário. Não editar à mão.",
+ "atualizado_em": "2026-10-02T21:44:10-03:00",
+ "posts": [
+  {
+   "id": "20260930-210000-2",
+   "tipo": "aviso",
+   "autor": "undefined",
+   "titulo": "undefined",
+   "texto": "undefined",
+   "numero": "",
+   "legenda": "",
+   "midia": "",
+   "ate": "",
+   "publicado_em": "2026-09-30T21:00"
+  },
+  {
+   "id": "20260930-210000-3",
+   "tipo": "aviso",
+   "autor": "undefined",
+   "titulo": "undefined",
+   "texto": "undefined",
+   "numero": "",
+   "legenda": "",
+   "midia": "",
+   "ate": "",
+   "publicado_em": "2026-09-30T21:00"
+  },
+  {
+   "id": "20260930-210000-4",
+   "tipo": "aviso",
+   "autor": "undefined",
+   "titulo": "undefined",
+   "texto": "undefined",
+   "numero": "",
+   "legenda": "",
+   "midia": "",
+   "ate": "",
+   "publicado_em": "2026-09-30T21:00"
+  }
+ ]
+}
